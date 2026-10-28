@@ -1,0 +1,23 @@
+{
+  "name": "deld-",
+  "version": "1.0.0",
+  "description": "Deld is an AI-powered restaurant automation platform designed to streamline and optimize end-to-end restaurant operations. The application leverages artificial intelligence to enhance customer experience, improve operational efficiency, and reduce manual intervention across various touchpoints.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shanvi196/Deld-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/shanvi196/Deld-/issues"
+  },
+  "homepage": "https://github.com/shanvi196/Deld-#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5"
+  }
+}
