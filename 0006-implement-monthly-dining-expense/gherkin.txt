@@ -1,0 +1,92 @@
+```gherkin
+Feature: Restaurant Dining Expense Tracker
+  As a user of the Deld restaurant platform
+  I want to log and track my dining expenses
+  So that I can manage my monthly restaurant budget
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am logged in as "sarah.chen@email.com" with password "password123"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Log expense from restaurant detail page
+    Given I am on the restaurant details page for "rest_0001"
+    When I click the "Log Expense" button with data-testid "log-expense-button"
+    Then an expense entry form should appear
+    And the form should have an amount input field with data-testid "expense-amount-input"
+    And the form should have a date input field with data-testid "expense-date-input"
+    And the form should have a submit button with data-testid "expense-submit-button"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Save expense to localStorage successfully
+    Given I am on the restaurant details page for "rest_0001"
+    And I have opened the expense entry form
+    When I enter "45.50" in the amount field
+    And I select today's date in the date field
+    And I click the submit button
+    Then the expense should be saved to localStorage with key "dining-expenses"
+    And the localStorage data should contain restaurantId "rest_0001"
+    And the localStorage data should contain amount 45.50
+    And the localStorage data should contain today's date
+    And a success toast message "Expense logged successfully" should appear
+
+  @unit-test @priority-high @authenticated
+  Scenario: View all logged expenses on dashboard
+    Given I have logged 3 expenses in localStorage:
+      | restaurantId | restaurantName | amount | date       |
+      | rest_0001    | Restaurant One | 45.50  | 2025-01-05 |
+      | rest_0002    | Restaurant Two | 32.00  | 2025-01-12 |
+      | rest_0003    | Restaurant Three | 28.75 | 2025-01-20 |
+    When I navigate to "/dining-expenses"
+    Then I should see exactly 3 expense entries
+    And the first expense should display "Restaurant Three" with amount "$28.75" and date "Jan 20, 2025"
+    And the second expense should display "Restaurant Two" with amount "$32.00" and date "Jan 12, 2025"
+    And the third expense should display "Restaurant One" with amount "$45.50" and date "Jan 5, 2025"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Show empty state when no expenses logged
+    Given I have 0 expenses in localStorage
+    When I navigate to "/dining-expenses"
+    Then I should see the text "No expenses logged yet"
+    And I should see exactly 0 expense entries
+    And the monthly summary section with data-testid "monthly-summaries" should not be present
+    And the "Clear All" button should not be present
+
+  @unit-test @priority-medium @authenticated
+  Scenario: Clear all expenses removes data and shows empty state
+    Given I have logged 3 expenses in localStorage:
+      | restaurantId | restaurantName | amount | date       |
+      | rest_0001    | Restaurant One | 45.50  | 2025-01-05 |
+      | rest_0002    | Restaurant Two | 32.00  | 2025-01-12 |
+      | rest_0003    | Restaurant Three | 28.75 | 2025-01-20 |
+    And I am on "/dining-expenses"
+    When I click the "Clear All" button with data-testid "clear-all-expenses-button"
+    Then I should see exactly 0 expense entries
+    And the localStorage key "dining-expenses" should be empty
+    And the text "No expenses logged yet" should appear
+    And the monthly summary section with data-testid "monthly-summaries" should not be present
+
+  @unit-test @priority-medium @authenticated
+  Scenario: Expense entries are isolated by userId
+    Given user "sarah.chen@email.com" has logged 2 expenses in localStorage
+    And I log out
+    And I log in as "john.doe@email.com" with password "password456"
+    When I navigate to "/dining-expenses"
+    Then I should see the text "No expenses logged yet"
+    And I should see exactly 0 expense entries
+    And the localStorage key "dining-expenses" should not contain entries with userId "sarah.chen@email.com"
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of expense entry form
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on restaurant "rest_0001" details page
+    When I click the "Log Expense" button
+    Then the page should visually show the expense entry form with amount input, date picker, and submit button clearly visible
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of expense dashboard with data
+    Given I am logged in as "sarah.chen@email.com"
+    And I have 4 expenses logged across different months
+    When I navigate to "/dining-expenses"
+    Then the page should visually show the chronological expense list with restaurant names, amounts, dates, and monthly summary sections with totals
+```

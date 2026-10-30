@@ -1,0 +1,99 @@
+```gherkin
+Feature: Restaurant Availability Alerts
+  As a user browsing restaurants
+  I want to set alerts for closed restaurants
+  So that I can be notified when they're about to open
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Notify Me button appears only on closed restaurants
+    Given I am on the home page with restaurant listings
+    When I view a restaurant card that is currently closed
+    Then I should see a "Notify Me" button with data-testid="notify-me-button"
+    And when I hover over the button I should see a tooltip with data-testid="notify-tooltip"
+    And the tooltip should display text containing "Opens at" followed by a time in format "HH:MM AM/PM"
+
+  @unit-test @priority-high
+  Scenario: Open alert modal and select reminder timing
+    Given I am on the home page with a closed restaurant visible
+    When I click the "Notify Me" button on a closed restaurant card
+    Then an alert modal should open with data-testid="alert-modal"
+    And I should see exactly 3 reminder timing options:
+      | data-testid          | label              |
+      | reminder-option-15   | 15 minutes before  |
+      | reminder-option-30   | 30 minutes before  |
+      | reminder-option-60   | 1 hour before      |
+    And the "15 minutes before" option with data-testid="reminder-option-15" should be selected by default
+    And I should see a confirm button with data-testid="confirm-alert-button"
+
+  @unit-test @priority-high
+  Scenario: Save alert to localStorage and update button state
+    Given I have opened the alert modal for a closed restaurant with id "restaurant-456"
+    And localStorage key "deld-opening-alerts" is initially empty
+    When I select the "30 minutes before" option with data-testid="reminder-option-30"
+    And I click the confirm button with data-testid="confirm-alert-button"
+    Then the modal should close within 500ms
+    And localStorage key "deld-opening-alerts" should contain exactly 1 alert object with:
+      | field          | description                        |
+      | restaurantId   | "restaurant-456"                   |
+      | restaurantName | The restaurant's display name      |
+      | openTime       | ISO 8601 timestamp of opening time |
+      | reminderOffset | 30                                 |
+      | createdAt      | ISO 8601 timestamp within last 5s  |
+    And the "Notify Me" button on that restaurant card should now display text "Alert Set"
+
+  @unit-test @priority-high
+  Scenario: View active alerts on alerts management page
+    Given localStorage key "deld-opening-alerts" contains exactly 2 alerts:
+      | restaurantId   | restaurantName    | reminderOffset |
+      | restaurant-111 | Pizza Palace      | 15             |
+      | restaurant-222 | Burger Barn       | 30             |
+    When I navigate to "/user/alerts"
+    Then I should see the alerts page with data-testid="alerts-page"
+    And I should see exactly 2 alert cards with data-testid="alert-card"
+    And the first alert card should display restaurant name "Pizza Palace"
+    And the second alert card should display restaurant name "Burger Barn"
+    And each alert card should show a cancel button with data-testid="cancel-alert-button"
+
+  @unit-test @priority-medium
+  Scenario: Cancel an active alert removes it from list and localStorage
+    Given localStorage key "deld-opening-alerts" contains exactly 2 alerts for restaurants "Restaurant A" and "Restaurant B"
+    And I am on the "/user/alerts" page showing 2 alert cards
+    When I click the cancel button with data-testid="cancel-alert-button" on the first alert card for "Restaurant A"
+    Then the alert card for "Restaurant A" should be removed from the list within 300ms
+    And exactly 1 alert card should remain visible for "Restaurant B"
+    And localStorage key "deld-opening-alerts" should contain exactly 1 alert
+    And localStorage key "deld-opening-alerts" should not contain any alert with restaurantName "Restaurant A"
+
+  @unit-test @edge-case
+  Scenario: Prevent duplicate alerts for the same restaurant
+    Given localStorage key "deld-opening-alerts" contains exactly 1 alert with restaurantId "restaurant-123"
+    When I am on the home page and view the closed restaurant card with id "restaurant-123"
+    Then the button with data-testid="notify-me-button" on that card should display text "Alert Set"
+    And the button should have a disabled or inactive visual state
+    When I click the "Alert Set" button on that restaurant card
+    Then no modal with data-testid="alert-modal" should appear
+    And localStorage key "deld-opening-alerts" should still contain exactly 1 alert for restaurantId "restaurant-123"
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of Notify Me button and tooltip on closed restaurant
+    Given I am on the home page
+    When I find a restaurant card showing closed status with a red "Closed" badge
+    And I hover over the "Notify Me" button with data-testid="notify-me-button"
+    Then the page should visually show:
+      - A button with a bell icon positioned in the bottom-right of the restaurant card
+      - A tooltip appearing above the button displaying "Opens at" followed by a specific time
+      - The tooltip should have a dark background with white text and an arrow pointing to the button
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of empty alerts page state
+    Given localStorage key "deld-opening-alerts" is empty or does not exist
+    When I navigate to "/user/alerts"
+    Then the page should visually show the alerts page with data-testid="alerts-page" containing:
+      - A vertically and horizontally centered empty state container
+      - An illustrative bell icon with a slash or "no alerts" indicator
+      - Text with data-testid="no-alerts-message" displaying exactly "No active alerts"
+      - The empty state should be centered within the main content area below any navigation
+```

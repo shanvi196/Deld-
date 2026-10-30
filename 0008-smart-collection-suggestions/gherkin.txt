@@ -1,0 +1,101 @@
+```gherkin
+Feature: Smart Collection Suggestions
+  As a logged-in user with restaurant reviews
+  I want to see auto-generated collection suggestions based on my review history
+  So that I can quickly create curated collections without manual effort
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am logged in as "sarah.chen@email.com" with password "password123"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Display suggested collections section when user has qualifying reviews
+    Given I am logged in as "sarah.chen@email.com"
+    And I have at least one 5-star review in my history
+    When I navigate to "http://localhost:3000/user/collections"
+    And I wait for the page to load
+    Then I should see an element with data-testid "suggested-collections-section"
+    And the section should contain heading text "Suggested for You"
+    And I should see at least 1 element with data-testid "suggestion-card"
+    And each suggestion card should display a collection name
+    And each suggestion card should display a restaurant count of at least 2
+
+  @unit-test @priority-high @authenticated
+  Scenario: Suggestion card shows correct data for 5-Star Favorites
+    Given I am logged in as "sarah.chen@email.com"
+    And I have multiple 5-star reviews
+    When I navigate to "http://localhost:3000/user/collections"
+    And I wait for the page to load
+    Then I should see a suggestion card containing text "5-Star Favorites"
+    And the suggestion card should have a "Create" button with data-testid "create-suggestion-button"
+    And the restaurant count shown should match the number of restaurants I rated 5 stars
+
+  @unit-test @priority-high @authenticated
+  Scenario: Create collection from suggestion successfully
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on the collections page at "http://localhost:3000/user/collections"
+    And I see a suggestion card with data-testid "suggestion-card"
+    When I click the "Create" button with data-testid "create-suggestion-button" on the first suggestion card
+    Then I should see a loading indicator with data-testid "create-suggestion-loading"
+    And after the loading completes I should see a toast message containing "Collection created"
+    And the clicked suggestion card should no longer be visible
+    And a new collection tile should appear in the collections grid with data-testid "collection-tile-name"
+
+  @unit-test @edge-case @authenticated
+  Scenario: Hide suggestions section when user has no reviews
+    Given I am logged in as a user with no reviews
+    When I navigate to "http://localhost:3000/user/collections"
+    And I wait for the page to load
+    Then I should NOT see an element with data-testid "suggested-collections-section"
+    And I should still see the collections grid with data-testid "collections-grid"
+    And I should still see the "Create Collection" button with data-testid "create-collection-button"
+
+  @unit-test @edge-case @authenticated
+  Scenario: Display error toast when collection creation fails due to network error
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on the collections page at "http://localhost:3000/user/collections"
+    And I see a suggestion card with data-testid "suggestion-card"
+    And the network connection to POST /api/collections will fail with status 500
+    When I click the "Create" button with data-testid "create-suggestion-button" on the first suggestion card
+    Then I should see a loading indicator with data-testid "create-suggestion-loading"
+    And after the loading completes I should see a toast message containing "Failed to create collection"
+    And the suggestion card should still be visible with data-testid "suggestion-card"
+    And the "Create" button should be enabled and not show loading state
+
+  @unit-test @edge-case @authenticated
+  Scenario: Collections grid updates immediately after creating suggestion without page refresh
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on the collections page at "http://localhost:3000/user/collections"
+    And I have 3 existing collections displayed in the collections grid with data-testid "collections-grid"
+    And I see a "5-Star Favorites" suggestion card with data-testid "suggestion-card"
+    When I click the "Create" button with data-testid "create-suggestion-button" on the "5-Star Favorites" suggestion card
+    And I wait for the toast message "Collection created!" to appear
+    Then the collections grid should now display exactly 4 collection tiles with data-testid "collection-tile"
+    And the newest collection tile should have the name "5-Star Favorites"
+    And the "5-Star Favorites" suggestion card should no longer be visible in the suggestions section
+    And the remaining suggestion cards should maintain their original order
+    And I should NOT need to refresh the page to see the new collection
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of suggested collections section layout
+    Given I am logged in as "sarah.chen@email.com"
+    And I have qualifying reviews for suggestions
+    When I navigate to "http://localhost:3000/user/collections"
+    And I wait for the page to fully load
+    Then the page should visually show a "Suggested for You" section above the collections grid
+    And suggestion cards should be displayed in a horizontal row or grid layout
+    And each card should show the collection name prominently
+    And each card should have a visible "Create" button
+    And the existing collections grid should appear below the suggestions section
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation after creating a suggested collection
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on the collections page with suggestions visible
+    When I click "Create" on the first suggestion card
+    And I wait for the toast notification to appear
+    Then the page should visually show the toast message "Collection created!"
+    And the suggestion that was clicked should no longer be visible
+    And the collections grid should contain a new collection tile
+    And the layout should remain consistent with no visual glitches
+```

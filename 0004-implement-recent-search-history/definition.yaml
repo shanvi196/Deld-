@@ -1,0 +1,189 @@
+problem_id: 0004-implement-recent-search-history
+app: deld
+task:
+  prompt: "Implement a user-scoped recent search history feature for restaurant search.\
+    \ When users perform searches, save their search queries to localStorage. Display\
+    \ these recent searches as clickable chips on both the homepage and restaurant\
+    \ detail page. Each chip should replay that search when clicked, and users must\
+    \ be able to remove individual searches or clear all history.\n\n**Feature Requirements**:\n\
+    \n1. **Search History Tracking**: When user submits a search query via the search\
+    \ bar (Enter key or clicking the search button), automatically save the search\
+    \ to localStorage. Store both the query text and location text as a JSON object.\
+    \ Maximum 5 searches stored (most recent first). Skip entries where both query\
+    \ and location are empty or whitespace-only. If the same query+location combination\
+    \ is re-searched, move it to the front instead of creating a duplicate. Trim whitespace\
+    \ from both fields before saving and comparing.\n\n2. **User-Scoped Storage**:\
+    \ The localStorage key must be scoped to the current user. For logged-in users,\
+    \ use the key `recentSearches_{userId}` where `{userId}` is the user's actual\
+    \ ID from the user context. For users who are not logged in, use the key `recentSearches_guest`.\
+    \ When a user logs in, their guest history should NOT be migrated — they start\
+    \ with their own scoped history (which may be empty). When a user logs out, the\
+    \ component should immediately switch to showing the guest history.\n\n3. **localStorage\
+    \ Data Structure**: The value stored must be a JSON array of objects with this\
+    \ exact shape:\n   ```json\n   [\n     { \"query\": \"sushi\", \"location\": \"\
+    San Francisco, CA\", \"timestamp\": 1700000000000 },\n     { \"query\": \"pizza\"\
+    , \"location\": \"\", \"timestamp\": 1699999000000 }\n   ]\n   ```\n   The `timestamp`\
+    \ field must be the Unix epoch in milliseconds (from `Date.now()`) when the search\
+    \ was performed. The array must be sorted by timestamp descending (most recent\
+    \ first). When the array exceeds 5 entries, the oldest entry (last in array) is\
+    \ evicted.\n\n4. **Recent Searches Display on Homepage**: Add a \"Recent Searches\"\
+    \ section between the search bar header and the filters/restaurant list area on\
+    \ the homepage (`/`). The section must include:\n   - A heading displaying \"\
+    Recent Searches\"\n   - Clickable pill/chip for each saved search displaying the\
+    \ query text (and location after a bullet separator if location is non-empty,\
+    \ e.g., \"sushi · San Francisco, CA\" or just \"pizza\" if location is empty)\n\
+    \   - Each chip must have a small remove button (× symbol) that removes only that\
+    \ individual search from history without triggering navigation\n   - A \"Clear\
+    \ History\" button that removes all saved searches from localStorage and hides\
+    \ the entire section\n   - The entire section must be hidden when there are no\
+    \ saved searches\n   - When a chip is clicked (not the × button), populate the\
+    \ search bar's query and location inputs with the saved values and trigger the\
+    \ search (updating URL parameters)\n\n5. **Recent Searches Display on Restaurant\
+    \ Detail Page**: Add a \"Your Recent Searches\" section on the restaurant detail\
+    \ left panel (`/restaurants/[id]`), positioned immediately above the existing\
+    \ \"People also searched for\" (RelatedSearches) section. This section must:\n\
+    \   - Display the same recent searches from localStorage as clickable pills\n\
+    \   - Use the heading \"Your Recent Searches\"\n   - Each chip click navigates\
+    \ to the homepage with the appropriate query and location URL parameters\n   -\
+    \ Include individual remove (×) buttons on each chip\n   - Include a \"Clear History\"\
+    \ button\n   - Be hidden when there are no saved searches\n   - Use the same user-scoped\
+    \ localStorage key as the homepage\n\n6. **Cross-Page Persistence**: Search history\
+    \ must persist across page navigations. If a user searches on the homepage, navigates\
+    \ to a restaurant detail page, and then returns to the homepage, all saved searches\
+    \ must still appear. The recent searches section on the restaurant detail page\
+    \ must reflect the same data as the homepage in real time (including any removals\
+    \ made on either page during the same session).\n\n**UI Text Strings (Exact Match\
+    \ Required)**:\n- Homepage section heading: \"Recent Searches\"\n- Restaurant\
+    \ detail section heading: \"Your Recent Searches\"\n- Chip text format: \"{query}\
+    \ · {location}\" when location is non-empty, \"{query}\" when location is empty\n\
+    - Remove button on each chip: \"×\" (multiplication sign)\n\n**Element Selectors\
+    \ (data-testid attributes)**:\n- Homepage recent searches container: `recent-searches-section`\n\
+    - Restaurant detail recent searches container: `detail-recent-searches-section`\n\
+    - Recent search chips: `recent-search-chip-{index}` (0-indexed, e.g., `recent-search-chip-0`\
+    \ for most recent)\n- Remove button on each chip: `recent-search-chip-remove-{index}`\
+    \ (e.g., `recent-search-chip-remove-0`)\n- Clear history button (homepage): `clear-search-history-button`\n\
+    - Clear history button (detail page): `detail-clear-search-history-button`\n-\
+    \ Search input: `search-query-input` (already exists)\n- Search location input:\
+    \ `search-location-input` (already exists)\n- Search submit button: `search-submit-button`\
+    \ (already exists)\n\n**Routes**:\n- Homepage `/` — recent searches section displayed\
+    \ below header, above restaurant list\n- Restaurant detail `/restaurants/[id]`\
+    \ — recent searches section in left panel above RelatedSearches\n- No new routes\
+    \ needed\n\n**Authentication**:\n- Feature works for both logged-in and guest\
+    \ users\n- localStorage key changes based on login state\n- Logging in/out switches\
+    \ the displayed history immediately\n\n**State Management**:\n- localStorage is\
+    \ the source of truth\n- Use `window.addEventListener('storage', ...)` or a shared\
+    \ state mechanism so that changes on one page surface (e.g., removing a chip on\
+    \ the detail page) are reflected if the user navigates back to the homepage\n\
+    - URL parameters (`query`, `location`) are updated when a chip is clicked on the\
+    \ homepage\n- Navigation via `router.push` is used when a chip is clicked on the\
+    \ restaurant detail page\n\n**Files Expected**: ~5-6 files (localStorage utility\
+    \ with user-scoping logic, recent searches display component, hook for managing\
+    \ search history state, homepage layout integration, restaurant detail page integration,\
+    \ optional shared types)."
+hint: "**Preferred Account**: If login is required, please use the following credentials:\n\
+  \  - Login: sarah.chen@email.com\n  - Password: password123"
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a recent search history feature for restaurant search. When
+    users perform searches, sav...
+checklist_items:
+- When a user submits a search on the homepage, the query and location are saved and
+  immediately appear as a clickable chip in a 'Recent Searches' section between the
+  search bar and the restaurant list; searching the same query+location again moves
+  it to the front rather than creating a duplicate, and only the five most recent
+  unique searches are retained.
+- Each recent search chip displays the query text followed by a bullet separator and
+  the location when a location was provided (e.g., 'sushi · San Francisco, CA'), or
+  just the query text when no location was given; chips with only empty or whitespace-only
+  query and location fields are never stored or displayed.
+- Clicking the × button on an individual chip removes only that search from the list
+  without triggering any navigation or search, and clicking the 'Clear History' button
+  removes all saved searches and hides the entire recent searches section immediately.
+- Clicking a recent search chip on the homepage populates both the search query and
+  location inputs with the saved values, triggers the search, and updates the URL
+  parameters accordingly; clicking a chip on the restaurant detail page navigates
+  to the homepage with the correct query and location parameters pre-filled.
+- The restaurant detail page displays a 'Your Recent Searches' section positioned
+  above the 'People also searched for' area in the left panel, showing the same set
+  of recent searches with the same chip format, individual remove buttons, and a clear-all
+  button; this section is hidden when no searches are saved.
+- Search history persists across page reloads and navigation — searches saved on the
+  homepage appear on the restaurant detail page and vice versa, and removing a search
+  on either page is reflected when returning to the other page.
+- Logged-in users see their own separate search history tied to their account, while
+  logged-out users see a guest history; logging in switches immediately to the authenticated
+  user's history (without migrating guest searches), and logging out switches back
+  to the guest history.
+- Whitespace is trimmed from both query and location fields before saving, so searches
+  like '  sushi  ' and 'sushi' are treated as the same entry and do not create duplicates.
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: playwright_test
+  args:
+    score_name: maximum_5_searches_stored_with_oldest_evicted_when_limit_exceeded
+    checklist_label: Maximum 5 searches stored with oldest evicted when limit exceeded
+    source_test_file: tests/maximum_5_searches_stored_with_oldest_evicted_when_limit_exceeded.spec.ts
+    destination_test_file: /workdir/app/__tests__/maximum_5_searches_stored_with_oldest_evicted_when_limit_exceeded.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: empty_and_whitespace_only_searches_are_not_saved_to_history
+    checklist_label: Empty and whitespace only searches are not saved to history
+    source_test_file: tests/empty_and_whitespace_only_searches_are_not_saved_to_history.spec.ts
+    destination_test_file: /workdir/app/__tests__/empty_and_whitespace_only_searches_are_not_saved_to_history.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: corrupted_or_malformed_localstorage_data_is_handled_gracefully_without_crashing
+    checklist_label: Corrupted or malformed localstorage data is handled gracefully
+      without crashing
+    source_test_file: tests/corrupted_or_malformed_localstorage_data_is_handled_gracefully_without_crashing.spec.ts
+    destination_test_file: /workdir/app/__tests__/corrupted_or_malformed_localstorage_data_is_handled_gracefully_without_crashing.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: removing_individual_chip_updates_localstorage_and_decrements_visible_chip_count
+    checklist_label: Removing individual chip updates localstorage and decrements
+      visible chip count
+    source_test_file: tests/removing_individual_chip_updates_localstorage_and_decrements_visible_chip_count.spec.ts
+    destination_test_file: /workdir/app/__tests__/removing_individual_chip_updates_localstorage_and_decrements_visible_chip_count.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: switching_between_guest_and_logged_in_user_maintains_fully_isolated_scoped_histories
+    checklist_label: Switching between guest and logged in user maintains fully isolated
+      scoped histories
+    source_test_file: tests/switching_between_guest_and_logged_in_user_maintains_fully_isolated_scoped_histories.spec.ts
+    destination_test_file: /workdir/app/__tests__/switching_between_guest_and_logged_in_user_maintains_fully_isolated_scoped_histories.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: chip_click_replays_search_with_url_params_on_homepage_clear_history_on_detail_page_removes_all_entries
+    checklist_label: Chip click replays search with url params on homepage clear history
+      on detail page removes all entries
+    source_test_file: tests/chip_click_replays_search_with_url_params_on_homepage_clear_history_on_detail_page_removes_all_entries.spec.ts
+    destination_test_file: /workdir/app/__tests__/chip_click_replays_search_with_url_params_on_homepage_clear_history_on_detail_page_removes_all_entries.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+extra_fields:
+  disable_graders:
+  - checklist_items

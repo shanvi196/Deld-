@@ -1,0 +1,239 @@
+problem_id: 0003-implement-private-notes-feature
+app: deld
+task:
+  prompt: "Implement a private notes feature for restaurants with pinning support.\
+    \ Users want to record personal observations about restaurants they visit, pin\
+    \ their most important notes for quick access, view all their notes organized\
+    \ by importance, and have notes automatically managed when they exceed a limit.\n\
+    \n## 1. Note Management Dialog\n\nAdd a notes button with `data-testid=\"add-note-button\"\
+    ` to the restaurant detail page quick actions area (alongside the existing Save\
+    \ and Review buttons on `/restaurants/[id]`). The button should use `variant=\"\
+    outline\"` and `size=\"xl\"` to match the existing Save button style. The button\
+    \ label should read \"Add Note\" when no note exists for this restaurant, \"Edit\
+    \ Note\" when an unpinned note exists, or \"Edit Note \\ud83d\\udccc\" (with the\
+    \ pin emoji appended) when a pinned note exists.\n\nIf the user is not logged\
+    \ in and clicks the notes button, open the login dialog instead of the notes dialog.\n\
+    \nClicking the button (when logged in) opens a dialog (`data-testid=\"note-dialog\"\
+    `) containing:\n- A dialog title \"Restaurant Notes\"\n- A textarea (`data-testid=\"\
+    note-input\"`) for entering or editing the note, pre-populated with the existing\
+    \ note text if one exists\n- A character counter (`data-testid=\"note-char-count\"\
+    `) below the textarea showing \"{current}/{max}\" (e.g., \"42/500\"). Maximum\
+    \ 500 characters. The counter must use a warning style (amber/orange text color)\
+    \ when the character count is between 400 and 499 inclusive, and an error style\
+    \ (red text color) when the count reaches exactly 500.\n- A \"Pin this note\"\
+    \ checkbox (`data-testid=\"note-pin-toggle\"`) with a label reading \"Pin this\
+    \ note\" — this checkbox is **only visible when editing an existing note**, not\
+    \ when creating a new note. It reflects the current pin state. If the user already\
+    \ has 3 pinned notes and attempts to check this box on an unpinned note, prevent\
+    \ the change and display the validation message \"Maximum of 3 pinned notes reached\"\
+    \ below the checkbox.\n- A Save button (`data-testid=\"save-note-button\"`) with\
+    \ text \"Save\"\n- A Delete button (`data-testid=\"delete-note-button\"`) with\
+    \ text \"Delete\" — only visible when a note already exists for this restaurant\n\
+    \nClicking Delete does **not** immediately remove the note. Instead, it opens\
+    \ a nested confirmation dialog (`data-testid=\"delete-confirm-dialog\"`) containing:\n\
+    - The text \"Are you sure you want to delete this note?\"\n- A Confirm button\
+    \ (`data-testid=\"delete-confirm-button\"`) with text \"Delete\"\n- A Cancel button\
+    \ (`data-testid=\"delete-cancel-button\"`) with text \"Cancel\"\n\nValidation\
+    \ and feedback:\n- Submitting an empty note shows the validation message \"Note\
+    \ cannot be empty\" (do not save)\n- Submitting a note longer than 500 characters\
+    \ is prevented (the textarea must enforce the `maxLength` limit)\n- On successful\
+    \ save: show toast \"Note saved\", close the dialog\n- On confirmed delete: show\
+    \ toast \"Note deleted\", close both the confirmation dialog and the note dialog\n\
+    - On cancel delete: close only the confirmation dialog, return to the note dialog\n\
+    - When a user already has 10 notes and saves a new note for a different restaurant,\
+    \ the oldest **unpinned** note (by `updatedAt` timestamp) is automatically evicted\
+    \ to make room. Show toast \"Note saved\" (do not mention eviction). If all 10\
+    \ existing notes are pinned (edge case since pin cap is 3, but handle it), evict\
+    \ the note with the oldest `updatedAt` regardless of pin status.\n\n## 2. localStorage\
+    \ Persistence\n\nStore all notes in localStorage under the key `restaurant-notes`.\
+    \ The value must be a JSON object with this exact structure:\n\n```json\n{\n \
+    \ \"sarah.chen@email.com\": {\n    \"abc-restaurant-id\": {\n      \"text\": \"\
+    The mushroom risotto was outstanding\",\n      \"pinned\": false,\n      \"createdAt\"\
+    : \"2024-06-15T10:30:00.000Z\",\n      \"updatedAt\": \"2024-06-15T10:30:00.000Z\"\
+    \n    },\n    \"another-restaurant-id\": {\n      \"text\": \"Noisy on weekends\
+    \ but great brunch\",\n      \"pinned\": true,\n      \"createdAt\": \"2024-06-14T08:00:00.000Z\"\
+    ,\n      \"updatedAt\": \"2024-06-16T12:00:00.000Z\"\n    }\n  }\n}\n```\n\nThe\
+    \ top-level keys are user email addresses. Each user's object maps restaurant\
+    \ IDs to note objects containing:\n- `text` (string): the note content\n- `pinned`\
+    \ (boolean): whether the note is pinned; defaults to `false` for new notes\n-\
+    \ `createdAt` (ISO 8601 timestamp string): set once when the note is first created,\
+    \ never modified afterward\n- `updatedAt` (ISO 8601 timestamp string): set to\
+    \ the current time whenever the note is created, edited, or its pin status is\
+    \ toggled\n\nNotes must persist across page navigation and browser sessions. When\
+    \ the dialog is reopened for a restaurant that already has a note, the textarea\
+    \ must be pre-populated with the saved text and the pin checkbox must reflect\
+    \ the current pin state.\n\n**10-note cap per user**: A user may have at most\
+    \ 10 notes total (pinned + unpinned). When saving a note for an 11th restaurant,\
+    \ automatically remove the **unpinned** note with the oldest `updatedAt` timestamp\
+    \ before saving the new one. Pinned notes are exempt from automatic eviction.\
+    \ If all 10 existing notes are pinned, remove the note with the oldest `updatedAt`\
+    \ regardless of pin status. Editing an existing note or toggling its pin status\
+    \ does not count toward this cap (it updates in place).\n\n**3-pin cap per user**:\
+    \ A user may pin at most 3 notes. Attempting to pin a 4th note must fail with\
+    \ a validation message and must not change the pin state.\n\n## 3. Notes Count\
+    \ Badge and Pin Indicator in Header\n\nAdd a notes count badge (`data-testid=\"\
+    notes-count-badge\"`) next to the user avatar in the header (visible on all pages\
+    \ that use the search bar header). The badge displays the total number of notes\
+    \ the current user has as its text content (e.g., \"3\"). The badge is only visible\
+    \ when the count is greater than 0.\n\nAdditionally, display a pin indicator (`data-testid=\"\
+    pinned-count-indicator\"`) adjacent to the notes count badge. This element shows\
+    \ the number of pinned notes as its text content (e.g., \"2\"). The pin indicator\
+    \ is only visible when the user has at least one pinned note.\n\nBoth elements\
+    \ must update immediately when notes are added, deleted, pinned, unpinned, or\
+    \ evicted due to the 10-note cap.\n\n## 4. \"My Notes\" Page and Navigation\n\n\
+    Add a \"My Notes\" link (`data-testid=\"user-avatar-menu-notes\"`) to the user\
+    \ avatar dropdown menu, positioned between the existing \"My Collections\" and\
+    \ \"My Reviews\" links. The link navigates to `/user/notes`.\n\nCreate the `/user/notes`\
+    \ page showing all of the current user's notes. The page must include:\n- A page\
+    \ heading (`data-testid=\"my-notes-heading\"`) with text \"My Notes\"\n- An empty\
+    \ state message (`data-testid=\"my-notes-empty\"`) showing \"No notes yet. Visit\
+    \ a restaurant to add your first note.\" when the user has no notes\n\nWhen notes\
+    \ exist, display them in two sections:\n\n**Pinned Notes section** (`data-testid=\"\
+    pinned-notes-section\"`):\n- A section heading with text \"Pinned\" — this entire\
+    \ section (heading + cards) is only rendered when at least one pinned note exists\n\
+    - Pinned note cards, sorted by `updatedAt` descending (most recently updated first)\n\
+    \n**All Notes section** (`data-testid=\"all-notes-section\"`):\n- A section heading\
+    \ with text \"All Notes\"\n- Unpinned note cards, sorted by `updatedAt` descending\
+    \ (most recently updated first)\n\nEach note card (`data-testid=\"note-card-{restaurantId}\"\
+    `) must display:\n- The restaurant name (`data-testid=\"note-card-restaurant-name-{restaurantId}\"\
+    `) as a clickable link to `/restaurants/{restaurantId}`\n- The full note text\
+    \ (`data-testid=\"note-card-text-{restaurantId}\"`)\n- A relative timestamp (`data-testid=\"\
+    note-card-timestamp-{restaurantId}\"`) such as \"2 days ago\" or \"just now\"\n\
+    - A pin/unpin toggle button (`data-testid=\"note-card-pin-{restaurantId}\"`) —\
+    \ clicking this pins an unpinned note or unpins a pinned note. The same 3-pin\
+    \ cap applies: if pinning would exceed 3 pinned notes, show toast \"Maximum of\
+    \ 3 pinned notes reached\" and do not change the state. When a note is pinned,\
+    \ it must immediately move from the \"All Notes\" section to the \"Pinned\" section\
+    \ (and vice versa when unpinned).\n- A delete button (`data-testid=\"note-card-delete-{restaurantId}\"\
+    `) with text \"Delete\" — clicking shows the same confirmation dialog (`data-testid=\"\
+    delete-confirm-dialog\"`) with confirm/cancel before actually deleting\n\nDeleting\
+    \ a note from this page removes it from localStorage, removes the card from the\
+    \ list, updates the header badge and pin indicator counts, and shows the toast\
+    \ \"Note deleted\". If all notes are deleted, show the empty state message.\n\n\
+    This page must only be accessible to logged-in users. If a logged-out user navigates\
+    \ to `/user/notes`, redirect them to the home page (`/`).\n\n---\n\n**Routes involved**:\
+    \ `/restaurants/[id]` (detail page — note button + dialog + delete confirmation),\
+    \ `/user/notes` (new page — notes list with pinned/unpinned sections), all pages\
+    \ with the search bar header (badge + pin indicator in header)\n\n**Auth**: The\
+    \ notes button on restaurant detail pages must check login status — if not logged\
+    \ in, open the login dialog. The `/user/notes` page requires authentication; redirect\
+    \ to `/` if not logged in. Notes are scoped to the logged-in user's email address.\n\
+    \n**State**: All note data lives in localStorage under the key `restaurant-notes`.\
+    \ No API calls are needed. The following surfaces must all stay synchronized —\
+    \ changes in one are immediately reflected in all others without requiring a page\
+    \ refresh:\n- The note button label on the restaurant detail page (\"Add Note\"\
+    \ / \"Edit Note\" / \"Edit Note \\ud83d\\udccc\")\n- The note dialog textarea\
+    \ pre-population and pin checkbox state\n- The header notes count badge and pinned\
+    \ count indicator\n- The \"My Notes\" page sections (pinned vs. unpinned), card\
+    \ contents, and empty state\n- Pin/unpin actions on the \"My Notes\" page must\
+    \ move cards between sections instantly"
+hint: "**Preferred Account**: If login is required, please use the following credentials:\n\
+  \  - Login: sarah.chen@email.com\n  - Password: password123"
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a private notes feature for restaurants. Users want to record
+    personal observations abo...
+checklist_items:
+- A notes button appears on the restaurant detail page alongside Save and Review,
+  labeled 'Add Note' when no note exists, 'Edit Note' when an unpinned note exists,
+  or 'Edit Note 📌' when a pinned note exists — and clicking it while logged out opens
+  the login dialog instead of the notes dialog.
+- The notes dialog allows creating and editing notes with a textarea pre-populated
+  with any existing text, a live character counter that turns amber at 400+ characters
+  and red at exactly 500, a pin checkbox that only appears when editing an existing
+  note (enforcing a maximum of 3 pinned notes with a visible error), and Save/Delete
+  buttons with appropriate visibility and confirmation flow.
+- Notes are persisted in localStorage keyed by user email and restaurant ID, survive
+  page reloads and navigation, maintain separate createdAt and updatedAt timestamps,
+  and are correctly scoped so switching accounts shows only that user's notes.
+- 'A per-user cap of 10 notes is enforced: saving an 11th note automatically evicts
+  the oldest unpinned note (or oldest overall if all are pinned) without any user-facing
+  eviction message, while editing or re-pinning existing notes does not trigger eviction.'
+- The header displays a notes count badge (visible only when count > 0) and a pinned
+  count indicator (visible only when pinned count > 0) next to the user avatar, both
+  updating immediately when notes are added, deleted, pinned, or unpinned from any
+  page.
+- The My Notes page at /user/notes shows a 'Pinned' section (only when pinned notes
+  exist) and an 'All Notes' section, each sorted by most recently updated first, with
+  note cards displaying restaurant name as a link, full note text, relative timestamp,
+  and working pin toggle and delete actions that move cards between sections instantly.
+- Deleting a note from either the restaurant detail dialog or the My Notes page requires
+  confirmation through a nested dialog, and upon confirmation removes the note from
+  storage, updates all badges and counts, and shows the appropriate toast — with an
+  empty state message appearing on My Notes when all notes are removed.
+- 'The My Notes page is protected: unauthenticated users navigating to /user/notes
+  are redirected to the home page, and the menu link to My Notes appears in the user
+  avatar dropdown between My Collections and My Reviews.'
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: playwright_test
+  args:
+    score_name: should_persist_note_across_page_navigation_verify_localstorage_shape_with_exact_field_names_and_sync_button_label
+    checklist_label: Persist note across page navigation verify localstorage shape
+      with exact field names and sync button label
+    source_test_file: tests/should_persist_note_across_page_navigation_verify_localstorage_shape_with_exact_field_names_and_sync_button_label.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_persist_note_across_page_navigation_verify_localstorage_shape_with_exact_field_names_and_sync_button_label.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_evict_the_oldest_unpinned_note_when_saving_an_11th_note_exceeding_the_10_note_cap
+    checklist_label: Evict the oldest unpinned note when saving an 11th note exceeding
+      the 10 note cap
+    source_test_file: tests/should_evict_the_oldest_unpinned_note_when_saving_an_11th_note_exceeding_the_10_note_cap.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_evict_the_oldest_unpinned_note_when_saving_an_11th_note_exceeding_the_10_note_cap.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_prevent_pinning_a_4th_note_and_display_validation_message_when_3_pin_cap_is_reached
+    checklist_label: Prevent pinning a 4th note and display validation message when
+      3 pin cap is reached
+    source_test_file: tests/should_prevent_pinning_a_4th_note_and_display_validation_message_when_3_pin_cap_is_reached.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_prevent_pinning_a_4th_note_and_display_validation_message_when_3_pin_cap_is_reached.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_move_note_card_between_pinned_and_all_notes_sections_when_toggling_pin_on_my_notes_page_and_update_header_indicat
+    checklist_label: Move note card between pinned and all notes sections when toggling
+      pin on my notes page and update header indicat
+    source_test_file: tests/should_move_note_card_between_pinned_and_all_notes_sections_when_toggling_pin_on_my_notes_page_and_update_header_indicat.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_move_note_card_between_pinned_and_all_notes_sections_when_toggling_pin_on_my_notes_page_and_update_header_indicat.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_validation_error_for_empty_note_submission_allow_delete_cancel_to_return_to_dialog_and_delete_note_from_rest
+    checklist_label: Show validation error for empty note submission allow delete
+      cancel to return to dialog and delete note from rest
+    source_test_file: tests/should_show_validation_error_for_empty_note_submission_allow_delete_cancel_to_return_to_dialog_and_delete_note_from_rest.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_validation_error_for_empty_note_submission_allow_delete_cancel_to_return_to_dialog_and_delete_note_from_rest.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_gate_notes_behind_authentication_showing_login_dialog_for_guests_redirect_logged_out_users_from_my_notes_page_and
+    checklist_label: Gate notes behind authentication showing login dialog for guests
+      redirect logged out users from my notes page and
+    source_test_file: tests/should_gate_notes_behind_authentication_showing_login_dialog_for_guests_redirect_logged_out_users_from_my_notes_page_and.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_gate_notes_behind_authentication_showing_login_dialog_for_guests_redirect_logged_out_users_from_my_notes_page_and.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+extra_fields:
+  disable_graders:
+  - checklist_items

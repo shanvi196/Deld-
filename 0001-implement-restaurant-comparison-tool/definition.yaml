@@ -1,0 +1,217 @@
+problem_id: 0001-implement-restaurant-comparison-tool
+app: deld
+task:
+  prompt: 'Implement a restaurant comparison tool for the Deld platform. Users want
+    to compare multiple restaurants side-by-side before making dining decisions. Create
+    a comparison feature that allows users to select restaurants, view them in a comparison
+    table, and manage selections across multiple pages.
+
+
+    **Feature Requirements**:
+
+
+    1. **Comparison Selection on Search Page**: Add a compare toggle button (data-testid:
+    "restaurant-card-compare-button-{restaurantId}") to each restaurant card on the
+    search/home page. Clicking the button when the user is NOT logged in must open
+    the login dialog (do not add to comparison). When logged in, clicking adds the
+    restaurant to the user''s comparison list stored in localStorage. The localStorage
+    key must be `comparisonList-{userId}` (e.g., `comparisonList-user_0001`) and the
+    value must be a JSON array of objects: `[{"restaurantId": "...", "addedAt": "<ISO
+    8601 timestamp>"}]`. Maximum 4 restaurants can be in the comparison list at once.
+    When the limit is reached and the user tries to add another, show a toast with
+    the exact message: "Maximum 4 restaurants can be compared". The compare button
+    must show a selected visual state with aria-pressed="true" when the restaurant
+    is in the comparison list, and aria-pressed="false" otherwise. Clicking a selected
+    button must remove that restaurant from the comparison list (toggle behavior).
+    The comparison list must persist in localStorage across page navigations — navigating
+    to a restaurant detail page and back must preserve the selected state of all compare
+    buttons.
+
+
+    2. **Floating Comparison Bar**: When at least 1 restaurant is in the comparison
+    list, display a fixed floating bar (data-testid: "comparison-bar") anchored to
+    the bottom of the viewport on the search page. The bar must show a mini thumbnail
+    image (data-testid: "comparison-bar-thumbnail-{restaurantId}") for each selected
+    restaurant, ordered left-to-right by addedAt timestamp (earliest first). Each
+    thumbnail must have an "x" remove button (data-testid: "comparison-bar-remove-{restaurantId}")
+    that removes that restaurant from the comparison list. Removing via the bar must
+    immediately update the corresponding restaurant card''s compare button (aria-pressed
+    must flip to "false"). The bar must display the count as: "1 restaurant selected"
+    (singular) or "N restaurants selected" (plural, for N > 1). Include a "Compare
+    Now" button (data-testid: "comparison-bar-compare-button") that navigates to /compare.
+    The "Compare Now" button must be disabled (with attribute disabled) when fewer
+    than 2 restaurants are selected. The bar must be hidden when 0 restaurants are
+    selected.
+
+
+    3. **Comparison View Page**: Create a "/compare" route displaying a comparison
+    table (data-testid: "comparison-table"). The table must show side-by-side columns
+    (data-testid: "comparison-column-{restaurantId}") ordered left-to-right by addedAt
+    timestamp (earliest added on the left). Each column must display, in order from
+    top to bottom: restaurant photo (first general photo or placeholder), restaurant
+    name, star rating (rendered as filled/empty stars plus numeric value), price range
+    (as $ symbols), cuisine types (as individual pill/chip elements), key features
+    section showing delivery, reservations, outdoor seating, wifi, and parking as
+    rows with checkmark icons for available and dash for unavailable, and operating
+    hours for each day of the week. Each column must include a "Remove" button (data-testid:
+    "comparison-column-remove-{restaurantId}") that removes the restaurant from the
+    comparison list AND removes the column from the table in real-time. A "Clear All"
+    button (data-testid: "comparison-clear-all-button") in the top-right must remove
+    all restaurants from the comparison list and show the empty state. The empty state
+    must display the text "Select restaurants to compare" and include a link (data-testid:
+    "comparison-empty-back-link") that navigates back to the home/search page ("/").
+    When the last restaurant is removed via individual remove buttons, the view must
+    also transition to the empty state.
+
+
+    4. **Multi-Surface Indicators**: Add a comparison badge (data-testid: "header-comparison-badge")
+    to the site header (next to the user section) that displays the number of restaurants
+    in the comparison list. The badge must only be visible when at least 1 restaurant
+    is selected and must be clickable, navigating to /compare. On the restaurant detail
+    page, add a compare toggle button (data-testid: "detail-compare-button-{restaurantId}")
+    in the quick actions area. This button must show "Add to Compare" when the restaurant
+    is not in the list (aria-pressed="false") and "In Comparison" when it is (aria-pressed="true").
+    Clicking must toggle the restaurant in/out of the comparison list with the same
+    max-4 limit and toast behavior. When a restaurant is added or removed from the
+    detail page, navigating back to the search page must reflect the updated state
+    on all compare buttons and the floating comparison bar. All surfaces (search cards,
+    comparison bar, detail page button, header badge, comparison page) must stay in
+    sync — a change on any surface must be reflected on all others.
+
+
+    **Implementation Details**:
+
+    - New Route: /compare (comparison page)
+
+    - Authentication: Required — clicking compare when not logged in opens auth dialog
+
+    - localStorage key: `comparisonList-{userId}` where userId comes from the logged-in
+    user''s id (e.g., `comparisonList-user_0001`)
+
+    - localStorage schema: `[{"restaurantId": "dc553a2b-ac48-4126-964b-bd95e45e5670",
+    "addedAt": "2024-01-15T10:30:00.000Z"}]`
+
+    - Column ordering: by addedAt ascending (earliest first on the left)
+
+    - Toast message (exact): "Maximum 4 restaurants can be compared"
+
+    - Count format (singular): "1 restaurant selected"
+
+    - Count format (plural): "3 restaurants selected"
+
+    - Empty state message: "Select restaurants to compare"
+
+    - User isolation: Each user has their own comparison list. Logging out and logging
+    in as a different user must show that user''s comparison list (or empty if they
+    have none). Switching users must not leak comparison data between accounts.'
+hint: "**Preferred Account**: If login is required, please use the following credentials:\n\
+  \  - Login: sarah.chen@email.com\n  - Password: password123"
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a restaurant comparison tool for the Deld platform. Users
+    want to compare multiple rest...
+checklist_items:
+- Each restaurant card on the search page has a compare toggle button that adds the
+  restaurant to the comparison list when clicked by a logged-in user, visually indicates
+  selected state, and removes the restaurant when clicked again; clicking the button
+  while logged out opens the login dialog instead of adding to the list.
+- The comparison list is stored per user in localStorage, keyed by user ID, so that
+  switching accounts shows each user's own selections without leaking data between
+  accounts, and selections persist across page navigations and reloads.
+- A maximum of 4 restaurants can be added to the comparison list; attempting to add
+  a fifth shows a toast with the message 'Maximum 4 restaurants can be compared' and
+  does not add the restaurant.
+- A floating bar appears at the bottom of the search page whenever at least one restaurant
+  is selected, showing thumbnail images for each selected restaurant in chronological
+  order, a count label using correct singular/plural phrasing, individual remove buttons
+  per thumbnail, and a 'Compare Now' button that is disabled when fewer than 2 restaurants
+  are selected and navigates to the comparison page otherwise.
+- The comparison page at /compare displays a side-by-side table with columns ordered
+  by selection time, each showing the restaurant's photo, name, star rating, price
+  range, cuisine tags, key features (delivery, reservations, outdoor seating, wifi,
+  parking) with check/dash indicators, and daily operating hours.
+- Removing a restaurant from the comparison page (via individual column remove or
+  'Clear All') immediately updates the table, and when all restaurants are removed
+  the page shows an empty state with the text 'Select restaurants to compare' and
+  a link back to the home page.
+- A comparison badge in the site header shows the count of selected restaurants whenever
+  at least one is selected and navigates to the comparison page when clicked; the
+  restaurant detail page includes a compare toggle button that respects the same max-4
+  limit and toast behavior.
+- 'All comparison surfaces stay in sync: adding or removing a restaurant from the
+  detail page, the floating bar, or the comparison page is immediately reflected on
+  every other surface, including the search card toggle states, the floating bar thumbnails
+  and count, the header badge count, and the comparison table columns.'
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: playwright_test
+  args:
+    score_name: compare_button_opens_login_dialog_when_user_is_not_logged_in_and_does_not_add_to_list
+    checklist_label: Compare button opens login dialog when user is not logged in
+      and does not add to list
+    source_test_file: tests/compare_button_opens_login_dialog_when_user_is_not_logged_in_and_does_not_add_to_list.spec.ts
+    destination_test_file: /workdir/app/__tests__/compare_button_opens_login_dialog_when_user_is_not_logged_in_and_does_not_add_to_list.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: add_restaurant_when_logged_in_and_verify_per_user_localstorage_key_and_object_schema
+    checklist_label: Add restaurant when logged in and verify per user localstorage
+      key and object schema
+    source_test_file: tests/add_restaurant_when_logged_in_and_verify_per_user_localstorage_key_and_object_schema.spec.ts
+    destination_test_file: /workdir/app/__tests__/add_restaurant_when_logged_in_and_verify_per_user_localstorage_key_and_object_schema.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: navigating_directly_to_compare_when_not_logged_in_redirects_to_home_page_with_login_dialog
+    checklist_label: Navigating directly to compare when not logged in redirects to
+      home page with login dialog
+    source_test_file: tests/navigating_directly_to_compare_when_not_logged_in_redirects_to_home_page_with_login_dialog.spec.ts
+    destination_test_file: /workdir/app/__tests__/navigating_directly_to_compare_when_not_logged_in_redirects_to_home_page_with_login_dialog.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: compare_now_button_state_transitions_and_comparison_page_column_removal_updates_table_and_localstorage
+    checklist_label: Compare now button state transitions and comparison page column
+      removal updates table and localstorage
+    source_test_file: tests/compare_now_button_state_transitions_and_comparison_page_column_removal_updates_table_and_localstorage.spec.ts
+    destination_test_file: /workdir/app/__tests__/compare_now_button_state_transitions_and_comparison_page_column_removal_updates_table_and_localstorage.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: corrupted_localstorage_data_is_handled_gracefully_and_app_recovers_to_empty_comparison_state
+    checklist_label: Corrupted localstorage data is handled gracefully and app recovers
+      to empty comparison state
+    source_test_file: tests/corrupted_localstorage_data_is_handled_gracefully_and_app_recovers_to_empty_comparison_state.spec.ts
+    destination_test_file: /workdir/app/__tests__/corrupted_localstorage_data_is_handled_gracefully_and_app_recovers_to_empty_comparison_state.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: user_isolation_ensures_switching_accounts_does_not_leak_comparison_data_between_users
+    checklist_label: User isolation ensures switching accounts does not leak comparison
+      data between users
+    source_test_file: tests/user_isolation_ensures_switching_accounts_does_not_leak_comparison_data_between_users.spec.ts
+    destination_test_file: /workdir/app/__tests__/user_isolation_ensures_switching_accounts_does_not_leak_comparison_data_between_users.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+extra_fields:
+  disable_graders:
+  - checklist_items

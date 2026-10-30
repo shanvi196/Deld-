@@ -1,0 +1,79 @@
+```gherkin
+Feature: Recent Search History Tracker
+  As a user searching for restaurants
+  I want to see my recent searches below the search bar
+  So that I can quickly repeat previous searches without retyping
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And localStorage "recentSearches" is cleared
+
+  @unit-test @priority-high
+  Scenario: Save search query to localStorage when user searches
+    Given I am on the homepage
+    When I type "sushi" into the search input with data-testid "search-query-input"
+    And I press Enter or click the search button
+    Then localStorage "recentSearches" should contain ["sushi"]
+    And I should be on the search results page
+
+  @unit-test @priority-high
+  Scenario: Display recent searches as clickable chips
+    Given localStorage "recentSearches" contains ["pizza", "burger", "sushi"]
+    When I navigate to "http://localhost:3000"
+    Then I should see a section with heading "Recent Searches"
+    And I should see exactly 3 clickable chips with text "pizza", "burger", "sushi"
+    And each chip should have a data-testid matching pattern "recent-search-chip-{index}"
+
+  @unit-test @priority-high
+  Scenario: Click recent search chip to apply search
+    Given localStorage "recentSearches" contains ["italian"]
+    And I am on the homepage
+    When I click the chip with data-testid "recent-search-chip-0"
+    Then the search input should contain "italian"
+    And the URL should contain "query=italian"
+    And restaurant results should be displayed
+
+  @unit-test @priority-high
+  Scenario: Clear history button removes all searches
+    Given localStorage "recentSearches" contains ["tacos", "ramen", "thai"]
+    And I am on the homepage showing recent searches
+    When I click the button with data-testid "clear-search-history-button"
+    Then localStorage "recentSearches" should be empty
+    And the "Recent Searches" section should not be visible
+    And the search input should remain empty
+
+  @unit-test @edge-case
+  Scenario: Duplicate search moves existing query to front position
+    Given localStorage "recentSearches" contains ["pizza", "burger", "sushi"]
+    And I am on the homepage
+    When I type "burger" into the search input with data-testid "search-query-input"
+    And I press Enter or click the search button
+    Then localStorage "recentSearches" should contain exactly 3 items
+    And localStorage "recentSearches" should equal ["burger", "pizza", "sushi"]
+    And the first chip with data-testid "recent-search-chip-0" should have text "burger"
+
+  @unit-test @edge-case
+  Scenario: Trimmed search query removes leading and trailing whitespace
+    Given localStorage "recentSearches" is empty
+    And I am on the homepage
+    When I type "  italian  " into the search input with data-testid "search-query-input"
+    And I press Enter or click the search button
+    Then localStorage "recentSearches" should contain exactly 1 item
+    And localStorage "recentSearches" should equal ["italian"]
+    And the saved query should not contain leading or trailing spaces
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of recent searches section
+    Given localStorage "recentSearches" contains ["italian", "chinese", "mexican"]
+    When I navigate to "http://localhost:3000"
+    Then the page should visually show the "Recent Searches" heading
+    And three clickable chips labeled "italian", "chinese", "mexican" should be visible
+    And the "Clear History" button should be visible below the chips
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of empty state without recent searches
+    Given localStorage "recentSearches" is empty
+    When I navigate to "http://localhost:3000"
+    Then the "Recent Searches" section should not be visible anywhere on the page
+    And only the search bar should be displayed without any chips below it
+```

@@ -1,0 +1,132 @@
+problem_id: 1425-maint-fix-restaurant-photos-gallery-layout-to-deld
+app: deld
+task:
+  prompt: 'Fix the restaurant-photos-gallery layout on `/restaurants/[id]` to use
+    a masonry grid with dynamic column count and photo management features.
+
+
+    **Feature Requirements**:
+
+
+    1. **Masonry Photo Gallery with Count Badge**: Add a gallery section (`data-testid="photo-gallery"`)
+    to the restaurant detail page left panel, below the existing photos carousel.
+    Aggregate all restaurant photos (general, menu urls, food urls) into a single
+    masonry grid. Photos from different categories may share the same URL; include
+    all entries without deduplication. Implement CSS grid with a shortest-column placement
+    algorithm — no external masonry library. Each photo (`data-testid="gallery-photo-{index}"`)
+    renders at natural aspect ratio with no cropping. Display a count badge (`data-testid="gallery-photo-count"`)
+    above the grid showing "{N} Photos" (e.g. "15 Photos", or "1 Photo" for singular).
+    Responsive columns: 1 below 640px, 2 at 640–1024px, 3 above 1024px. Gap: 8px.
+
+
+    2. **Show All / Show Less Toggle**: When more than 12 photos exist, initially
+    show only the first 12. Render a toggle button (`data-testid="gallery-toggle"`)
+    below visible photos with text "Show All ({N})" when collapsed (N = total count)
+    and "Show Less" when expanded. Clicking alternates between 12 and all. Hide the
+    toggle when 12 or fewer photos.
+
+
+    3. **Edge States & Lazy Placeholders**: Zero photos: render empty state (`data-testid="gallery-empty-state"`)
+    with text "No photos yet". One photo: render full-width spanning all columns.
+    Each photo uses `loading="lazy"` and shows a placeholder div (`data-testid="photo-placeholder-{index}"`,
+    background `#e5e7eb`) while the image loads.
+
+
+    **Route**: `/restaurants/[id]` — public, no authentication required
+
+    **State**: Component-local only (useState for toggle expanded/collapsed)'
+hint: "**Files**: ~6 files — new gallery component directory with sub-components,\
+  \ layout integration\n\n  **Preferred Account**: If login is required, please use\
+  \ the following credentials:\n  - Login: sarah.chen@email.com\n  - Password: password123"
+problem_metadata:
+  task_type: feature-implementation
+  description: Fix the restaurant-photos-gallery layout on `/restaurants/[id]` to
+    use a masonry grid with dynami...
+  intent: 133
+checklist_items:
+- The restaurant detail page displays a photo gallery section below the existing photos
+  carousel in the left panel, showing all restaurant photos (general, menu, and food
+  images) combined into a single masonry-style grid layout
+- A count badge above the gallery shows the total number of photos with correct pluralization
+  (e.g. '24 Photos' or '1 Photo')
+- 'The gallery grid is responsive: it displays 1 column on narrow screens (below 640px),
+  2 columns on medium screens (640–1024px), and 3 columns on wide screens (above 1024px),
+  with consistent 8px spacing between photos'
+- Photos render at their natural aspect ratio without cropping, and shorter columns
+  receive the next photo so that column heights stay roughly balanced (masonry behavior)
+- When a restaurant has more than 12 photos, only the first 12 are shown initially
+  with a toggle button below them labeled 'Show All (N)'; clicking it reveals all
+  photos and the button changes to 'Show Less', clicking again collapses back to 12
+- When a restaurant has 12 or fewer photos, all photos are displayed and no toggle
+  button appears
+- When a restaurant has no photos, the gallery area shows an empty state message reading
+  'No photos yet'; when exactly one photo exists, it spans the full width of the gallery
+- Each photo loads lazily and shows a light gray placeholder rectangle until the image
+  finishes loading, preventing layout shifts as images appear
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: playwright_test
+  args:
+    score_name: gallery_section_renders_on_restaurant_detail_page
+    source_test_file: tests/gallery_section_renders_on_restaurant_detail_page.spec.ts
+    destination_test_file: /workdir/app/__tests__/gallery_section_renders_on_restaurant_detail_page.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: photo_count_badge_displays_correct_total_number_of_photos
+    source_test_file: tests/photo_count_badge_displays_correct_total_number_of_photos.spec.ts
+    destination_test_file: /workdir/app/__tests__/photo_count_badge_displays_correct_total_number_of_photos.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: show_all_and_show_less_toggle_cycles_between_12_and_all_photos
+    source_test_file: tests/show_all_and_show_less_toggle_cycles_between_12_and_all_photos.spec.ts
+    destination_test_file: /workdir/app/__tests__/show_all_and_show_less_toggle_cycles_between_12_and_all_photos.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: empty_state_renders_when_restaurant_has_no_photos
+    source_test_file: tests/empty_state_renders_when_restaurant_has_no_photos.spec.ts
+    destination_test_file: /workdir/app/__tests__/empty_state_renders_when_restaurant_has_no_photos.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: gallery_aggregates_photos_from_all_restaurant_sources_into_unified_grid
+    source_test_file: tests/gallery_aggregates_photos_from_all_restaurant_sources_into_unified_grid.spec.ts
+    destination_test_file: /workdir/app/__tests__/gallery_aggregates_photos_from_all_restaurant_sources_into_unified_grid.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: toggle_state_resets_to_collapsed_after_navigating_away_and_returning
+    source_test_file: tests/toggle_state_resets_to_collapsed_after_navigating_away_and_returning.spec.ts
+    destination_test_file: /workdir/app/__tests__/toggle_state_resets_to_collapsed_after_navigating_away_and_returning.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: gallery_photos_use_lazy_loading_attribute_on_images
+    source_test_file: tests/gallery_photos_use_lazy_loading_attribute_on_images.spec.ts
+    destination_test_file: /workdir/app/__tests__/gallery_photos_use_lazy_loading_attribute_on_images.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0

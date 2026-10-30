@@ -1,0 +1,151 @@
+problem_id: 0007-implement-cuisine-discovery-quiz
+app: deld
+task:
+  prompt: 'Implement a cuisine discovery quiz feature that helps users find new restaurant cuisines to try. Add a "Discover Cuisines" button to the homepage that opens a dialog with a 3-question quiz about taste preferences (spice level, dietary preference, atmosphere preference). After completion, display 3 recommended cuisine types with brief descriptions and a button to search for each cuisine.
+
+
+    **Feature Requirements**:
+
+
+    1. **Quiz Dialog Component**: Add a "Discover Cuisines" button below the search bar on the homepage that opens a modal dialog. The quiz has 3 single-choice questions: "How spicy do you like your food?" (Mild/Medium/Spicy/Very Spicy), "Dietary preference?" (No Preference/Vegetarian/Vegan/Pescatarian), "Preferred dining atmosphere?" (Casual/Fine Dining/Family-Friendly/Romantic). Each question is shown one at a time with Next/Back buttons for navigation. Include a progress indicator showing current step (e.g., "1 of 3"). All questions must be answered before showing results.
+
+
+    2. **Results Display Component**: After completing the quiz, show a results screen within the same dialog displaying 3 recommended cuisines. Each recommendation shows the cuisine name as a heading, a 1-2 sentence description explaining why it matches their preferences, and a "Search {Cuisine}" button that closes the dialog and navigates to the search page with that cuisine filter applied. Include a "Retake Quiz" button to restart from question 1.
+
+
+    **Routes**: Homepage (/) - no new routes, uses dialog overlay.
+
+
+    **Files**: 4 files (quiz dialog component, quiz logic/recommendation algorithm, homepage integration, CSS/styling if needed).
+
+
+    **Authentication**: Not required (available to all users).
+
+    **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password: password123
+
+
+    **Element Selectors**:
+    - Search cuisine button 0: `[data-testid="search-cuisine-button-0"]`
+    - Quiz answer Spicy: `[data-testid="quiz-answer-Spicy"]`
+    - Quiz back button: `[data-testid="quiz-back-button"]`
+    - Quiz answer Medium: `[data-testid="quiz-answer-Medium"]`
+    - Cuisine card: `[data-testid="cuisine-card-"]`
+    - Cuisine quiz dialog: `[data-testid="cuisine-quiz-dialog"]`
+    - Discover cuisines button: `[data-testid="discover-cuisines-button"]`
+    - Quiz answer Casual: `[data-testid="quiz-answer-Casual"]`
+    - Quiz answer Vegan: `[data-testid="quiz-answer-Vegan"]`
+    - Quiz answer Vegetarian: `[data-testid="quiz-answer-Vegetarian"]`
+    - Quiz dialog close: `[data-testid="quiz-dialog-close"]`
+    - Quiz next button: `[data-testid="quiz-next-button"]`
+    - Retake quiz button: `[data-testid="retake-quiz-button"]`'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a cuisine discovery quiz feature that helps users find new restaurant cuisines to try. ...
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: open_quiz_dialog_from_homepage
+    source_test_file: tests/open_quiz_dialog_from_homepage.spec.ts
+    destination_test_file: /workdir/app/__tests__/open_quiz_dialog_from_homepage.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: navigate_through_quiz_questions_sequentially
+    source_test_file: tests/navigate_through_quiz_questions_sequentially.spec.ts
+    destination_test_file: /workdir/app/__tests__/navigate_through_quiz_questions_sequentially.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: navigate_backward_through_quiz_questions
+    source_test_file: tests/navigate_backward_through_quiz_questions.spec.ts
+    destination_test_file: /workdir/app/__tests__/navigate_backward_through_quiz_questions.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: complete_quiz_and_view_recommended_cuisines
+    source_test_file: tests/complete_quiz_and_view_recommended_cuisines.spec.ts
+    destination_test_file: /workdir/app/__tests__/complete_quiz_and_view_recommended_cuisines.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: search_for_recommended_cuisine_from_results
+    source_test_file: tests/search_for_recommended_cuisine_from_results.spec.ts
+    destination_test_file: /workdir/app/__tests__/search_for_recommended_cuisine_from_results.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: close_dialog_without_completing_quiz_preserves_no_state
+    source_test_file: tests/close_dialog_without_completing_quiz_preserves_no_state.spec.ts
+    destination_test_file: /workdir/app/__tests__/close_dialog_without_completing_quiz_preserves_no_state.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_quiz
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the quiz question screen visual display on a scale of 0 to 1:
+
+
+      0 - Quiz dialog not visible or major layout issues: Dialog not displayed, heading "How spicy do you like your food?" missing or incorrect, radio button options not showing all 4 labels (Mild/Medium/Spicy/Very Spicy) in clear vertical layout, progress indicator "1 of 3" not visible at top of dialog, or quiz-next-button not visible or not displaying disabled styling with reduced opacity
+
+
+      1 - Quiz question screen correctly displayed: Dialog visible with heading "How spicy do you like your food?" prominently shown, exactly 4 radio button options clearly visible with labels "Mild", "Medium", "Spicy", "Very Spicy" in vertical layout, progress indicator "1 of 3" visible at top of dialog, and quiz-next-button visible with disabled styling (reduced opacity/muted appearance)'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const btn = document.querySelector('[data-testid="discover-cuisines-button"]'); if (btn) btn.click(); })();
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_cuisine
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the cuisine recommendations screen visual display on a scale of 0 to 1:
+
+
+      0 - Recommendations screen not visible or major layout issues: Heading "Recommended Cuisines for You" not displayed, fewer or more than 3 cuisine recommendation cards visible, cards missing essential elements (cuisine name heading, description text, or Search button), layout not in vertical column or grid format, or retake-quiz-button not visible at bottom
+
+
+      1 - Recommendations screen correctly displayed: Heading "Recommended Cuisines for You" prominently shown as main heading, exactly 3 cuisine recommendation cards displayed in vertical column or grid layout, each card clearly shows a cuisine name as heading, 1-2 sentences of description text, and a "Search" button with clear styling, and retake-quiz-button visible at bottom of dialog with distinct button styling'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const btn = document.querySelector('[data-testid="discover-cuisines-button"]'); if (btn) btn.click(); })();
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+    - (function() { const radio = document.querySelector('[data-testid="quiz-answer-Medium"]'); if (radio) radio.click(); })();
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const nextBtn = document.querySelector('[data-testid="quiz-next-button"]'); if (nextBtn) nextBtn.click(); })();
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const radio = document.querySelector('[data-testid="quiz-answer-No Preference"]'); if (radio) radio.click(); })();
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const nextBtn = document.querySelector('[data-testid="quiz-next-button"]'); if (nextBtn) nextBtn.click(); })();
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const radio = document.querySelector('[data-testid="quiz-answer-Family-Friendly"]'); if (radio) radio.click(); })();
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const nextBtn = document.querySelector('[data-testid="quiz-next-button"]'); if (nextBtn) nextBtn.click(); })();
+    - await new Promise(resolve => setTimeout(resolve, 1500))

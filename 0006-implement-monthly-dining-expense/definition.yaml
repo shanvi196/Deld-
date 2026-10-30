@@ -1,0 +1,175 @@
+problem_id: 0006-implement-monthly-dining-expense
+app: deld
+task:
+  prompt: "Implement a monthly dining expense tracker for the Deld restaurant platform.\
+    \ Users need to record, manage, and monitor their restaurant spending to stay\
+    \ within a dining budget.\n\n**Feature Requirements**:\n\n1. **Expense Entry on\
+    \ Restaurant Detail Page**: On each restaurant detail page, add a \"Log Expense\"\
+    \ button (`[data-testid=\"log-expense-button\"]`) in the quick actions area alongside\
+    \ the existing Save and Review buttons. Clicking it opens a dialog (`[data-testid=\"\
+    log-expense-dialog\"]`) with:\n   - An amount input (`[data-testid=\"expense-amount-input\"\
+    ]`) that accepts numeric values with up to 2 decimal places. Validate that the\
+    \ amount is greater than 0 and at most 10000. Show inline validation error text\
+    \ \"Amount must be between $0.01 and $10,000\" (`[data-testid=\"expense-amount-error\"\
+    ]`) for invalid values.\n   - A date input (`[data-testid=\"expense-date-input\"\
+    ]`) defaulting to today's date.\n   - A submit button (`[data-testid=\"expense-submit-button\"\
+    ]`).\n   - On successful save, show a success toast with text \"Expense logged\
+    \ successfully\" and close the dialog.\n   - The Log Expense button must only\
+    \ be visible to logged-in users. Guests should not see this button.\n\n2. **Expense\
+    \ Dashboard Page**: Create a new `/dining-expenses` route (auth-protected — unauthenticated\
+    \ users should be redirected to home and shown the login dialog). This page displays:\n\
+    \   - A page heading \"Dining Expenses\" (`[data-testid=\"expenses-page-heading\"\
+    ]`).\n   - A chronological list of all logged expenses, sorted **newest first**\
+    \ by date (ties broken by most recently added). Each expense entry (`[data-testid=\"\
+    expense-entry-{id}\"]`) must display: the restaurant name (as a clickable link\
+    \ to that restaurant's detail page), formatted amount (e.g., \"$45.50\"), formatted\
+    \ date (e.g., \"Jan 15, 2025\"), and a delete button (`[data-testid=\"delete-expense-{id}\"\
+    ]`) represented by a trash icon.\n   - Clicking the delete button on an individual\
+    \ expense removes it immediately from the list and from localStorage. Show a toast\
+    \ \"Expense deleted\" after removal.\n   - A monthly summaries section (`[data-testid=\"\
+    monthly-summaries\"]`) showing the total for each month that has expenses, formatted\
+    \ as \"January 2025: $245.50\". Months must be listed in reverse chronological\
+    \ order (most recent month first). When expenses are deleted, monthly totals must\
+    \ update immediately.\n   - A \"Clear All\" button (`[data-testid=\"clear-all-expenses-button\"\
+    ]`) that removes all expenses for the current user from localStorage and resets\
+    \ the view. This button should be disabled when there are no expenses.\n   - Empty\
+    \ state: show the text \"No expenses logged yet\" (`[data-testid=\"expenses-empty-state\"\
+    ]`) when the user has no expenses.\n   - The expense list is **capped at 50 entries\
+    \ per user**. When a 51st expense is added, the oldest entry (by date, then by\
+    \ insertion order) must be automatically evicted.\n\n3. **Navigation Link with\
+    \ Spending Badge**: Add a \"Dining Expenses\" link (`[data-testid=\"user-avatar-menu-expenses\"\
+    ]`) to the user avatar dropdown menu (between \"My Reviews\" and the logout separator).\
+    \ This link must:\n   - Navigate to `/dining-expenses`.\n   - Display a badge\
+    \ (`[data-testid=\"expenses-current-month-badge\"]`) next to the link text showing\
+    \ the current month's total spending formatted as a dollar amount (e.g., \"$127.50\"\
+    ). If no expenses exist for the current month, do not show the badge.\n   - Use\
+    \ a DollarSign icon (from lucide-react) to match the existing menu icon style.\n\
+    \   - The badge value must update in real-time when expenses are added or deleted\
+    \ without requiring a page reload.\n\n4. **Budget Threshold Warning**: On the\
+    \ expenses dashboard, display a warning banner (`[data-testid=\"budget-warning-banner\"\
+    ]`) when the current month's total exceeds $500. The banner text must read: \"\
+    You've exceeded your $500 monthly dining budget\". The banner must not appear\
+    \ when the total is $500 or below. When expenses are deleted bringing the total\
+    \ back to $500 or below, the banner must disappear immediately.\n\n**localStorage\
+    \ Specification**:\n- Key format: `deld-dining-expenses-{userId}` (e.g., `deld-dining-expenses-user_0001`)\n\
+    - Value: JSON array of expense objects, each with the structure:\n  ```\n  {\n\
+    \    \"id\": string (UUID),\n    \"restaurantId\": string,\n    \"restaurantName\"\
+    : string,\n    \"amount\": number,\n    \"date\": string (ISO 8601 date, e.g.,\
+    \ \"2025-01-15\"),\n    \"userId\": string,\n    \"createdAt\": string (ISO 8601\
+    \ timestamp for insertion ordering)\n  }\n  ```\n- Data must persist across page\
+    \ navigation and browser refresh.\n- Each user's expenses must be completely isolated\
+    \ — logging in as a different user must show only that user's data.\n\n**Route**:\
+    \ `/dining-expenses` (new page, auth-protected under the `(auth)` route group\
+    \ with the search bar header layout)\n\n**Auth**: Required for logging expenses,\
+    \ viewing the expenses dashboard, and seeing the expense menu link and badge.\
+    \ The Log Expense button must be hidden for unauthenticated users.\n\n**State**:\
+    \ All expense data stored in localStorage with the key format `deld-dining-expenses-{userId}`.\
+    \ The 50-entry cap is enforced on write. Cross-component state must stay synchronized\
+    \ — adding an expense on a restaurant detail page must be reflected immediately\
+    \ when navigating to the dashboard, and the dropdown badge must reflect the current\
+    \ month's total at all times."
+hint: "**Preferred Account**: If login is required, please use the following credentials:\n\
+  \  - Login: sarah.chen@email.com\n  - Password: password123"
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a monthly dining expense tracker for the Deld restaurant
+    platform. Users need to record...
+checklist_items:
+- Logged-in users see a 'Log Expense' button on each restaurant detail page that opens
+  a dialog where they can enter a dollar amount and date, submit it, and see a success
+  toast — while guests do not see this button at all.
+- The expense dialog validates the amount field, rejecting values that are zero, negative,
+  or above $10,000, and showing an inline error message for invalid entries while
+  preventing submission.
+- The /dining-expenses page is auth-protected (redirecting unauthenticated visitors
+  to the home page with a login prompt) and displays a chronological list of logged
+  expenses sorted newest-first, each showing restaurant name as a link to its detail
+  page, formatted dollar amount, and formatted date.
+- Users can delete individual expenses via a trash icon on each entry and clear all
+  expenses with a 'Clear All' button; deletions immediately update the list, monthly
+  totals, and the budget warning banner, and the 'Clear All' button is disabled when
+  no expenses exist.
+- A monthly summaries section displays total spending per month in reverse chronological
+  order, and a warning banner appears only when the current month's total exceeds
+  $500, disappearing immediately when expenses are deleted back to $500 or below.
+- The user avatar dropdown menu includes a 'Dining Expenses' link that navigates to
+  the expenses dashboard and shows a badge with the current month's total spending
+  — the badge is hidden when no expenses exist for the current month and updates in
+  real-time as expenses are added or deleted.
+- All expense data is stored per-user in localStorage, persists across page reloads
+  and navigation, and is fully isolated between user accounts — logging in as a different
+  user shows only that user's expenses.
+- The expense list enforces a cap of 50 entries per user, automatically removing the
+  oldest expense when a new one would exceed this limit, and an empty state message
+  is displayed when no expenses have been logged.
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: playwright_test
+  args:
+    score_name: multi_user_isolation_user_0001_expenses_are_invisible_to_user_0002_and_localstorage_stores_correct_data_shape_with_all_r
+    checklist_label: Multi user isolation user 0001 expenses are invisible to user
+      0002 and localstorage stores correct data shape with all r
+    source_test_file: tests/multi_user_isolation_user_0001_expenses_are_invisible_to_user_0002_and_localstorage_stores_correct_data_shape_with_all_r.spec.ts
+    destination_test_file: /workdir/app/__tests__/multi_user_isolation_user_0001_expenses_are_invisible_to_user_0002_and_localstorage_stores_correct_data_shape_with_all_r.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: budget_warning_banner_appears_at_exactly_50001_but_not_at_50000
+    checklist_label: Budget warning banner appears at exactly 50001 but not at 50000
+    source_test_file: tests/budget_warning_banner_appears_at_exactly_50001_but_not_at_50000.spec.ts
+    destination_test_file: /workdir/app/__tests__/budget_warning_banner_appears_at_exactly_50001_but_not_at_50000.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: fifty_entry_cap_evicts_the_oldest_expense_when_a_51st_is_added
+    checklist_label: 50 entry cap evicts the oldest expense when a 51st is added
+    source_test_file: tests/fifty_entry_cap_evicts_the_oldest_expense_when_a_51st_is_added.spec.ts
+    destination_test_file: /workdir/app/__tests__/fifty_entry_cap_evicts_the_oldest_expense_when_a_51st_is_added.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: cross_page_state_sync_and_persistence_logging_expense_on_restaurant_page_updates_dashboard_and_survives_full_page_reload
+    checklist_label: Cross page state sync and persistence logging expense on restaurant
+      page updates dashboard and survives full page reload
+    source_test_file: tests/cross_page_state_sync_and_persistence_logging_expense_on_restaurant_page_updates_dashboard_and_survives_full_page_reload.spec.ts
+    destination_test_file: /workdir/app/__tests__/cross_page_state_sync_and_persistence_logging_expense_on_restaurant_page_updates_dashboard_and_survives_full_page_reload.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clear_all_removes_every_expense_and_resets_dashboard_individual_delete_updates_list_monthly_summary_and_hides_badge_at_0
+    checklist_label: Clear all removes every expense and resets dashboard individual
+      delete updates list monthly summary and hides badge at 0
+    source_test_file: tests/clear_all_removes_every_expense_and_resets_dashboard_individual_delete_updates_list_monthly_summary_and_hides_badge_at_0.spec.ts
+    destination_test_file: /workdir/app/__tests__/clear_all_removes_every_expense_and_resets_dashboard_individual_delete_updates_list_monthly_summary_and_hides_badge_at_0.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: permission_gating_and_form_validation_guests_cannot_access_expense_features_logged_in_users_receive_inline_validation_er
+    checklist_label: Permission gating and form validation guests cannot access expense
+      features logged in users receive inline validation er
+    source_test_file: tests/permission_gating_and_form_validation_guests_cannot_access_expense_features_logged_in_users_receive_inline_validation_er.spec.ts
+    destination_test_file: /workdir/app/__tests__/permission_gating_and_form_validation_guests_cannot_access_expense_features_logged_in_users_receive_inline_validation_er.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+extra_fields:
+  disable_graders:
+  - checklist_items

@@ -1,0 +1,173 @@
+problem_id: 0009-restaurant-availability-alerts
+app: deld
+task:
+  prompt: 'Implement Restaurant Availability Alerts for the Deld app. Users want to be notified when closed restaurants are
+    about to open.
+
+
+    **Feature Requirements**:
+
+
+    1. **Notify Me Button on Closed Restaurants**: Add a ''Notify Me'' button (data-testid=''notify-me-button'') that appears
+    ONLY on restaurant cards showing closed status. The button displays a tooltip (data-testid=''notify-tooltip'') showing
+    the next opening time (e.g., ''Opens at 11:00 AM''). Clicking opens a modal (data-testid=''alert-modal'') with radio options
+    for reminder timing: 15 minutes, 30 minutes, or 1 hour before opening (data-testid=''reminder-option-15'', ''reminder-option-30'',
+    ''reminder-option-60''). Confirm button (data-testid=''confirm-alert-button'') saves alert to localStorage under key ''deld-opening-alerts''
+    with structure: { restaurantId, restaurantName, openTime, reminderOffset, createdAt }. After saving, button text changes
+    to ''Alert Set'' and clicking it again should NOT open the modal.
+
+
+    2. **Alerts Management Page**: Create route /user/alerts (data-testid=''alerts-page'') showing active alerts in a list.
+    Each alert card (data-testid=''alert-card'') displays restaurant name, scheduled time, and cancel button (data-testid=''cancel-alert-button'').
+    Empty state (data-testid=''no-alerts-message'') shows ''No active alerts''.
+
+
+    **Routes**: /user/alerts
+
+
+    **Element Selectors**:
+
+    - Reminder option 30: `[data-testid="reminder-option-30"]`
+
+    - Reminder option 60: `[data-testid="reminder-option-60"]`'
+hint: '**Files**: ~4 (notify-me-button component, alert-modal component, alerts page, localStorage utility)
+
+
+  **Authentication**: Not required for alerts (localStorage-based)
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password:
+  password123
+
+
+  **localStorage** use following keys in localStorage:
+
+  - `deld-opening-alerts`'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement Restaurant Availability Alerts for the Deld app. Users want to be notified when closed ...
+  intent: 1
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_notify_me_button_only_on_closed_restaurant_cards_with_tooltip_showing_opening_time
+    checklist_label: Display notify me button only on closed restaurant cards with tooltip showing opening time
+    source_test_file: tests/should_display_notify_me_button_only_on_closed_restaurant_cards_with_tooltip_showing_opening_time.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_notify_me_button_only_on_closed_restaurant_cards_with_tooltip_showing_opening_time.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_open_alert_modal_with_3_reminder_timing_options_and_default_selection
+    checklist_label: Open alert modal with 3 reminder timing options and default selection
+    source_test_file: tests/should_open_alert_modal_with_3_reminder_timing_options_and_default_selection.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_open_alert_modal_with_3_reminder_timing_options_and_default_selection.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_save_alert_to_localstorage_with_correct_structure_and_update_button_text
+    checklist_label: Save alert to localstorage with correct structure and update button text
+    source_test_file: tests/should_save_alert_to_localstorage_with_correct_structure_and_update_button_text.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_save_alert_to_localstorage_with_correct_structure_and_update_button_text.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_alerts_page_with_exactly_2_alert_cards_showing_restaurant_names_and_cancel_buttons
+    checklist_label: Display alerts page with exactly 2 alert cards showing restaurant names and cancel buttons
+    source_test_file: tests/should_display_alerts_page_with_exactly_2_alert_cards_showing_restaurant_names_and_cancel_buttons.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_alerts_page_with_exactly_2_alert_cards_showing_restaurant_names_and_cancel_buttons.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_remove_alert_from_list_and_localstorage_when_cancel_button_is_clicked
+    checklist_label: Remove alert from list and localstorage when cancel button is clicked
+    source_test_file: tests/should_remove_alert_from_list_and_localstorage_when_cancel_button_is_clicked.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_remove_alert_from_list_and_localstorage_when_cancel_button_is_clicked.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_empty_state_message_when_no_alerts_exist
+    checklist_label: Display empty state message when no alerts exist
+    source_test_file: tests/should_display_empty_state_message_when_no_alerts_exist.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_empty_state_message_when_no_alerts_exist.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_notify
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the Notify Me button and tooltip display on a scale of 0 to 1:
+
+
+      0 - Feature not implemented: No Notify Me button visible on closed restaurant cards, or button exists but no tooltip
+      appears on hover, or button appears on open restaurants instead of only closed ones
+
+
+      1 - Feature correctly implemented: Notify Me button with bell icon visible in the bottom-right area of a closed restaurant
+      card, tooltip is displayed above/near the button showing ''Opens at'' followed by a specific time (e.g., ''Opens at
+      11:00 AM''), tooltip has dark background with white/light text and appears to have an arrow or pointer toward the button'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - '(function() { const cards = document.querySelectorAll(''[data-testid^="restaurant-card-link-"]''); for (const card
+      of cards) { if (card.textContent && card.textContent.includes(''Closed'')) { const notifyBtn = card.querySelector(''[data-testid="notify-me-button"]'');
+      if (notifyBtn) { notifyBtn.dispatchEvent(new MouseEvent(''mouseenter'', { bubbles: true })); break; } } } })()'
+    - await new Promise(resolve => setTimeout(resolve, 800))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_empty
+    screenshot_url: http://localhost:3000/user/alerts
+    evaluation_rubric: 'Rate the empty alerts page display on a scale of 0 to 1:
+
+
+      0 - Page not implemented or broken: 404 error displayed, or page exists but shows no empty state UI, or empty state
+      message is missing or uses different text than ''No active alerts''
+
+
+      1 - Empty state correctly displayed: Alerts page with data-testid=''alerts-page'' is visible, centered empty state container
+      is shown with an illustrative icon (bell with slash or similar ''no alerts'' indicator), text displaying exactly ''No
+      active alerts'' is visible, empty state is properly centered within the main content area below any navigation header'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - (function() { localStorage.removeItem('deld-opening-alerts'); })()
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - eslint
+  - tsc
+  - vlm.screenshot_10_rate_the_empty
+  - vlm.screenshot_9_rate_the_notify
+  - checklist_items
+  grader_weights:
+    should_display_alerts_page_with_exactly_2_alert_cards_showing_restaurant_names_and_cancel_buttons: 0.2278
+    should_display_empty_state_message_when_no_alerts_exist: 0.4574
+    should_remove_alert_from_list_and_localstorage_when_cancel_button_is_clicked: 0.3148
+  gating_graders:
+  - playwright_test.should_display_notify_me_button_only_on_closed_restaurant_cards_with_tooltip_showing_opening_time
+  - playwright_test.should_open_alert_modal_with_3_reminder_timing_options_and_default_selection
+  - playwright_test.should_save_alert_to_localstorage_with_correct_structure_and_update_button_text

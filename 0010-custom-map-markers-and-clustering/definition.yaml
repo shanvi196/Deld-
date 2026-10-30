@@ -1,0 +1,177 @@
+problem_id: 0010-custom-map-markers-and-clustering
+app: deld
+task:
+  prompt: "Implement map marker customization controls for the home page. Users want\
+    \ to personalize how restaurant markers appear on the map, with preferences persisted\
+    \ per user and applied across all maps in the app.\n\n**Feature Requirements**:\n\
+    \n1. **Map Control Panel**: Add a collapsible floating control panel in the top-right\
+    \ corner of the map area on the home page. A toggle button (data-testid=\"map-control-toggle\"\
+    ) opens/closes the panel (data-testid=\"map-control-panel\"). The panel contains\
+    \ three groups of controls:\n   - **Marker Style**: Two icon buttons — \"Pin\"\
+    \ (data-testid=\"marker-style-pin\") for default pin markers and \"Circle\" (data-testid=\"\
+    marker-style-circle\") for circle markers. The active style button must have a\
+    \ visually distinct highlight (e.g., colored background or border). Default: \"\
+    pin\".\n   - **Marker Color**: Five color swatch buttons — red (data-testid=\"\
+    marker-color-red\"), blue (data-testid=\"marker-color-blue\"), green (data-testid=\"\
+    marker-color-green\"), purple (data-testid=\"marker-color-purple\"), orange (data-testid=\"\
+    marker-color-orange\"). The active color swatch must show a checkmark or ring\
+    \ indicator. Default: \"red\".\n   - **Show Labels Toggle**: A toggle button (data-testid=\"\
+    toggle-labels-button\") to show/hide restaurant names as text labels below each\
+    \ marker on the map. When enabled, each marker displays the restaurant name underneath\
+    \ it. Default: labels hidden.\n   - **Reset to Defaults**: A button (data-testid=\"\
+    reset-preferences-button\") that restores all marker preferences to their default\
+    \ values (pin style, red color, labels hidden). This button should only be enabled\
+    \ when at least one setting differs from defaults; otherwise it appears disabled.\n\
+    \   - **Non-Default Badge**: When any preference differs from its default value,\
+    \ the map-control-toggle button must display a small numeric badge (data-testid=\"\
+    preferences-badge\") showing the count of non-default settings (1–3). When all\
+    \ settings are at defaults, the badge must not be rendered.\n\n2. **User-Scoped\
+    \ Persistence**: Marker preferences must be saved to localStorage and survive\
+    \ full page navigation (e.g., navigate to a restaurant detail page and back —\
+    \ preferences must still be applied).\n   - **Logged-in users**: Store under key\
+    \ `deld-map-preferences-{userId}` where `{userId}` is the authenticated user's\
+    \ ID. Each user's preferences are independent.\n   - **Guest users** (not logged\
+    \ in): Store under key `deld-map-preferences-guest`.\n   - **Login migration**:\
+    \ When a guest user logs in, if `deld-map-preferences-guest` exists in localStorage,\
+    \ migrate its contents to `deld-map-preferences-{userId}` (only if the user does\
+    \ not already have saved preferences) and delete the guest key.\n   - **Logout\
+    \ behavior**: When a user logs out, their preferences remain saved under their\
+    \ user-scoped key for their next login. The app should fall back to the guest\
+    \ key (or defaults if no guest key exists).\n   - **JSON structure**: `{ \"markerStyle\"\
+    : \"pin\" | \"circle\", \"markerColor\": \"red\" | \"blue\" | \"green\" | \"purple\"\
+    \ | \"orange\", \"showLabels\": boolean }`\n\n3. **Multi-Surface Marker Rendering**:\
+    \ The saved marker preferences must apply to ALL Leaflet maps in the application,\
+    \ not just the home page:\n   - **Home page map** (`/`): All restaurant markers\
+    \ render using the selected style and color. When \"circle\" style is selected,\
+    \ markers render as Leaflet `CircleMarker` components with the chosen color as\
+    \ fill. When \"pin\" style is selected, markers render as standard `Marker` components\
+    \ with a colored icon matching the chosen color. Labels (restaurant names) appear\
+    \ below markers when enabled.\n   - **Restaurant detail page map** (`/restaurants/[id]`):\
+    \ The single location marker in the LocationAndHoursSection must also reflect\
+    \ the user's marker style and color preferences. If the user chose circle markers\
+    \ in green, the detail page map marker must also be a green circle marker.\n\n\
+    4. **Preference Indicator on Detail Page**: On restaurant detail pages (`/restaurants/[id]`),\
+    \ when the user has any non-default map preferences, display a small chip/badge\
+    \ (data-testid=\"map-customized-indicator\") near the LocationAndHoursSection\
+    \ heading that reads \"Custom Map View\". This chip should be styled as a subtle\
+    \ pill (e.g., small, rounded, muted background). Clicking this chip navigates\
+    \ the user back to the home page (`/`). When all preferences are at default values,\
+    \ this chip must not be rendered.\n\n**Routes**: Home page `/` (existing), Restaurant\
+    \ detail page `/restaurants/[id]` (existing)\n\n**Auth**: Feature works for both\
+    \ logged-in and guest users. Logged-in user preferences are isolated per user\
+    \ ID. Guest preferences are shared and migrate on login.\n\n**State**: localStorage\
+    \ with keys `deld-map-preferences-{userId}` or `deld-map-preferences-guest`. JSON\
+    \ shape: `{ \"markerStyle\": \"pin\" | \"circle\", \"markerColor\": \"red\" |\
+    \ \"blue\" | \"green\" | \"purple\" | \"orange\", \"showLabels\": boolean }`.\
+    \ Defaults: `{ \"markerStyle\": \"pin\", \"markerColor\": \"red\", \"showLabels\"\
+    : false }`."
+hint: "**Preferred Account**: If login is required, please use the following credentials:\n\
+  \  - Login: sarah.chen@email.com\n  - Password: password123"
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement map marker customization controls for the home page. Users
+    want to personalize how rest...
+  intent: 2
+checklist_items:
+- A collapsible floating control panel appears in the top-right corner of the home
+  page map, with a toggle button that opens and closes it, containing marker style
+  options (pin and circle), five color swatches (red, blue, green, purple, orange),
+  a show/hide labels toggle, and a reset button — with the active style and color
+  visually highlighted (distinct background for style, checkmark or ring for color).
+- Selecting 'circle' style changes all restaurant markers on the home page map to
+  filled circle markers in the chosen color, selecting 'pin' style renders standard
+  pin markers with a colored icon, and enabling labels displays restaurant names as
+  text below each marker — all changes apply immediately on selection.
+- 'Marker preferences persist across full page navigations: after customizing markers
+  on the home page, navigating to a restaurant detail page and returning to the home
+  page shows the same custom markers, and a full page reload also preserves the selections.'
+- Each logged-in user has independent marker preferences — logging in as User A with
+  green circle markers, then logging out and logging in as User B shows User B's own
+  saved preferences (or defaults if none were saved), and logging back into User A
+  restores green circle markers.
+- 'A guest user''s marker preferences migrate to their account upon login: customizing
+  markers while logged out, then logging in applies those guest preferences to the
+  newly logged-in session (provided the user had no previously saved preferences),
+  and the guest preferences are cleared from storage.'
+- The restaurant detail page map reflects the user's marker preferences — if the user
+  selected green circle markers on the home page, the single location marker on the
+  detail page also renders as a green circle, and a 'Custom Map View' chip appears
+  near the location section heading that navigates back to the home page when clicked.
+- The reset button restores all preferences to defaults (pin style, red color, labels
+  hidden) and is disabled when all settings are already at their default values; additionally,
+  the control panel toggle button shows a numeric badge indicating how many settings
+  differ from defaults (1 to 3), and the badge disappears when everything is reset
+  to defaults.
+- When all preferences are at default values, neither the badge on the map control
+  toggle nor the 'Custom Map View' chip on the restaurant detail page is visible.
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: playwright_test
+  args:
+    score_name: user_preferences_are_isolated_per_user_and_not_affected_by_guest_activity
+    checklist_label: User preferences are isolated per user and not affected by guest
+      activity
+    source_test_file: tests/user_preferences_are_isolated_per_user_and_not_affected_by_guest_activity.spec.ts
+    destination_test_file: /workdir/app/__tests__/user_preferences_are_isolated_per_user_and_not_affected_by_guest_activity.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: reset_button_restores_defaults_and_removes_custom_map_view_chip_on_detail_page
+    checklist_label: Reset button restores defaults and removes custom map view chip
+      on detail page
+    source_test_file: tests/reset_button_restores_defaults_and_removes_custom_map_view_chip_on_detail_page.spec.ts
+    destination_test_file: /workdir/app/__tests__/reset_button_restores_defaults_and_removes_custom_map_view_chip_on_detail_page.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: corrupted_localstorage_value_falls_back_to_defaults_without_crashing
+    checklist_label: Corrupted localstorage value falls back to defaults without crashing
+    source_test_file: tests/corrupted_localstorage_value_falls_back_to_defaults_without_crashing.spec.ts
+    destination_test_file: /workdir/app/__tests__/corrupted_localstorage_value_falls_back_to_defaults_without_crashing.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: guest_preferences_migrate_to_user_key_on_login_when_user_has_no_existing_preferences
+    checklist_label: Guest preferences migrate to user key on login when user has
+      no existing preferences
+    source_test_file: tests/guest_preferences_migrate_to_user_key_on_login_when_user_has_no_existing_preferences.spec.ts
+    destination_test_file: /workdir/app/__tests__/guest_preferences_migrate_to_user_key_on_login_when_user_has_no_existing_preferences.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: guest_preferences_do_not_overwrite_existing_user_preferences_on_login
+    checklist_label: Guest preferences do not overwrite existing user preferences
+      on login
+    source_test_file: tests/guest_preferences_do_not_overwrite_existing_user_preferences_on_login.spec.ts
+    destination_test_file: /workdir/app/__tests__/guest_preferences_do_not_overwrite_existing_user_preferences_on_login.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: logout_preserves_user_preferences_and_re_login_restores_them
+    checklist_label: Logout preserves user preferences and re login restores them
+    source_test_file: tests/logout_preserves_user_preferences_and_re_login_restores_them.spec.ts
+    destination_test_file: /workdir/app/__tests__/logout_preserves_user_preferences_and_re_login_restores_them.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+extra_fields:
+  disable_graders:
+  - checklist_items

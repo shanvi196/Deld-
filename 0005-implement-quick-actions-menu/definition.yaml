@@ -1,0 +1,191 @@
+problem_id: 0005-implement-quick-actions-menu
+app: deld
+task:
+  prompt: "Implement a Quick Actions menu with persistent action tracking for restaurant\
+    \ cards on the search page.\n\n## Feature Requirements\n\n### 1. Menu Button &\
+    \ Dropdown\nAdd a three-dot button (⋮) to the top-right corner of each restaurant\
+    \ card. The button must use `data-testid=\"quick-actions-trigger-{restaurantId}\"\
+    ` and must not trigger navigation to the restaurant detail page when clicked.\
+    \ Clicking the button opens a dropdown menu (`data-testid=\"quick-actions-menu-{restaurantId}\"\
+    `) positioned below the button. The menu contains three options, each with `role=\"\
+    menuitem\"`:\n- \"Save to Collection\" (`data-testid=\"quick-action-save-{restaurantId}\"\
+    `)\n- \"Copy Link\" (`data-testid=\"quick-action-copy-{restaurantId}\"`)\n- \"\
+    Report Issue\" (`data-testid=\"quick-action-report-{restaurantId}\"`)\n\nThe menu\
+    \ must close when an action is selected or when clicking outside. The three-dot\
+    \ button should only be visible on hover over the restaurant card.\n\n### 2. Save\
+    \ to Collection (Bidirectional Toggle)\nClicking \"Save to Collection\" checks\
+    \ if the user is logged in. If not logged in, open the login dialog. If logged\
+    \ in, open the existing save-to-collection dialog so the user can choose which\
+    \ collection to save to. Once saved, the menu item text must change to \"Saved\
+    \ ✓\" and its `data-testid` must change to `quick-action-unsave-{restaurantId}`.\
+    \ Clicking \"Saved ✓\" removes the restaurant from all collections it belongs\
+    \ to and reverts the label back to \"Save to Collection\". Additionally, a small\
+    \ bookmark icon overlay (`data-testid=\"card-bookmark-{restaurantId}\"`) must\
+    \ appear on the top-left corner of the restaurant card image whenever the restaurant\
+    \ is in any of the user's collections. This overlay must disappear immediately\
+    \ when the restaurant is unsaved. The bookmark indicator must also be visible\
+    \ when the user navigates away from the search page and returns — it should be\
+    \ derived from the user's actual collection data, not ephemeral state.\n\n###\
+    \ 3. Copy Link with Persistent History\nClicking \"Copy Link\" copies the restaurant's\
+    \ full URL (format: `{window.location.origin}/restaurants/{restaurantId}`) to\
+    \ the clipboard and shows a \"Link copied!\" toast. Each copy action is recorded\
+    \ in localStorage under the key `deld:copied-links:{userId}` (use `deld:copied-links:guest`\
+    \ for logged-out users). The stored value must be a JSON array of objects with\
+    \ this exact structure:\n```json\n[\n  { \"restaurantId\": \"abc123\", \"restaurantName\"\
+    : \"Sushi Place\", \"copiedAt\": \"2024-01-15T10:30:00.000Z\" }\n]\n```\nThe array\
+    \ must be sorted by `copiedAt` descending (newest first) and capped at 10 entries.\
+    \ When a new entry would exceed 10, the oldest entry is evicted. If the same restaurant\
+    \ is copied again, its `copiedAt` timestamp must be updated and it must move to\
+    \ the top — no duplicate restaurantId entries allowed. This data must persist\
+    \ across page navigation: navigating to a restaurant detail page and back to search\
+    \ must preserve the full history.\n\n### 4. Report Issue with Duplicate Prevention\n\
+    Clicking \"Report Issue\" shows a \"Report submitted\" toast and records the restaurant\
+    \ ID in localStorage under the key `deld:reported-restaurants:{userId}` (use `deld:reported-restaurants:guest`\
+    \ for logged-out users). The stored value must be a JSON array of restaurant ID\
+    \ strings:\n```json\n[\"abc123\", \"def456\"]\n```\nIf a restaurant has already\
+    \ been reported (its ID exists in the array), the menu item must display \"Reported\"\
+    \ instead of \"Report Issue\", must have `aria-disabled=\"true\"`, and clicking\
+    \ it must have no effect — no duplicate toast, no duplicate entry. The reported\
+    \ state must persist across page navigation and survive browser refresh.\n\n###\
+    \ 5. Copied Links Badge in Header (Multi-Surface)\nWhen a logged-in user has entries\
+    \ in their copied-links history (from Requirement 3), display a numeric badge\
+    \ (`data-testid=\"copied-links-badge\"`) on the user avatar button (`[data-testid=\"\
+    user-avatar-menu-trigger\"]`). The badge shows the count of items currently in\
+    \ the `deld:copied-links:{userId}` localStorage array. The badge must:\n- Update\
+    \ immediately when a new link is copied (no page reload required)\n- Not render\
+    \ when the count is 0\n- Persist after page navigation (read from localStorage\
+    \ on component mount)\n- Be styled as a small red circle with white text, positioned\
+    \ at the top-right of the avatar\n\nAdditionally, add a \"Recently Copied\" section\
+    \ (`data-testid=\"recently-copied-section\"`) inside the user avatar dropdown\
+    \ menu, appearing between the existing menu items and the logout button. This\
+    \ section shows up to 3 most recent copied restaurant names as links to their\
+    \ detail pages. Each link must use `data-testid=\"recently-copied-item-{restaurantId}\"\
+    `. If there are no copied links, this section must not render.\n\n## Routes\n\
+    No new routes. Modifies the search page (`/`) and header components.\n\n## Authentication\n\
+    - Save to Collection requires login (opens login dialog if not authenticated)\n\
+    - Copy Link and Report Issue work for both logged-in and guest users\n- localStorage\
+    \ keys use the user's ID for logged-in users, literal string \"guest\" for anonymous\
+    \ users\n- When a guest user logs in, their guest localStorage data does NOT migrate\
+    \ — the logged-in user starts fresh\n\n## State & Persistence\n- Saved/unsaved\
+    \ bookmark state: Derived from user's actual collections via existing collection\
+    \ query — not localStorage\n- Copy history: `deld:copied-links:{userId}` — JSON\
+    \ array, max 10, sorted by copiedAt desc, no duplicate restaurantIds\n- Report\
+    \ state: `deld:reported-restaurants:{userId}` — JSON array of restaurant ID strings\n\
+    - Header badge count: Reactively reads from copied-links localStorage, updates\
+    \ without page reload\n\n## Files\n5-7 files: restaurant card component, quick\
+    \ actions menu component, localStorage utility hooks, header badge component,\
+    \ user avatar menu modification"
+hint: "**Preferred Account**: If login is required, please use the following credentials:\n\
+  \  - Login: sarah.chen@email.com\n  - Password: password123"
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Quick Actions menu for restaurant cards. Users need fast
+    access to common restaurant ...
+checklist_items:
+- Each restaurant card on the search page shows a three-dot menu button in the top-right
+  corner on hover, and clicking it opens a dropdown with 'Save to Collection', 'Copy
+  Link', and 'Report Issue' options without navigating to the restaurant detail page.
+- Clicking 'Save to Collection' when logged out opens the login dialog; when logged
+  in, it opens the collection picker dialog, and after saving, the menu item changes
+  to 'Saved ✓' with a bookmark icon overlay appearing on the card's image — clicking
+  'Saved ✓' removes the restaurant from all collections, hides the bookmark, and reverts
+  the label back.
+- The bookmark overlay on saved restaurant cards persists across page navigation (e.g.,
+  visiting a restaurant detail page and returning to search) because it is derived
+  from the user's actual collection data rather than temporary UI state.
+- Clicking 'Copy Link' copies the restaurant's full URL to the clipboard, shows a
+  'Link copied!' toast, and records the action in localStorage under a user-specific
+  key as a JSON array of objects sorted newest-first, capped at 10 entries, with no
+  duplicate restaurants — re-copying the same restaurant updates its timestamp and
+  moves it to the top.
+- Clicking 'Report Issue' shows a 'Report submitted' toast and records the restaurant
+  ID in localStorage; if the same restaurant's menu is opened again, the option displays
+  'Reported', is visually disabled, and clicking it has no effect — no duplicate toast
+  or entry is created.
+- A red numeric badge appears on the user avatar in the header showing the count of
+  copied links from localStorage, updates immediately when a new link is copied without
+  page reload, does not appear when the count is zero, and persists after navigating
+  between pages.
+- The user avatar dropdown menu includes a 'Recently Copied' section showing up to
+  3 most recent copied restaurant names as clickable links to their detail pages,
+  and this section is hidden when there are no copied links.
+- All localStorage-based state (copied links history, reported restaurants) uses the
+  logged-in user's ID in the storage key, uses 'guest' for anonymous users, and logging
+  in as a different user shows that user's own data rather than carrying over guest
+  or previous-user data.
+- The dropdown menu closes when clicking any action item or clicking outside the menu,
+  and all features — save toggle, copy with history, report with duplicate prevention,
+  and header badge — work together end-to-end across page navigations and browser
+  refreshes.
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: playwright_test
+  args:
+    score_name: should_cap_copied_links_history_at_10_entries_and_evict_the_oldest_when_an_11th_is_copied
+    checklist_label: Cap copied links history at 10 entries and evict the oldest when
+      an 11th is copied
+    source_test_file: tests/should_cap_copied_links_history_at_10_entries_and_evict_the_oldest_when_an_11th_is_copied.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_cap_copied_links_history_at_10_entries_and_evict_the_oldest_when_an_11th_is_copied.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_open_login_dialog_when_guest_user_clicks_save_to_collection_and_show_save_dialog_after_successful_authentication
+    checklist_label: Open login dialog when guest user clicks save to collection and
+      show save dialog after successful authentication
+    source_test_file: tests/should_open_login_dialog_when_guest_user_clicks_save_to_collection_and_show_save_dialog_after_successful_authentication.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_open_login_dialog_when_guest_user_clicks_save_to_collection_and_show_save_dialog_after_successful_authentication.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_disabled_reported_state_and_prevent_duplicate_report_submissions
+    checklist_label: Show disabled reported state and prevent duplicate report submissions
+    source_test_file: tests/should_show_disabled_reported_state_and_prevent_duplicate_report_submissions.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_disabled_reported_state_and_prevent_duplicate_report_submissions.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_persist_copied_links_across_page_navigation_and_show_correct_badge_count_on_restaurant_detail_page
+    checklist_label: Persist copied links across page navigation and show correct
+      badge count on restaurant detail page
+    source_test_file: tests/should_persist_copied_links_across_page_navigation_and_show_correct_badge_count_on_restaurant_detail_page.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_persist_copied_links_across_page_navigation_and_show_correct_badge_count_on_restaurant_detail_page.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_use_guest_localstorage_key_for_copy_and_report_actions_and_not_migrate_data_to_logged_in_user_after_authenticatio
+    checklist_label: Use guest localstorage key for copy and report actions and not
+      migrate data to logged in user after authenticatio
+    source_test_file: tests/should_use_guest_localstorage_key_for_copy_and_report_actions_and_not_migrate_data_to_logged_in_user_after_authenticatio.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_use_guest_localstorage_key_for_copy_and_report_actions_and_not_migrate_data_to_logged_in_user_after_authenticatio.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_remove_bookmark_overlay_and_revert_menu_label_when_unsaving_a_restaurant_from_all_collections
+    checklist_label: Remove bookmark overlay and revert menu label when unsaving a
+      restaurant from all collections
+    source_test_file: tests/should_remove_bookmark_overlay_and_revert_menu_label_when_unsaving_a_restaurant_from_all_collections.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_remove_bookmark_overlay_and_revert_menu_label_when_unsaving_a_restaurant_from_all_collections.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+extra_fields:
+  disable_graders:
+  - checklist_items

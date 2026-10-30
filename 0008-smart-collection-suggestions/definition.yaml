@@ -1,0 +1,195 @@
+problem_id: 0008-smart-collection-suggestions
+app: deld
+task:
+  prompt: 'Implement Smart Collection Suggestions for the Deld restaurant app. Add
+    a ''Suggested Collections'' section on the /user/collections page that displays
+    3-4 auto-generated collection ideas based on the logged-in user''s review history.
+
+
+    **Feature Requirements**:
+
+
+    1. **Suggested Collections Section**: Display a section titled "Suggested for
+    You" (data-testid="suggested-collections-section") above the existing collections
+    grid. Show 3-4 suggestion cards (data-testid="suggestion-card") each with: collection
+    name, description, restaurant count, and a "Create" button (data-testid="create-suggestion-button").
+    Suggestions are generated client-side by analyzing user''s reviews - filter by:
+    5-star ratings for "Your 5-Star Favorites", restaurants with priceRange "$" or
+    "$$" for "Budget Eats", reviews with occasion containing "date" for "Date Night
+    Spots". Hide section if user has no reviews or no suggestions qualify (minimum
+    2 restaurants per suggestion).
+
+
+    2. **Create Collection from Suggestion**: When user clicks "Create" on a suggestion
+    card, create a new collection via existing POST /api/collections endpoint with
+    the suggestion name, then add all matching restaurants via POST /api/collections/[id]/items.
+    Show loading state on button during creation (data-testid="create-suggestion-loading").
+    After success, remove that suggestion card from the list and show toast "Collection
+    created!". The new collection appears in the collections grid below.
+
+
+    **Routes**: /user/collections (modify existing page)
+
+    **Element Selectors**:
+    - Suggestion card name: `[data-testid="suggestion-card-name"]`
+    - Collection tile: `[data-testid="collection-tile"]`
+    - Suggestion card restaurant count: `[data-testid="suggestion-card-restaurant-count"]`'
+hint: '**Files**: ~4 (suggested-collections-section component, suggestion-card component,
+  collections page, suggestion-generator utility)
+
+
+  **Authentication**: Required (uses logged-in user''s reviews)'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement Smart Collection Suggestions for the Deld restaurant app.
+    Add a 'Suggested Collections'...
+  intent: 0
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_suggested_collections_section_when_user_has_qualifying_reviews
+    checklist_label: Display suggested collections section when user has qualifying
+      reviews
+    source_test_file: tests/should_display_suggested_collections_section_when_user_has_qualifying_reviews.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_suggested_collections_section_when_user_has_qualifying_reviews.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_5_star_favorites_suggestion_card_with_correct_data
+    checklist_label: Show 5 star favorites suggestion card with correct data
+    source_test_file: tests/should_show_5_star_favorites_suggestion_card_with_correct_data.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_5_star_favorites_suggestion_card_with_correct_data.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_create_collection_from_suggestion_successfully
+    checklist_label: Create collection from suggestion successfully
+    source_test_file: tests/should_create_collection_from_suggestion_successfully.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_create_collection_from_suggestion_successfully.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_hide_suggestions_section_when_user_has_no_reviews
+    checklist_label: Hide suggestions section when user has no reviews
+    source_test_file: tests/should_hide_suggestions_section_when_user_has_no_reviews.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_hide_suggestions_section_when_user_has_no_reviews.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_error_toast_when_collection_creation_fails
+    checklist_label: Display error toast when collection creation fails
+    source_test_file: tests/should_display_error_toast_when_collection_creation_fails.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_error_toast_when_collection_creation_fails.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_update_collections_grid_immediately_without_page_refresh
+    checklist_label: Update collections grid immediately without page refresh
+    source_test_file: tests/should_update_collections_grid_immediately_without_page_refresh.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_update_collections_grid_immediately_without_page_refresh.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_suggested
+    screenshot_url: http://localhost:3000/user/collections
+    evaluation_rubric: 'Rate the suggested collections section layout on a scale of
+      0 to 1:
+
+
+      0 - Missing or broken: No ''Suggested for You'' section visible, or section
+      appears below collections grid instead of above, or no suggestion cards displayed,
+      or cards lack collection names or Create buttons, or page shows error state
+
+
+      1 - Correctly implemented: A clearly visible ''Suggested for You'' section appears
+      ABOVE the existing collections grid, contains suggestion cards displayed in
+      a horizontal row or grid layout, each card prominently shows a collection name
+      (like ''5-Star Favorites'' or ''Budget Eats''), each card displays a restaurant
+      count (at least 2), each card has a visible ''Create'' button, and the existing
+      collections grid appears below the suggestions section'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const pwdInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (pwdInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(pwdInput, ''password123''); pwdInput.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_page
+    screenshot_url: http://localhost:3000/user/collections
+    evaluation_rubric: 'Rate the page state after creating a suggested collection
+      on a scale of 0 to 1:
+
+
+      0 - Creation failed or incomplete: No toast notification visible, or error toast
+      shown instead of success, or the clicked suggestion card is still visible in
+      the suggestions section, or no new collection tile appeared in the collections
+      grid, or page shows error state or visual glitches
+
+
+      1 - Creation successful: A success toast message containing ''Collection created''
+      is visible (or was recently shown), the suggestion card that was clicked is
+      no longer visible in the suggestions section, the collections grid now contains
+      a new collection tile (the total count increased by 1), the layout remains consistent
+      with no visual glitches or broken elements, and the page did not require a refresh
+      to show the new collection'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const pwdInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (pwdInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(pwdInput, ''password123''); pwdInput.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - (function() { const createBtn = document.querySelector('[data-testid="create-suggestion-button"]');
+      if (createBtn) createBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 3000))

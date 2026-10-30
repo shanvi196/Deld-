@@ -1,0 +1,104 @@
+```gherkin
+Feature: Cuisine Discovery Quiz
+  As a user browsing restaurants
+  I want to take a quiz about my taste preferences
+  So that I can discover new cuisines that match my tastes
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Open quiz dialog from homepage
+    Given I am on the homepage
+    When I click the button with data-testid "discover-cuisines-button"
+    Then the dialog with data-testid "cuisine-quiz-dialog" should be visible
+    And I should see the heading text "How spicy do you like your food?"
+    And I should see the progress indicator showing "1 of 3"
+    And I should see exactly 4 radio button options
+    And the button with data-testid "quiz-next-button" should be disabled
+    And the button with data-testid "quiz-back-button" should not be visible
+
+  @unit-test @priority-high
+  Scenario: Navigate through quiz questions sequentially
+    Given I am on the homepage
+    And the cuisine quiz dialog is open showing question 1
+    When I select the radio button with data-testid "quiz-answer-Medium"
+    And I click the button with data-testid "quiz-next-button"
+    Then I should see the heading text "Dietary preference?"
+    And the progress indicator should show "2 of 3"
+    And I should see exactly 4 dietary preference options
+    And the button with data-testid "quiz-next-button" should be disabled
+    And the button with data-testid "quiz-back-button" should be visible
+    And no radio button should be selected
+
+  @unit-test @priority-high
+  Scenario: Navigate backward through quiz questions
+    Given I am on the homepage
+    And the cuisine quiz dialog is open showing question 1
+    And I have selected the answer "Spicy" on question 1
+    And I have clicked next to advance to question 2
+    And I have selected the answer "Vegan" on question 2
+    And I have clicked next to advance to question 3
+    When I click the button with data-testid "quiz-back-button"
+    Then I should see the heading text "Dietary preference?"
+    And the progress indicator should show "2 of 3"
+    And the radio button with data-testid "quiz-answer-Vegan" should be selected
+    And the button with data-testid "quiz-next-button" should be enabled
+
+  @unit-test @priority-high
+  Scenario: Complete quiz and view recommended cuisines
+    Given I am on the homepage
+    And the cuisine quiz dialog is open
+    When I answer all 3 questions by selecting:
+      | Question | Answer |
+      | 1 | Spicy |
+      | 2 | Vegetarian |
+      | 3 | Casual |
+    And I click the button with data-testid "quiz-next-button" on question 3
+    Then I should see the heading text "Recommended Cuisines for You"
+    And I should see exactly 3 cuisine recommendation cards
+    And each card should have a cuisine name heading element
+    And each card should have a description text element
+    And each card should have a "Search" button with data-testid matching pattern "search-cuisine-button-{index}"
+    And the button with data-testid "retake-quiz-button" should be visible
+    And the button with data-testid "quiz-dialog-close" should be visible
+
+  @unit-test @priority-high
+  Scenario: Search for recommended cuisine from results
+    Given I have completed the quiz with answers "Spicy", "Vegetarian", "Casual"
+    And I see recommended cuisines including "Thai" as the first result
+    When I click the button with data-testid "search-cuisine-button-0"
+    Then the dialog with data-testid "cuisine-quiz-dialog" should not be visible
+    And the URL should be "http://localhost:3000/search"
+    And the URL should contain "categories=Thai"
+    And at least 1 restaurant card with category "Thai" should be displayed
+
+  @unit-test @edge-case
+  Scenario: Close dialog without completing quiz preserves no state
+    Given the cuisine quiz dialog is open on question 2
+    And I have selected the answer "Vegetarian" on question 2
+    When I click the dialog close button with data-testid "quiz-dialog-close"
+    And I click the button with data-testid "discover-cuisines-button" to reopen the dialog
+    Then I should see the heading text "How spicy do you like your food?"
+    And the progress indicator should show "1 of 3"
+    And no radio button should be selected
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of quiz question screen
+    Given I am on the homepage
+    When I click the button with data-testid "discover-cuisines-button"
+    And the quiz dialog opens showing question 1
+    Then the page should visually show the dialog with heading "How spicy do you like your food?"
+    And 4 radio button options should be clearly visible with labels "Mild", "Medium", "Spicy", "Very Spicy" in vertical layout
+    And the progress indicator "1 of 3" should be visible at the top of the dialog
+    And the button with data-testid "quiz-next-button" should be visible and styled as disabled with reduced opacity
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of cuisine recommendations screen
+    Given I have completed all 3 quiz questions with answers "Medium", "No Preference", "Family-Friendly"
+    When the results screen is displayed
+    Then the page should visually show "Recommended Cuisines for You" as the heading
+    And exactly 3 cuisine recommendation cards should be displayed in a vertical column or grid layout
+    And each card should show a cuisine name as a heading, 1-2 sentences of description text, and a "Search" button
+    And the button with data-testid "retake-quiz-button" should be visible at the bottom of the dialog with clear styling
+```

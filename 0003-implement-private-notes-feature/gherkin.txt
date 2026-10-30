@@ -1,0 +1,97 @@
+```gherkin
+Feature: Private Restaurant Notes
+  As a user visiting restaurants
+  I want to add private notes about my experiences
+  So that I can remember personal observations for future visits
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And localStorage is cleared of previous notes
+
+  @unit-test @authenticated @priority-high
+  Scenario: Add new note to restaurant
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on the restaurant details page for "rest_0001"
+    When I click the button with data-testid "add-note-button"
+    And I fill the textarea with data-testid "note-input" with text "Great outdoor seating, but parking is difficult"
+    And I click the button with data-testid "save-note-button"
+    Then localStorage should contain a note for restaurant "rest_0001" and current user
+    And the note text should be "Great outdoor seating, but parking is difficult"
+    And a success toast with text "Note saved" should appear
+
+  @unit-test @authenticated @priority-high
+  Scenario: Edit existing note
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on the restaurant details page for "rest_0001"
+    And I have previously saved a note "Original note text" for this restaurant
+    When I click the button with data-testid "add-note-button"
+    Then the textarea with data-testid "note-input" should contain "Original note text"
+    When I clear the textarea and fill it with "Updated note text"
+    And I click the button with data-testid "save-note-button"
+    Then localStorage should contain the updated note "Updated note text"
+    And the old note should be replaced, not duplicated
+
+  @unit-test @authenticated @priority-high
+  Scenario: Delete existing note
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on the restaurant details page for "rest_0001"
+    And I have previously saved a note "Note to be deleted" for this restaurant
+    When I click the button with data-testid "add-note-button"
+    And I click the button with data-testid "delete-note-button"
+    Then localStorage should not contain a note for restaurant "rest_0001" and current user
+    And a success toast with text "Note deleted" should appear
+    And the dialog should close
+
+  @unit-test @authenticated @edge-case
+  Scenario: Save empty note shows validation error
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on the restaurant details page for "rest_0001"
+    When I click the button with data-testid "add-note-button"
+    And I click the button with data-testid "save-note-button" without entering text
+    Then an error message "Note cannot be empty" should be displayed
+    And the note should not be saved to localStorage
+
+  @unit-test @authenticated @edge-case
+  Scenario: Notes are isolated per user account
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on the restaurant details page for "rest_0001"
+    And I save a note "Sarah's note about rest_0001" for this restaurant
+    When I log out and log in as "james.wilson@email.com"
+    And I navigate to the restaurant details page for "rest_0001"
+    And I click the button with data-testid "add-note-button"
+    Then the textarea with data-testid "note-input" should be empty
+    And localStorage should not contain "Sarah's note about rest_0001" for user "james.wilson@email.com"
+
+  @unit-test @authenticated @edge-case
+  Scenario: Notes count badge updates when adding first note
+    Given I am logged in as "sarah.chen@email.com"
+    And localStorage contains 0 notes for the current user
+    And the element with data-testid "notes-count-badge" should not be visible
+    When I navigate to restaurant details page for "rest_0001"
+    And I click the button with data-testid "add-note-button"
+    And I fill the textarea with data-testid "note-input" with text "First note"
+    And I click the button with data-testid "save-note-button"
+    Then the element with data-testid "notes-count-badge" should display "1"
+    And the badge should be visible
+
+  @screenshot-test @authenticated @priority-medium
+  Scenario: Visual validation of notes dialog with text
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on restaurant details page for "rest_0001"
+    When I click the add note button
+    And I enter note text "Perfect for business lunches"
+    Then the notes dialog should be visually open
+    And the textarea should contain the entered text
+    And the save button should be visible and enabled
+
+  @screenshot-test @authenticated @priority-medium
+  Scenario: Visual validation of empty notes dialog
+    Given I am logged in as "sarah.chen@email.com"
+    And I am on restaurant details page for "rest_0001"
+    And no note exists for this restaurant
+    When I click the button with data-testid "add-note-button"
+    Then the notes dialog should be visually open
+    And the textarea with data-testid "note-input" should be empty
+    And the delete button should not be visible
+    And the save button should be visible and enabled
+```

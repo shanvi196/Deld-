@@ -1,0 +1,82 @@
+```gherkin
+Feature: Map Marker Customization Controls
+  As a user browsing restaurants on the map
+  I want to customize how markers appear
+  So that I can personalize my map viewing experience
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Map control panel is visible on home page
+    Given I am on the home page "/"
+    When the map area loads
+    Then I should see the map control panel with data-testid "map-control-panel"
+    And I should see the pin style button with data-testid "marker-style-pin"
+    And I should see the circle style button with data-testid "marker-style-circle"
+    And I should see the toggle labels button with data-testid "toggle-labels-button"
+
+  @unit-test @priority-high
+  Scenario: Switch marker style from pin to circle
+    Given I am on the home page "/"
+    And the map control panel is visible
+    And the "pin" style is currently active by default
+    When I click the circle style button with data-testid "marker-style-circle"
+    Then the circle style button should have an active/highlighted state
+    And the pin style button should not have an active state
+    And localStorage key "deld-map-preferences" should contain {"markerStyle":"circle"}
+
+  @unit-test @priority-high
+  Scenario: Marker style persists after page reload
+    Given I am on the home page "/"
+    And I have previously selected "circle" marker style stored in localStorage
+    When I reload the page
+    Then the circle style button with data-testid "marker-style-circle" should be active
+    And the pin style button should not be active
+
+  @unit-test @priority-high
+  Scenario: Enable show labels toggle
+    Given I am on the home page "/"
+    And the map control panel is visible
+    And labels are hidden by default
+    When I click the toggle labels button with data-testid "toggle-labels-button"
+    Then the toggle labels button should show an enabled/active state
+    And localStorage key "deld-map-preferences" should contain {"showLabels":true}
+
+  @unit-test @edge-case
+  Scenario: Default state with no localStorage
+    Given localStorage does not contain "deld-map-preferences" key
+    When I navigate to the home page "/"
+    Then the pin style button should be active by default
+    And the toggle labels button should show a disabled/inactive state
+    And no restaurant name labels should be visible below markers
+
+  @unit-test @integration
+  Scenario: Multiple preference changes persist together in localStorage
+    Given I am on the home page "/"
+    And localStorage key "deld-map-preferences" contains {"markerStyle":"pin","showLabels":false}
+    When I click the circle style button with data-testid "marker-style-circle"
+    And I click the toggle labels button with data-testid "toggle-labels-button"
+    Then localStorage key "deld-map-preferences" should contain {"markerStyle":"circle","showLabels":true}
+    And when I reload the page
+    Then the circle style button should be active
+    And the toggle labels button should show an enabled/active state
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of map control panel with circle markers active
+    Given I am on the home page "/"
+    When I click the circle style button with data-testid "marker-style-circle"
+    And I wait for the map to update
+    Then the map should display circle-style markers instead of pin markers
+    And the control panel should show circle button as visually highlighted
+    And the map area should be clearly visible with restaurant markers
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of map with labels enabled
+    Given I am on the home page "/"
+    When I click the toggle labels button with data-testid "toggle-labels-button"
+    And I wait for labels to appear on the map
+    Then restaurant name labels should be visible below each marker on the map
+    And the toggle labels button should appear in an active/enabled visual state
+    And the map should show markers with text labels underneath them
+```
