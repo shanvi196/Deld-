@@ -1,0 +1,192 @@
+problem_id: 0026-review-character-limit-warning
+app: deld
+task:
+  prompt: 'Implement a character limit warning system for the review form. The existing
+    character counter in the CharacterCountIndicator component needs color-based visual
+    feedback as users approach the 1000 character limit.
+
+
+    **Feature Requirements**:
+
+
+    1. **Color-Coded Counter Display**: Modify the CharacterCountIndicator component
+    to show the counter text in different colors based on character count thresholds.
+    Display text in green (text-green-600) when under 800 characters, yellow (text-yellow-600)
+    when between 800-960 characters, and red (text-red-600) when at 960+ characters.
+    Add data-testid="character-count-text" to the counter text element.
+
+
+    2. **Warning Message at High Count**: When character count exceeds 960 characters,
+    display an additional warning message "Approaching character limit!" below the
+    counter. This warning should have data-testid="character-limit-warning" and use
+    text-red-600 styling. The warning should only appear when count >= 960 and disappear
+    when count drops below 960.
+
+
+    **Routes**: /addreview/[restaurantId] (existing)'
+hint: '**Files**: ~2 files (character-count-indicator.tsx, about-experience.tsx)
+
+
+  **Authentication**: Required (must be logged in to access review form)'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a character limit warning system for the review form. The
+    existing character counter in...
+  intent: 29
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_green_color_when_under_800_characters
+    checklist_label: Display green color when under 800 characters
+    source_test_file: tests/should_display_green_color_when_under_800_characters.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_green_color_when_under_800_characters.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_yellow_color_when_between_800_and_960_characters
+    checklist_label: Display yellow color when between 800 and 960 characters
+    source_test_file: tests/should_display_yellow_color_when_between_800_and_960_characters.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_yellow_color_when_between_800_and_960_characters.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_red_color_and_warning_message_at_960_or_more_characters
+    checklist_label: Display red color and warning message at 960 or more characters
+    source_test_file: tests/should_display_red_color_and_warning_message_at_960_or_more_characters.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_red_color_and_warning_message_at_960_or_more_characters.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_transition_from_green_to_yellow_at_exact_800_character_boundary
+    checklist_label: Transition from green to yellow at exact 800 character boundary
+    source_test_file: tests/should_transition_from_green_to_yellow_at_exact_800_character_boundary.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_transition_from_green_to_yellow_at_exact_800_character_boundary.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_transition_from_yellow_to_red_with_warning_at_exact_960_character_boundary
+    checklist_label: Transition from yellow to red with warning at exact 960 character
+      boundary
+    source_test_file: tests/should_transition_from_yellow_to_red_with_warning_at_exact_960_character_boundary.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_transition_from_yellow_to_red_with_warning_at_exact_960_character_boundary.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_hide_warning_when_character_count_drops_below_960_by_deleting_text
+    checklist_label: Hide warning when character count drops below 960 by deleting
+      text
+    source_test_file: tests/should_hide_warning_when_character_count_drops_below_960_by_deleting_text.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_hide_warning_when_character_count_drops_below_960_by_deleting_text.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_character
+    screenshot_url: http://localhost:3000/addreview/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the character limit warning display on a scale of 0 to
+      1:
+
+
+      0 - Yellow warning state NOT visible: Character counter does not show "850/1000"
+      in yellow color, counter text is missing or shows wrong count, the text-yellow-600
+      styling is not applied, or the review form is not properly displayed
+
+
+      1 - Yellow warning state correctly displayed: Character counter clearly shows
+      "850/1000" in yellow/amber color (text-yellow-600 class), no warning message
+      is visible below the counter (warning only appears at 960+), the review form
+      is fully visible with textarea containing text, star rating component, and submit
+      button all visible and properly aligned'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const pwInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (pwInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(pwInput, ''password123''); pwInput.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - '(function() { const textarea = document.querySelector(''[data-testid="review-textarea"]'');
+      if (textarea) { const text = ''A''.repeat(850); Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,
+      ''value'').set.call(textarea, text); textarea.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_character
+    screenshot_url: http://localhost:3000/addreview/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the character limit red warning state display on a scale
+      of 0 to 1:
+
+
+      0 - Red warning state NOT visible: Character counter does not show "975/1000"
+      in red color, warning message "Approaching character limit!" is missing or not
+      displayed in red, the text-red-600 styling is not applied to either element,
+      or the form layout is broken
+
+
+      1 - Red warning state correctly displayed: Character counter clearly shows "975/1000"
+      in red color (text-red-600 class), warning message "Approaching character limit!"
+      is visible below the counter in red text (text-red-600 class), the review form
+      layout remains intact with textarea, star rating, and submit button all properly
+      aligned and visible'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const pwInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (pwInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(pwInput, ''password123''); pwInput.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - '(function() { const textarea = document.querySelector(''[data-testid="review-textarea"]'');
+      if (textarea) { const text = ''A''.repeat(975); Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,
+      ''value'').set.call(textarea, text); textarea.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))

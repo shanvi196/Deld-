@@ -1,0 +1,166 @@
+problem_id: 0023-review-sorting-dropdown
+app: deld
+task:
+  prompt: 'Implement a review sorting dropdown for restaurant detail pages. Users
+    want to sort reviews to find the most relevant ones quickly.
+
+
+    **Feature Requirements**:
+
+
+    1. **Sort Dropdown Component**: Add a dropdown menu above the reviews section
+    on restaurant detail pages using the existing DropdownMenu atom component. The
+    dropdown trigger should display the currently selected sort option with data-testid="review-sort-dropdown-trigger".
+    Dropdown content should have data-testid="review-sort-dropdown-content". Sort
+    options: "Newest First" (data-testid="review-sort-option-newest"), "Oldest First"
+    (data-testid="review-sort-option-oldest"), "Highest Rated" (data-testid="review-sort-option-highest"),
+    "Lowest Rated" (data-testid="review-sort-option-lowest"), "Most Helpful" (data-testid="review-sort-option-helpful").
+
+
+    2. **URL State Persistence**: Store the selected sort option in URL search params
+    using nuqs for shareability. Parameter name: "reviewSort" with values: "newest",
+    "oldest", "highest", "lowest", "helpful". Default sort is "newest". When user
+    selects a sort option, update URL param and re-sort the displayed reviews accordingly.
+    The sort should persist across page navigation and page refresh. Each review card
+    must include data-rating attribute with the numeric rating value (1-5) for testing
+    sort order.
+
+
+    **Routes**: `/restaurants/[id]` (restaurant detail page)'
+hint: '**Files**: ~4 (review-sort-dropdown component, reviews section integration,
+  nuqs parser setup, client-side sorting logic)
+
+
+  **Authentication**: Not required (public feature)
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a review sorting dropdown for restaurant detail pages. Users
+    want to sort reviews to fi...
+  intent: 23
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_sort_dropdown_with_default
+    checklist_label: Display sort dropdown with default
+    source_test_file: tests/should_display_sort_dropdown_with_default.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_sort_dropdown_with_default.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_all_sort_options_when_dropdown_is_opened
+    checklist_label: Show all sort options when dropdown is opened
+    source_test_file: tests/should_show_all_sort_options_when_dropdown_is_opened.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_all_sort_options_when_dropdown_is_opened.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_update_url_param_when_sort_option_is_selected
+    checklist_label: Update url param when sort option is selected
+    source_test_file: tests/should_update_url_param_when_sort_option_is_selected.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_update_url_param_when_sort_option_is_selected.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_persist_sort_selection_on_page_refresh
+    checklist_label: Persist sort selection on page refresh
+    source_test_file: tests/should_persist_sort_selection_on_page_refresh.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_persist_sort_selection_on_page_refresh.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_reorder_reviews_when_sorting_by_highest_rated
+    checklist_label: Reorder reviews when sorting by highest rated
+    source_test_file: tests/should_reorder_reviews_when_sorting_by_highest_rated.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_reorder_reviews_when_sorting_by_highest_rated.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_load_correct_sort_from_url_on_direct_navigation
+    checklist_label: Load correct sort from url on direct navigation
+    source_test_file: tests/should_load_correct_sort_from_url_on_direct_navigation.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_load_correct_sort_from_url_on_direct_navigation.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_review
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the review sort dropdown display on a scale of 0 to 1:
+
+
+      0 - No dropdown visible: Review sort dropdown is not present on the restaurant
+      detail page, or the dropdown trigger is not clickable, or clicking reveals no
+      dropdown content.
+
+
+      1 - Dropdown correctly displayed: Review sort dropdown is visible and open,
+      showing all five sort options (Newest First, Oldest First, Highest Rated, Lowest
+      Rated, Most Helpful) with proper styling consistent with the app''s existing
+      DropdownMenu design patterns. Options should be clearly readable and appear
+      in a dropdown menu format.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000));
+    - |
+      document.querySelector('[data-testid="review-sort-dropdown-trigger"]').scrollIntoView({ behavior: 'smooth', block: 'center'});
+    - await new Promise(resolve => setTimeout(resolve, 1000));
+    - |
+      document.querySelector('[data-testid="review-sort-dropdown-trigger"]').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    - await new Promise(resolve => setTimeout(resolve, 500));
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_sorted
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980?reviewSort=highest
+    evaluation_rubric: 'Rate the sorted reviews display with URL state on a scale
+      of 0 to 1:
+
+
+      0 - URL state not reflected: Reviews section not visible, or sort dropdown does
+      not show "Highest Rated" as selected despite the reviewSort=highest URL parameter,
+      or no visual indication of the current sort state.
+
+
+      1 - URL state correctly applied: Reviews section is visible on the restaurant
+      detail page with the sort dropdown trigger clearly showing "Highest Rated" as
+      the selected option (matching the reviewSort=highest URL parameter). Review
+      cards should be displayed in the reviews area, indicating the sort has been
+      applied.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000));
+    - |
+      document.querySelector('[data-testid="review-sort-dropdown-trigger"]').scrollIntoView({ behavior: 'smooth', block: 'center'});
+    - await new Promise(resolve => setTimeout(resolve, 1000));
+    - |
+      document.querySelector('[data-testid="review-sort-dropdown-trigger"]').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    - await new Promise(resolve => setTimeout(resolve, 500));

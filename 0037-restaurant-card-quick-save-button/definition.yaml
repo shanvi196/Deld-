@@ -1,0 +1,188 @@
+problem_id: 0037-restaurant-card-quick-save-button
+app: deld
+task:
+  prompt: "Implement a Quick Save Button on Restaurant Cards with a Recently Saved\
+    \ Section\n\nUsers browsing restaurants want to quickly save them to collections\
+    \ without navigating away from the list view, and see their most recently saved\
+    \ restaurants at the top of the homepage for easy access.\n\n## Feature Requirements\n\
+    \n### 1. Quick Save Button on Restaurant Cards\n\nAdd a bookmark icon button to\
+    \ each `RestaurantCard` on the homepage restaurant list.\n\n- **Button element**:\
+    \ `data-testid='quick-save-button-{restaurantId}'` using the Lucide `Bookmark`\
+    \ icon.\n- **Positioning**: Absolutely positioned in the **top-right corner**\
+    \ of the restaurant card image area (the 168×168 image container).\n- **Hover\
+    \ reveal (desktop)**: On screens `xl` and above, the button starts at `opacity-0`\
+    \ and transitions to `opacity-100` when the user hovers over the restaurant card\
+    \ (`group-hover`). Use a `transition-opacity duration-200` animation. On smaller\
+    \ screens, the button is always visible.\n- **Saved state**: If the restaurant\
+    \ exists in **any** of the logged-in user's collections, show a **filled** bookmark\
+    \ icon (`fill-current` class on the Bookmark SVG). Otherwise, show an **outline**\
+    \ bookmark icon.\n- **Click behavior**: Clicking the quick save button must **not**\
+    \ navigate to the restaurant detail page. It must stop event propagation and open\
+    \ the `SaveToCollectionDialog` for that restaurant. The dialog must have `data-testid='save-to-collection-dialog'`.\n\
+    - **Guest users**: If no user is logged in, the quick save button should still\
+    \ appear but clicking it navigates to `/login` instead of opening the dialog.\n\
+    \n### 2. Save Dialog Integration with Bidirectional State\n\nReuse the existing\
+    \ `SaveToCollectionDialog` component, triggered from the quick save button.\n\n\
+    - The dialog shows all of the user's collections with the ability to **save**\
+    \ (add) or **remove** the restaurant from each collection.\n- When the user **saves**\
+    \ the restaurant to a collection:\n  - The quick save button icon updates to the\
+    \ **filled** state immediately.\n  - The restaurant is added to the **Recently\
+    \ Saved** section (see Requirement 3).\n- When the user **removes** the restaurant\
+    \ from a collection via the dialog's \"Remove\" button:\n  - If the restaurant\
+    \ is no longer in **any** collection, the quick save button icon reverts to the\
+    \ **outline** state.\n  - The restaurant is **removed** from the Recently Saved\
+    \ section.\n- The dialog must include a \"Save to a New Collection\" button that\
+    \ opens the new collection creation flow, then returns to the save dialog.\n-\
+    \ Closing the dialog (clicking outside or pressing Escape) must not navigate away\
+    \ from the homepage.\n\n### 3. Recently Saved Section on Homepage\n\nAdd a \"\
+    Recently Saved\" section at the top of the homepage (above the main restaurant\
+    \ list) that shows restaurants the user has recently quick-saved.\n\n- **Section\
+    \ container**: `data-testid='recently-saved-section'`. Rendered only when the\
+    \ user is logged in **and** has at least one recently saved restaurant.\n- **Section\
+    \ heading**: Display \"Recently Saved\" as a heading with `data-testid='recently-saved-heading'`.\n\
+    - **Layout**: A horizontal scrollable row of compact restaurant cards. Each card\
+    \ has `data-testid='recently-saved-card-{restaurantId}'` and shows the restaurant\
+    \ image (80×80 rounded), name, and rating. Clicking a card navigates to `/restaurants/{restaurantId}`.\n\
+    - **Ordering**: Most recently saved first (newest on the left).\n- **Limit**:\
+    \ Maximum **8** restaurants displayed. When a 9th restaurant is saved, the **oldest**\
+    \ entry is evicted.\n- **localStorage persistence**: The recently saved list must\
+    \ be stored in `localStorage` under the key `deld-recently-saved-{userId}` (e.g.,\
+    \ `deld-recently-saved-abc123`). The stored value is a JSON array:\n  ```json\n\
+    \  [\n    { \"restaurantId\": \"rest-1\", \"savedAt\": \"2025-01-15T10:30:00.000Z\"\
+    \ },\n    { \"restaurantId\": \"rest-2\", \"savedAt\": \"2025-01-15T10:25:00.000Z\"\
+    \ }\n  ]\n  ```\n  The array must always be sorted by `savedAt` descending (newest\
+    \ first) and contain at most 8 entries.\n- **Cross-page persistence**: The recently\
+    \ saved data must survive full page navigation (e.g., navigating to a restaurant\
+    \ detail page and pressing the browser back button must still show the Recently\
+    \ Saved section with correct data).\n- **Bidirectional updates**: When a restaurant\
+    \ is removed from **all** collections (via the save dialog), it must also be removed\
+    \ from the Recently Saved section and from localStorage. The section should hide\
+    \ entirely if the list becomes empty.\n\n### 4. Saved Restaurants Count Badge\
+    \ in Header\n\nAdd a numeric badge to the user avatar area in the header showing\
+    \ how many unique restaurants the user has saved across all collections.\n\n-\
+    \ **Badge element**: `data-testid='saved-count-badge'`, displayed as a small red\
+    \ circular badge overlaid on or next to the user avatar trigger button (`data-testid='user-avatar-menu-trigger'`).\n\
+    - **Count**: The number of **unique** restaurants across all of the user's collections\
+    \ (not total collection items — a restaurant in 2 collections counts as 1).\n\
+    - **Visibility**: Only shown when the count is **greater than 0**. Hidden when\
+    \ the user has no saved restaurants.\n- **Real-time updates**: The badge count\
+    \ must update immediately when a restaurant is saved or removed via the quick\
+    \ save dialog (both adding and removing).\n\n## Routes\n\n- **Homepage**: `/`\
+    \ — Quick save buttons on cards, Recently Saved section, header badge\n- **Restaurant\
+    \ Detail**: `/restaurants/{id}` — Existing save button should reflect same saved\
+    \ state (no changes needed, but state must be consistent)\n- **Login**: `/login`\
+    \ — Guest users redirected here when clicking quick save\n\n## Auth\n\n- Quick\
+    \ save button appears for all users but has different click behavior (dialog for\
+    \ logged-in, redirect for guests)\n- Recently Saved section only appears for logged-in\
+    \ users\n- Header badge only appears for logged-in users\n- localStorage is keyed\
+    \ per user to isolate data between accounts\n\n## State\n\n- **Server state**:\
+    \ Collections data via existing TanStack React Query (`userCollectionsQueryOptions`)\n\
+    - **Client state**: Recently saved list in `localStorage` key `deld-recently-saved-{userId}`\n\
+    - **Derived state**: Quick save button filled/outline derived from collections\
+    \ query; badge count derived from unique restaurant count across collections\n\
+    - Both localStorage and query cache must stay in sync when saves/removes occur"
+hint: "**Preferred Account**: If login is required, please use the following credentials:\n\
+  \  - Login: sarah.chen@email.com\n  - Password: password123"
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Quick Save Button on Restaurant Cards. Users browsing restaurants
+    want to save them t...
+  intent: 43
+checklist_items:
+- Each restaurant card on the homepage displays a bookmark icon in the top-right corner
+  of its image area; on desktop-wide screens the icon is hidden until hovering over
+  the card, while on smaller screens it is always visible.
+- Clicking the bookmark icon on a restaurant card opens a save-to-collection dialog
+  without navigating away from the homepage; the dialog lists the user's collections
+  and allows adding or removing the restaurant from any collection, including creating
+  a new collection.
+- The bookmark icon appears filled when the restaurant belongs to at least one of
+  the user's collections, and reverts to an outline when the restaurant is removed
+  from all collections via the dialog.
+- When a guest (not logged in) clicks the bookmark icon, they are redirected to the
+  login page instead of seeing the save dialog.
+- A 'Recently Saved' section appears at the top of the homepage for logged-in users
+  who have quick-saved at least one restaurant, showing up to 8 compact cards (image,
+  name, rating) in a horizontal scrollable row ordered newest-first, and each card
+  navigates to the restaurant's detail page.
+- The Recently Saved section persists across full page navigations (e.g., visiting
+  a restaurant detail page and pressing back) and across browser refreshes, with data
+  stored per user so switching accounts shows each user's own saved list.
+- Removing a restaurant from all collections via the save dialog also removes it from
+  the Recently Saved section; if no recently saved restaurants remain, the section
+  disappears entirely.
+- A numeric badge on the user avatar in the header shows the count of unique restaurants
+  saved across all collections, updates immediately when restaurants are saved or
+  removed, and is hidden when the count is zero.
+- Saving a 9th restaurant to the Recently Saved list evicts the oldest entry so that
+  no more than 8 restaurants are ever shown in the section.
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: playwright_test
+  args:
+    score_name: should_isolate_recently_saved_data_between_different_user_accounts
+    checklist_label: Isolate recently saved data between different user accounts
+    source_test_file: tests/should_isolate_recently_saved_data_between_different_user_accounts.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_isolate_recently_saved_data_between_different_user_accounts.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_remove_from_recently_saved_and_update_badge_when_removed_from_all_collections
+    checklist_label: Remove from recently saved and update badge when removed from
+      all collections
+    source_test_file: tests/should_remove_from_recently_saved_and_update_badge_when_removed_from_all_collections.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_remove_from_recently_saved_and_update_badge_when_removed_from_all_collections.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_hide_all_auth_gated_features_for_guest_user_and_redirect_on_quick_save_click
+    checklist_label: Hide all auth gated features for guest user and redirect on quick
+      save click
+    source_test_file: tests/should_hide_all_auth_gated_features_for_guest_user_and_redirect_on_quick_save_click.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_hide_all_auth_gated_features_for_guest_user_and_redirect_on_quick_save_click.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_not_update_saved_state_when_collection_save_api_call_fails
+    checklist_label: Not update saved state when collection save api call fails
+    source_test_file: tests/should_not_update_saved_state_when_collection_save_api_call_fails.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_not_update_saved_state_when_collection_save_api_call_fails.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_reflect_saved_state_and_badge_on_detail_page_after_homepage_save
+    checklist_label: Reflect saved state and badge on detail page after homepage save
+    source_test_file: tests/should_reflect_saved_state_and_badge_on_detail_page_after_homepage_save.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_reflect_saved_state_and_badge_on_detail_page_after_homepage_save.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_initialize_all_derived_state_when_saving_first_restaurant_via_quick_save
+    checklist_label: Initialize all derived state when saving first restaurant via
+      quick save
+    source_test_file: tests/should_initialize_all_derived_state_when_saving_first_restaurant_via_quick_save.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_initialize_all_derived_state_when_saving_first_restaurant_via_quick_save.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+extra_fields:
+  disable_graders:
+  - checklist_items

@@ -1,0 +1,81 @@
+```gherkin
+Feature: Dietary Compatibility Score
+  As a user with dietary restrictions
+  I want to see how well restaurants match my dietary needs
+  So that I can quickly identify suitable dining options
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: No dietary score badge displayed when user is not logged in
+    Given I am on the homepage without being logged in
+    When the restaurant cards load
+    Then no elements with data-testid="dietary-score-badge" should be visible
+    And restaurant cards should display normally without score indicators
+
+  @unit-test @priority-high @authenticated
+  Scenario: Dietary score badge displayed when logged in user has dietary restrictions
+    Given I am logged in as a user with dietary restrictions ["vegetarian", "gluten-free"]
+    And I am on the homepage
+    When the restaurant cards load
+    Then at least one element with data-testid="dietary-score-badge" should be visible
+    And the badges should appear on restaurant cards
+
+  @unit-test @priority-high @authenticated
+  Scenario: Dietary score badge displays percentage value
+    Given I am logged in as a user with dietary restrictions ["vegetarian"]
+    And I am on the homepage
+    When the restaurant cards load
+    Then the element with data-testid="dietary-score-value" should be visible
+    And the score value should match the pattern "\d+%"
+    And the percentage should be between 0 and 100
+
+  @unit-test @edge-case @authenticated
+  Scenario: No badge displayed when user has empty dietary restrictions
+    Given I am logged in as a user with empty dietary restrictions []
+    And I am on the homepage
+    When the restaurant cards load
+    Then no elements with data-testid="dietary-score-badge" should be visible
+    And restaurant cards should display without score indicators
+
+  @unit-test @integration @authenticated
+  Scenario: Dietary score badge updates when user logs out from homepage
+    Given I am logged in as a user with dietary restrictions ["vegetarian", "gluten-free"]
+    And I am on the homepage
+    And at least one element with data-testid="dietary-score-badge" is visible
+    When I click the logout button in the navigation
+    And I wait for the page to update
+    Then no elements with data-testid="dietary-score-badge" should be visible
+    And restaurant cards should remain visible without score indicators
+
+  @unit-test @integration @authenticated
+  Scenario: Dietary score recalculates when navigating back to homepage after profile update
+    Given I am logged in as a user with dietary restrictions ["vegetarian"]
+    And I am on the homepage
+    And a restaurant exists with dietaryOptions ["vegetarian", "vegan"]
+    And the dietary score badge for that restaurant displays "100%"
+    When I navigate to the profile settings page
+    And I update my dietary restrictions to ["vegetarian", "gluten-free"]
+    And I save the profile changes
+    And I navigate back to the homepage
+    Then the dietary score badge for that restaurant should display "50%"
+    And the badge should have yellow color styling indicating medium compatibility
+
+  @screenshot-test @priority-high @authenticated
+  Scenario: Visual validation of dietary score badges on restaurant cards
+    Given I am logged in as a user with dietary restrictions ["vegetarian", "gluten-free"]
+    And I am on the homepage
+    When the page fully loads
+    Then the page should show restaurant cards with circular dietary compatibility score badges
+    And each badge should display a percentage value inside
+    And badges should be visually distinct and properly positioned on cards
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation that badges do not appear for logged out users
+    Given I am not logged in
+    And I am on the homepage
+    When the page fully loads
+    Then restaurant cards should be visible without any dietary score badges
+    And cards should show normal content including image, name, rating, and cuisine
+```

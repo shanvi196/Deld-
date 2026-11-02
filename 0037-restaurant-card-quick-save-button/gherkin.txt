@@ -1,0 +1,94 @@
+```gherkin
+Feature: Restaurant Card Quick Save Button
+  As a user browsing restaurants on the homepage
+  I want to save restaurants to my collections without leaving the list view
+  So that I can quickly bookmark interesting restaurants while browsing
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Quick save button appears on restaurant card hover
+    Given I am on the homepage with at least 3 restaurant cards visible
+    When I hover over a restaurant card with data-testid "restaurant-card-link-rest_0001"
+    Then a quick save button with data-testid "quick-save-button-rest_0001" should be visible
+    And the button should be positioned in the top-right corner of the card
+    And the button should have an outline bookmark icon
+    And the other restaurant cards should NOT display their quick save buttons
+
+  @unit-test @priority-high @authenticated
+  Scenario: Quick save button opens SaveToCollectionDialog when clicked
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the homepage with at least 1 restaurant card visible
+    When I hover over the first restaurant card
+    And I click the quick save button with data-testid starting with "quick-save-button-"
+    Then the SaveToCollectionDialog with data-testid "save-to-collection-dialog" should be visible
+    And the dialog should display at least 1 existing collection
+    And a text input with data-testid "collection-name-input" should be visible for creating new collections
+
+  @unit-test @priority-high
+  Scenario: Quick save button shows login dialog for unauthenticated users
+    Given I am not logged in
+    And I am on the homepage with at least 1 restaurant card visible
+    When I hover over the first restaurant card
+    And I click the quick save button with data-testid starting with "quick-save-button-"
+    Then the login dialog with data-testid "login-dialog" should appear within 500ms
+    And the current URL should be exactly "http://localhost:3000"
+    And the restaurant cards should still be visible behind the dialog overlay
+
+  @unit-test @priority-medium @authenticated
+  Scenario: Bookmark icon shows filled state for saved restaurants
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I have restaurant "rest_0001" saved in the collection "Favorites"
+    And I am on the homepage with restaurant card "rest_0001" visible
+    When I hover over the restaurant card with data-testid "restaurant-card-link-rest_0001"
+    Then the quick save button with data-testid "quick-save-button-rest_0001" should display a filled bookmark icon
+    And the button should have aria-label "Remove from collection" or "Saved to collection"
+
+  @unit-test @priority-medium @authenticated
+  Scenario: Quick save button state synchronizes after saving to multiple collections
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I have exactly 2 collections named "Favorites" and "Date Night"
+    And restaurant "rest_0002" is NOT saved in any collection
+    And I am on the homepage with restaurant card "rest_0002" visible
+    And the quick save button for "rest_0002" displays an outline bookmark icon
+    When I click the quick save button with data-testid "quick-save-button-rest_0002"
+    And the SaveToCollectionDialog appears with both collections unchecked
+    And I check the collection "Favorites"
+    And I check the collection "Date Night"
+    And I close the dialog by clicking outside the dialog overlay
+    Then the quick save button with data-testid "quick-save-button-rest_0002" should display a filled bookmark icon
+    And reopening the SaveToCollectionDialog for "rest_0002" should show both "Favorites" and "Date Night" as checked
+
+  @unit-test @priority-medium @authenticated @edge-case
+  Scenario: Quick save button state updates when removing restaurant from all collections
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I have restaurant "rest_0001" saved in exactly 1 collection named "Favorites"
+    And I am on the homepage with restaurant card "rest_0001" visible
+    And the quick save button for "rest_0001" displays a filled bookmark icon
+    When I click the quick save button with data-testid "quick-save-button-rest_0001"
+    And the SaveToCollectionDialog appears showing "Favorites" as checked
+    And I uncheck the collection "Favorites" to remove the restaurant
+    And I close the dialog by clicking the close button
+    Then the quick save button with data-testid "quick-save-button-rest_0001" should now display an outline bookmark icon
+    And the restaurant "rest_0001" should no longer be in any collection
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of quick save button on hover
+    Given I am on the homepage with at least 3 restaurant cards loaded
+    When I hover over the first restaurant card
+    Then the page should visually show a bookmark icon button in the top-right corner of the first card only
+    And the second and third restaurant cards should NOT show their quick save buttons
+    And the quick save button should have visible contrast against the card background image
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of SaveToCollectionDialog opened from card
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the homepage with at least 1 restaurant card visible
+    When I hover over the first restaurant card
+    And I click the quick save button
+    Then the page should visually show the SaveToCollectionDialog centered on screen
+    And the dialog should display a list of collection checkboxes
+    And the homepage content should be visible but dimmed with an overlay opacity of approximately 50%
+    And the dialog close button with X icon should be visible in the top-right corner of the dialog
+```

@@ -1,0 +1,76 @@
+```gherkin
+Feature: Empty Search State for No Results
+  As a user searching for restaurants
+  I want to see a friendly empty state when my search filters yield no results
+  So that I understand why no restaurants appear and can easily clear my filters
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Display empty state when filters yield no results
+    Given I am on the search page with filters "categories=Icelandic&price=%24%24%24%24"
+    When the page loads completely
+    Then I should see the empty search state container with data-testid="empty-search-state"
+    And I should see the heading "No restaurants found" with data-testid="empty-state-heading"
+
+  @unit-test @priority-high
+  Scenario: Display placeholder image in empty state
+    Given I am on the search page with filters "categories=Icelandic&price=%24%24%24%24"
+    When the page loads completely
+    Then I should see the empty state image with data-testid="empty-state-image"
+    And the image src attribute should contain "/placeholder.svg"
+
+  @unit-test @priority-high
+  Scenario: Clear filters button is visible and labeled correctly
+    Given I am on the search page with filters "categories=Icelandic&price=%24%24%24%24"
+    When the page loads completely
+    Then I should see the "Clear filters" button with data-testid="clear-filters-button"
+    And the button should be enabled and clickable
+
+  @unit-test @priority-high
+  Scenario: Clicking clear filters resets search and shows restaurants
+    Given I am on the search page with filters "categories=Icelandic&price=%24%24%24%24"
+    And I can see the empty search state with data-testid="empty-search-state"
+    When I click the "Clear filters" button with data-testid="clear-filters-button"
+    Then the URL should be exactly "/" with no query parameters
+    And I should not see the empty search state with data-testid="empty-search-state"
+    And I should see at least 1 restaurant card with data-testid starting with "restaurant-card"
+
+  @unit-test @edge-case
+  Scenario: Empty state does not appear when restaurants exist with no filters
+    Given I am on the search page at "/" with no query parameters
+    When the page loads completely
+    Then I should not see the empty search state with data-testid="empty-search-state"
+    And I should see at least 1 restaurant card with data-testid starting with "restaurant-card"
+
+  @unit-test @edge-case
+  Scenario: Empty state appears with multiple combined filters returning zero results
+    Given I am on the search page with filters "categories=Icelandic&price=%24%24%24%24&openNow=true&distance=1"
+    When the page loads completely
+    Then I should see the empty search state container with data-testid="empty-search-state"
+    And I should see the subtext "Try adjusting your filters" with data-testid="empty-state-subtext"
+    And the URL should contain "categories=Icelandic"
+    And the URL should contain "price=%24%24%24%24"
+    And the URL should contain "openNow=true"
+    And the URL should contain "distance=1"
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of empty search state layout
+    Given I navigate to "/?categories=Icelandic&price=%24%24%24%24"
+    When the page loads completely
+    Then the empty state should be vertically centered in the content area
+    And the placeholder image with data-testid="empty-state-image" should appear above the heading
+    And the heading "No restaurants found" should appear below the image
+    And the subtext "Try adjusting your filters" should appear below the heading
+    And the "Clear filters" button should appear below the subtext
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation after clearing filters shows restaurant grid
+    Given I navigate to "/?categories=Icelandic&price=%24%24%24%24"
+    And I wait until the empty state with data-testid="empty-search-state" is visible
+    When I click the "Clear filters" button with data-testid="clear-filters-button"
+    Then the empty search state with data-testid="empty-search-state" should not be visible
+    And the restaurant cards should be displayed in a grid layout
+    And at least 1 restaurant card with data-testid starting with "restaurant-card" should be visible
+```

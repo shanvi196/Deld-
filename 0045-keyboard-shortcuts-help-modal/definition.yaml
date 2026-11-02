@@ -1,0 +1,152 @@
+problem_id: 0045-keyboard-shortcuts-help-modal
+app: deld
+task:
+  prompt: 'Implement a Keyboard Shortcuts Help Modal for the Deld application. Users need a way to discover available keyboard
+    shortcuts to navigate the app more efficiently.
+
+
+    **Feature Requirements**:
+
+
+    1. **Shortcuts Help Dialog**: Create a modal dialog accessible via the ''?'' key that displays available keyboard shortcuts.
+    The dialog uses the existing Dialog atom components with a grid layout showing key combinations and their descriptions.
+    Include shortcuts for: ''/'' (focus search), ''Esc'' (close modals), ''j/k'' (list navigation placeholder). Store shortcuts
+    in a constants file at src/config/keyboard/shortcuts.ts. Add data-testid=''shortcuts-help-dialog'' to the dialog, data-testid=''shortcut-item''
+    to each shortcut row, data-testid=''shortcut-key'' to the key badge.
+
+
+    2. **Help Button Trigger**: Add a help icon button in the header that opens the shortcuts dialog when clicked. The button
+    should display a question mark icon (use HelpCircle from lucide-react). Add data-testid=''help-button'' to the button.
+    The dialog can be opened either by clicking this button OR pressing ''?'' key.
+
+
+    **Routes**: No new routes needed - dialog is global overlay.'
+hint: '**Files**: ~4 files (shortcuts-help-dialog component, shortcuts constants, header modification, keyboard hook)
+
+
+  **Authentication**: Not required - shortcuts help is available to all users.
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password:
+  password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Keyboard Shortcuts Help Modal for the Deld application. Users need a way to discover ...
+  intent: 53
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_open_shortcuts_help_dialog_when_pressing_key
+    checklist_label: Open shortcuts help dialog when pressing key
+    source_test_file: tests/should_open_shortcuts_help_dialog_when_pressing_key.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_open_shortcuts_help_dialog_when_pressing_key.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_open_shortcuts_help_dialog_when_clicking_help_button
+    checklist_label: Open shortcuts help dialog when clicking help button
+    source_test_file: tests/should_open_shortcuts_help_dialog_when_clicking_help_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_open_shortcuts_help_dialog_when_clicking_help_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_correct_shortcut_items_with_keys_and_descriptions
+    checklist_label: Display correct shortcut items with keys and descriptions
+    source_test_file: tests/should_display_correct_shortcut_items_with_keys_and_descriptions.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_correct_shortcut_items_with_keys_and_descriptions.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_close_shortcuts_help_dialog_when_pressing_escape_key
+    checklist_label: Close shortcuts help dialog when pressing escape key
+    source_test_file: tests/should_close_shortcuts_help_dialog_when_pressing_escape_key.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_close_shortcuts_help_dialog_when_pressing_escape_key.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_not_open_shortcuts_dialog_when_typing_in_search_input
+    checklist_label: Not open shortcuts dialog when typing in search input
+    source_test_file: tests/should_not_open_shortcuts_dialog_when_typing_in_search_input.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_not_open_shortcuts_dialog_when_typing_in_search_input.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_maintain_dialog_state_correctly_when_navigating_between_pages
+    checklist_label: Maintain dialog state correctly when navigating between pages
+    source_test_file: tests/should_maintain_dialog_state_correctly_when_navigating_between_pages.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_maintain_dialog_state_correctly_when_navigating_between_pages.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_keyboard
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the keyboard shortcuts help dialog on a scale of 0 to 1:
+
+
+      0 - Dialog not visible: No modal overlay appears after pressing ''?'' key, page shows normal home view without any dialog
+      or popup, no semi-transparent backdrop visible
+
+
+      1 - Dialog correctly displayed: Modal dialog is visible with semi-transparent backdrop dimming the page behind it, dialog
+      is centered on viewport (horizontally and vertically), dialog contains a grid/list layout showing exactly 3 keyboard
+      shortcuts: ''/'' with ''Focus search'', ''Esc'' with ''Close modals'', and ''j/k'' with ''List navigation'', each shortcut
+      key badge has distinct styling (different background color from description text)'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000'
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { document.dispatchEvent(new KeyboardEvent(''keydown'', { key: ''?'', shiftKey: true, bubbles: true }));
+      })()'
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_help
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the help button and shortcuts dialog on a scale of 0 to 1:
+
+
+      0 - Help button missing or dialog fails to open: No help button visible in the header area, or clicking the help button
+      does not open any dialog, or the button exists but has no question mark/help icon
+
+
+      1 - Help button and dialog work correctly: Help button is visible in the header area displaying a HelpCircle/question
+      mark icon, clicking the button opens a centered modal dialog with rounded corners, dialog has a title ''Keyboard Shortcuts''
+      displayed prominently at the top in bold text, backdrop behind the dialog is visually dimmed, dialog shows keyboard
+      shortcut items in an organized layout'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000'
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const helpBtn = document.querySelector('[data-testid="help-button"]'); if (helpBtn) { helpBtn.click();
+      } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+extra_fields:
+  disable_graders:
+  - playwright_test.should_close_shortcuts_help_dialog_when_pressing_escape_key
+  - playwright_test.should_not_open_shortcuts_dialog_when_typing_in_search_input

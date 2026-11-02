@@ -1,0 +1,92 @@
+```gherkin
+Feature: Group Dining Planner
+  As a user planning restaurant visits with friends
+  I want to create group dining events and share them
+  So that I can organize group outings easily
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Open event creation modal from restaurant detail page
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the restaurant detail page "/restaurant/rest_0001"
+    When I click the button with data-testid "plan-group-visit-button"
+    Then the modal with data-testid "group-event-modal" should be visible
+    And the input with data-testid "event-name-input" should be empty
+    And the input with data-testid "event-date-input" should be visible
+    And the button with data-testid "create-event-button" should be visible
+
+  @unit-test @priority-high @authenticated
+  Scenario: Create group event and see shareable link
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the restaurant detail page "/restaurant/rest_0001"
+    And I have opened the group event modal by clicking data-testid "plan-group-visit-button"
+    When I fill the input with data-testid "event-name-input" with "Birthday Dinner"
+    And I fill the input with data-testid "event-date-input" with "2025-12-25"
+    And I click the button with data-testid "create-event-button"
+    Then a success toast should appear with text "Event created successfully"
+    And the element with data-testid "event-share-link" should be visible
+    And the shareable link should match pattern "/events/evt_[a-zA-Z0-9]+"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Event is persisted in localStorage after creation
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the restaurant detail page "/restaurant/rest_0001"
+    And I have created a group event named "Team Lunch" for date "2025-11-15"
+    When I check localStorage for key "groupEvents"
+    Then localStorage should contain an array with at least 1 event
+    And the event should have properties "id", "restaurantId", "name", "date", "createdAt"
+    And the event name should be "Team Lunch"
+    And the event restaurantId should be "rest_0001"
+
+  @unit-test @priority-high
+  Scenario: View event details on public event page
+    Given localStorage contains a group event with id "evt_test123" for restaurant "rest_0001" named "Friday Dinner" on date "2025-10-30"
+    When I navigate to "/events/evt_test123"
+    Then the element with data-testid "event-name" should contain text "Friday Dinner"
+    And the element with data-testid "event-date" should contain text "October 30, 2025"
+    And the element with data-testid "event-restaurant-link" should be visible
+    And the restaurant link should have href "/restaurant/rest_0001"
+
+  @unit-test @edge-case
+  Scenario: Event not found page for invalid event ID
+    Given localStorage key "groupEvents" is set to an empty array "[]"
+    When I navigate to "/events/nonexistent_evt_999"
+    Then the element with data-testid "event-not-found" should be visible
+    And the element with data-testid "event-not-found" should contain text "Event not found"
+    And the element with data-testid "event-name" should not exist
+
+  @unit-test @edge-case @authenticated
+  Scenario: Multiple events for same restaurant are stored separately in localStorage
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And localStorage contains a group event with id "evt_existing001" for restaurant "rest_0001" named "First Event" on date "2025-09-01"
+    And I am on the restaurant detail page "/restaurant/rest_0001"
+    And I have opened the group event modal by clicking data-testid "plan-group-visit-button"
+    When I fill the input with data-testid "event-name-input" with "Second Event"
+    And I fill the input with data-testid "event-date-input" with "2025-09-15"
+    And I click the button with data-testid "create-event-button"
+    Then localStorage key "groupEvents" should contain exactly 2 events
+    And the first event in localStorage should have name "First Event"
+    And the second event in localStorage should have name "Second Event"
+    And both events should have restaurantId "rest_0001"
+    And the two events should have different id values
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of group event creation modal
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the restaurant detail page "/restaurant/rest_0001"
+    When I click the button with data-testid "plan-group-visit-button"
+    Then the page should visually show the group event modal
+    And the modal should have a form with event name input, date picker, and create button
+    And the modal should follow the app's existing dialog styling patterns
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of event details page
+    Given localStorage contains a group event with id "evt_visual789" for restaurant "rest_0001" named "Screenshot Test Event" on date "2025-08-15"
+    When I navigate to "/events/evt_visual789"
+    Then the page should visually show the event details
+    And the event name "Screenshot Test Event" should be prominently displayed
+    And a link to the restaurant should be visible
+    And the event date should be displayed in a readable format
+```

@@ -1,0 +1,183 @@
+problem_id: 0015-custom-sort-preferences-memory
+app: deld
+task:
+  prompt: 'Implement sort preference memory for the home page restaurant search. When
+    users change the sort option, save their preference to localStorage under ''deld-sort-memory''
+    with key ''home'' and show a toast ''Sort preference saved''. When returning to
+    the home page, auto-apply the saved sort preference. Add a ''Reset to Default''
+    option in the sort dropdown that clears the saved preference, resets to ''Recommended'',
+    and shows toast ''Sort reset to default''.
+
+
+    **Feature Requirements**:
+
+
+    1. **Sort Preference Persistence**: Save user''s selected sort option to localStorage
+    when changed. Key: ''deld-sort-memory'', structure: {home: ''highest-rated''}.
+    On home page load, read localStorage and apply saved sort if exists. Show toast
+    ''Sort preference saved'' on each sort change with data-testid=''sort-saved-toast''.
+
+
+    2. **Reset to Default Option**: Add ''Reset to Default'' item at bottom of sort
+    dropdown with data-testid=''sort-reset-to-default''. When clicked: clear localStorage
+    preference, set sort to ''Recommended'', show toast ''Sort reset to default''
+    with data-testid=''sort-reset-toast''. Item should have separator above it.
+
+
+    **Routes**: Home page http://localhost:3000
+
+
+    **Element Selectors**:
+    - Sort option newest: `[data-testid="sort-option-newest"]`
+    - Sort option highest rated: `[data-testid="sort-option-highest-rated"]`'
+hint: '**Files**: ~3-4 files (restaurant-list-header.tsx, localStorage utility, RestaurantsSearchContext
+  or hook)
+
+
+  **Authentication**: Not required
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123
+
+
+    **localStorage** use following keys in localStorage:
+
+    - `home`'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement sort preference memory for the home page restaurant search.
+    When users change the sort ...
+  intent: 9
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: sort_preference_is_saved_to_localstorage_when_changed
+    checklist_label: Sort preference is saved to localstorage when changed
+    source_test_file: tests/sort_preference_is_saved_to_localstorage_when_changed.spec.ts
+    destination_test_file: /workdir/app/__tests__/sort_preference_is_saved_to_localstorage_when_changed.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: saved_sort_preference_is_auto_applied_on_page_load
+    checklist_label: Saved sort preference is auto applied on page load
+    source_test_file: tests/saved_sort_preference_is_auto_applied_on_page_load.spec.ts
+    destination_test_file: /workdir/app/__tests__/saved_sort_preference_is_auto_applied_on_page_load.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: reset_to_default_clears_preference_and_shows_toast
+    checklist_label: Reset to default clears preference and shows toast
+    source_test_file: tests/reset_to_default_clears_preference_and_shows_toast.spec.ts
+    destination_test_file: /workdir/app/__tests__/reset_to_default_clears_preference_and_shows_toast.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: invalid_localstorage_value_falls_back_to_default_sort
+    checklist_label: Invalid localstorage value falls back to default sort
+    source_test_file: tests/invalid_localstorage_value_falls_back_to_default_sort.spec.ts
+    destination_test_file: /workdir/app/__tests__/invalid_localstorage_value_falls_back_to_default_sort.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: url_sort_parameter_takes_precedence_over_localstorage_preference
+    checklist_label: Url sort parameter takes precedence over localstorage preference
+    source_test_file: tests/url_sort_parameter_takes_precedence_over_localstorage_preference.spec.ts
+    destination_test_file: /workdir/app/__tests__/url_sort_parameter_takes_precedence_over_localstorage_preference.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: sort_preference_persists_after_navigating_away_and_returning
+    checklist_label: Sort preference persists after navigating away and returning
+    source_test_file: tests/sort_preference_persists_after_navigating_away_and_returning.spec.ts
+    destination_test_file: /workdir/app/__tests__/sort_preference_persists_after_navigating_away_and_returning.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_sort
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the sort dropdown display on a scale of 0 to 1:
+
+
+      0 - Dropdown not properly displayed: Sort dropdown is not open, options are
+      not visible, or ''Reset to Default'' option is missing. Separator line between
+      sort options and ''Reset to Default'' is not present.
+
+
+      1 - Dropdown correctly displayed: Sort dropdown is open showing all sort options
+      in order (Recommended, Highest Rated, Most Reviewed, Newest). A visual separator
+      line appears between ''Newest'' and ''Reset to Default''. ''Reset to Default''
+      is the last item positioned below the separator.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function(){const el=document.querySelector(''[data-testid="sort-dropdown-trigger"]'');if(el)el.dispatchEvent(new KeyboardEvent(''keydown'',{key:''Enter'',bubbles:true}));})();'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_toast
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the toast notification display on a scale of 0 to 1:
+
+
+      0 - Toast not visible or incorrect: No toast notification appears after sort
+      change, or toast does not display ''Sort preference saved'' text, or toast is
+      not positioned at bottom-center of screen.
+
+
+      1 - Toast correctly displayed: A toast notification is visible at bottom-center
+      of the screen displaying the text ''Sort preference saved''. The toast should
+      be clearly visible and properly styled.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.localStorage.removeItem('deld-sort-memory')
+    - window.location.href = 'http://localhost:3000'
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function(){const el=document.querySelector(''[data-testid="sort-dropdown-trigger"]'');if(el)el.dispatchEvent(new KeyboardEvent(''keydown'',{key:''Enter'',bubbles:true}));})();'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function waitForOption(){const option=document.querySelector('[data-testid="sort-option-highest-rated"]');
+      if(!option){requestAnimationFrame(waitForOption);return;}
+      option.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));option.click();})();
+    - await new Promise(resolve => setTimeout(resolve, 500))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - eslint
+  - playwright_test.invalid_localstorage_value_falls_back_to_default_sort
+  - playwright_test.url_sort_parameter_takes_precedence_over_localstorage_preference
+  - tsc
+  - vlm.screenshot_10_rate_the_toast
+  - vlm.screenshot_9_rate_the_sort
+  - checklist_items
+  grader_weights:
+    reset_to_default_clears_preference_and_shows_toast: 0.1056
+    saved_sort_preference_is_auto_applied_on_page_load: 0.2982
+    sort_preference_is_saved_to_localstorage_when_changed: 0.2981
+    sort_preference_persists_after_navigating_away_and_returning: 0.2981

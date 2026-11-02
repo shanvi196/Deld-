@@ -1,0 +1,91 @@
+```gherkin
+Feature: Rating Filter Quick Chips for Restaurant Reviews
+  As a user viewing restaurant reviews
+  I want to filter reviews by star rating using quick chips
+  So that I can focus on reviews of a specific quality level
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am on the restaurant details page for restaurant "25047088-5a40-4fab-be5c-3ee9a54fb980"
+    And the reviews section is visible
+
+  @unit-test @priority-high
+  Scenario: Click 5-star chip filters to show only 5-star reviews
+    Given the rating filter chips are visible below the reviews section header
+    And I note the total number of displayed reviews as "initial_count"
+    When I click the chip with data-testid "rating-chip-5"
+    Then the "rating-chip-5" chip should have an active/highlighted state
+    And all visible review cards should have exactly 5 filled star icons
+    And the displayed reviews count should be less than or equal to "initial_count"
+
+  @unit-test @priority-high
+  Scenario: Click 4-star-plus chip filters to show reviews with 4 or more stars
+    Given the rating filter chips are visible below the reviews section header
+    When I click the chip with data-testid "rating-chip-4"
+    Then the "rating-chip-4" chip should have an active/highlighted state
+    And all visible review cards should have either 4 or 5 filled star icons
+    And the "rating-chip-5" chip should have no highlighted background
+    And the "rating-chip-3" chip should have no highlighted background
+
+  @unit-test @priority-high
+  Scenario: Deselect active chip to show all reviews again
+    Given I have clicked the "rating-chip-5" chip and it is active
+    And only 5-star reviews are currently displayed
+    And I note the current filtered count as "filtered_count"
+    When I click the "rating-chip-5" chip again
+    Then the "rating-chip-5" chip should have no highlighted background
+    And the total number of visible review cards should be greater than "filtered_count"
+    And reviews with ratings 1, 2, 3, 4, and 5 stars should all be visible if they exist
+
+  @unit-test @priority-medium
+  Scenario: Rating chips display correct count of matching reviews
+    Given the rating filter chips are visible
+    Then the chip with data-testid "rating-chip-5" should display text matching pattern "5★ \(\d+\)"
+    And the chip with data-testid "rating-chip-4" should display text matching pattern "4★\+ \(\d+\)"
+    And the chip with data-testid "rating-chip-3" should display text matching pattern "3★\+ \(\d+\)"
+    And the count shown on "rating-chip-4" should be greater than or equal to "rating-chip-5" count
+    And the count shown on "rating-chip-3" should be greater than or equal to "rating-chip-4" count
+
+  @unit-test @priority-high
+  Scenario: Switching between chips updates filter without requiring deselection
+    Given the rating filter chips are visible below the reviews section header
+    And the restaurant has at least 1 review with 3 stars and at least 1 review with 5 stars
+    When I click the chip with data-testid "rating-chip-5"
+    Then the "rating-chip-5" chip should have an active/highlighted state
+    And all visible review cards should have exactly 5 filled star icons
+    When I click the chip with data-testid "rating-chip-3"
+    Then the "rating-chip-3" chip should have an active/highlighted state
+    And the "rating-chip-5" chip should have no highlighted background
+    And all visible review cards should have 3, 4, or 5 filled star icons
+
+  @unit-test @priority-medium
+  Scenario: Filter state persists during pagination within reviews section
+    Given the rating filter chips are visible below the reviews section header
+    And the restaurant has more than 10 reviews with 5 stars
+    And reviews are paginated with 10 reviews per page
+    When I click the chip with data-testid "rating-chip-5"
+    Then all visible review cards should have exactly 5 filled star icons
+    When I click the "Next" pagination button in the reviews section
+    Then the "rating-chip-5" chip should still have an active/highlighted state
+    And all visible review cards on page 2 should have exactly 5 filled star icons
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of rating chips in default state
+    Given I am on the restaurant details page
+    When the reviews section has fully loaded
+    And I scroll to the reviews section
+    Then the page should visually show exactly 3 rating filter chips below the reviews header
+    And the chips should display "5★ (N)", "4★+ (N)", "3★+ (N)" where N is a number
+    And all 3 chips should appear with a light gray background indicating inactive state
+    And the chips should be styled as horizontally-aligned pill-shaped buttons with rounded corners
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of active rating chip with filtered reviews
+    Given I am on the restaurant details page with at least 5 reviews visible
+    When I click the chip with data-testid "rating-chip-5"
+    And the reviews list updates within 500ms
+    Then the "rating-chip-5" chip should display with a blue or primary-colored background
+    And the "rating-chip-4" and "rating-chip-3" chips should display with light gray backgrounds
+    And only review cards with 5 filled yellow star icons should be visible
+    And review cards with 1, 2, 3, or 4 stars should not be present in the DOM
+```

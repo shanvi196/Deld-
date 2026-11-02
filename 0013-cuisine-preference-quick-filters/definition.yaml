@@ -1,0 +1,201 @@
+problem_id: 0013-cuisine-preference-quick-filters
+app: deld
+task:
+  prompt: "Implement Cuisine Preference Quick Filters for the Deld restaurant app.\
+    \ Users want quick access to their favorite cuisines without navigating through\
+    \ the full filter panel. This feature is only available to logged-in users and\
+    \ persists preferences per user in localStorage.\n\n**Feature 1: Quick Filter\
+    \ Chips Bar (Home Page)**\n\nAdd a horizontal scrollable container (`data-testid=\"\
+    cuisine-quick-filters\"`) positioned below the search bar header and above the\
+    \ existing filters sidebar and restaurant list on the home page (`/`). This bar\
+    \ is only visible when the user is logged in AND has at least one saved cuisine\
+    \ preference.\n\n- Display up to 5 cuisine chips from the user's saved preferences,\
+    \ in their saved order (first 5 only).\n- Each chip (`data-testid=\"cuisine-chip-{slug}\"\
+    `, e.g., `cuisine-chip-thai`, `cuisine-chip-italian`) displays the cuisine's display\
+    \ name from `CATEGORIES_DICTIONARY`.\n- Clicking a chip toggles that cuisine in\
+    \ the current URL `categories` param using the existing `setCategories` action\
+    \ from `RestaurantsSearchContext`. If the cuisine is already in `categories`,\
+    \ remove it; if not, add it.\n- Active chips (cuisine currently present in URL\
+    \ `categories`) must show a visually distinct selected state (e.g., filled/highlighted\
+    \ background) and have `aria-pressed=\"true\"` set on the element.\n- Include\
+    \ a \"Customize\" button (`data-testid=\"customize-cuisines-btn\"`) as the last\
+    \ item in the bar, styled distinctly from the chips (e.g., outline style with\
+    \ a gear or edit icon).\n- When the user has no saved preferences, the entire\
+    \ chips bar must not be rendered in the DOM.\n\n**Feature 2: Customize Preferences\
+    \ Modal**\n\nClicking the \"Customize\" button opens a dialog (`data-testid=\"\
+    cuisine-prefs-modal\"`).\n\n- Show all of the user's currently saved cuisines\
+    \ as an ordered list. Each item displays the cuisine display name with:\n  - A\
+    \ drag handle (`data-testid=\"cuisine-drag-handle-{index}\"`, 0-indexed) for reordering\
+    \ items via drag-and-drop.\n  - A remove button (`data-testid=\"remove-cuisine-{slug}\"\
+    `) that immediately removes that cuisine from the modal's local list state.\n\
+    - Below the list, include an \"Add Cuisine\" dropdown/select (`data-testid=\"\
+    add-cuisine-select\"`) showing all cuisines from `CATEGORIES_DICTIONARY` that\
+    \ are NOT already in the user's current list. Selecting a cuisine appends it to\
+    \ the end of the list.\n- Enforce a maximum of 10 cuisines. When the user has\
+    \ 10 cuisines, the \"Add Cuisine\" dropdown must be disabled and a message (`data-testid=\"\
+    max-cuisines-message\"`) reading \"Maximum 10 cuisines reached\" must be displayed.\n\
+    - Display a count label (`data-testid=\"cuisine-count\"`) showing \"{current}/{max}\"\
+    \ format (e.g., \"3/10\").\n- \"Save\" button (`data-testid=\"save-cuisine-prefs\"\
+    `) persists the ordered list to localStorage and closes the modal. When saving,\
+    \ if any cuisines that were removed from the preferences list are currently active\
+    \ in the URL `categories` param, those cuisines must also be removed from the\
+    \ URL `categories` (bidirectional sync).\n- \"Cancel\" button (`data-testid=\"\
+    cancel-cuisine-prefs\"`) discards all unsaved changes and closes the modal, restoring\
+    \ the list to its state when the modal was opened.\n\n**Feature 3: \"Matches Your\
+    \ Taste\" Badge (Restaurant Detail Page)**\n\nOn each restaurant detail page (`/restaurants/[id]`),\
+    \ if the logged-in user has saved cuisine preferences and the restaurant's `cuisine`\
+    \ array contains any cuisine matching the user's saved preferences:\n\n- Display\
+    \ a badge (`data-testid=\"matches-your-taste-badge\"`) in the restaurant header\
+    \ area (near the restaurant name or above the quick action buttons) showing the\
+    \ text \"Matches Your Taste\" with a heart icon.\n- Below the badge, render small\
+    \ tags for each matching cuisine (`data-testid=\"matched-cuisine-{slug}\"`, e.g.,\
+    \ `matched-cuisine-italian`), showing the cuisine display name.\n- This badge\
+    \ and tags must only be visible to logged-in users who have at least one saved\
+    \ cuisine preference. They must not be rendered for logged-out users or users\
+    \ with no saved preferences.\n- If no cuisines match, the badge and tags must\
+    \ not be rendered.\n\n**Feature 4: User-Scoped Persistence & Isolation**\n\n-\
+    \ localStorage key format: `deld-cuisine-prefs-{userId}` (e.g., `deld-cuisine-prefs-user_0001`\
+    \ for Sarah Chen).\n- localStorage value: JSON string with structure `{ \"cuisines\"\
+    : [\"italian\", \"thai\", \"japanese\"], \"updatedAt\": \"2024-01-15T14:20:00.000Z\"\
+    \ }`\n  - `cuisines`: ordered array of `CategorySlug` strings (the slug keys,\
+    \ not display names)\n  - `updatedAt`: ISO-8601 timestamp set to current time\
+    \ whenever the user saves changes\n- Each user must see only their own preferences.\
+    \ Logging out and logging in as a different user must show that user's preferences\
+    \ (or hide the bar if they have none).\n- Preferences must survive page navigation:\
+    \ navigating from `/` to `/restaurants/[id]` and back must show the same chips\
+    \ bar with the same preferences.\n- Preferences must survive a full page refresh.\n\
+    - On first use (no localStorage entry exists for the user), the chips bar is hidden.\
+    \ The user must open the Customize modal via some other entry point or the bar\
+    \ should not appear until preferences are saved. To handle this bootstrap case:\
+    \ if the user is logged in but has no saved preferences, show a single \"Set Cuisine\
+    \ Preferences\" link button (`data-testid=\"setup-cuisines-btn\"`) in place of\
+    \ the chips bar, which opens the Customize modal.\n\n**Routes**: Home page `/`,\
+    \ Restaurant detail page `/restaurants/[id]`\n\n**Auth**: Feature requires login.\
+    \ All UI elements for this feature are hidden entirely for logged-out users.\n\
+    \n**State**:\n- localStorage `deld-cuisine-prefs-{userId}` — source of truth for\
+    \ ordered cuisine preferences\n- URL param `categories` — existing filter param,\
+    \ toggled by chip clicks, synced bidirectionally on preference removal via modal\n\
+    - No server-side storage — this is a purely client-side feature\n\n**Element Selectors**:\n\
+    - Quick filters container: `[data-testid=\"cuisine-quick-filters\"]`\n- Setup\
+    \ link (no prefs yet): `[data-testid=\"setup-cuisines-btn\"]`\n- Cuisine chip:\
+    \ `[data-testid=\"cuisine-chip-{slug}\"]` (e.g., `cuisine-chip-italian`, `cuisine-chip-thai`)\n\
+    - Active chip state: `[data-testid=\"cuisine-chip-{slug}\"][aria-pressed=\"true\"\
+    ]`\n- Customize button: `[data-testid=\"customize-cuisines-btn\"]`\n- Modal dialog:\
+    \ `[data-testid=\"cuisine-prefs-modal\"]`\n- Drag handle (0-indexed): `[data-testid=\"\
+    cuisine-drag-handle-{index}\"]`\n- Remove button: `[data-testid=\"remove-cuisine-{slug}\"\
+    ]`\n- Add cuisine dropdown: `[data-testid=\"add-cuisine-select\"]`\n- Max cuisines\
+    \ message: `[data-testid=\"max-cuisines-message\"]`\n- Cuisine count label: `[data-testid=\"\
+    cuisine-count\"]`\n- Save button: `[data-testid=\"save-cuisine-prefs\"]`\n- Cancel\
+    \ button: `[data-testid=\"cancel-cuisine-prefs\"]`\n- Matches badge: `[data-testid=\"\
+    matches-your-taste-badge\"]`\n- Matched cuisine tag: `[data-testid=\"matched-cuisine-{slug}\"\
+    ]`"
+hint: "**Preferred Account**: If login is required, please use the following credentials:\n\
+  \  - Login: sarah.chen@email.com\n  - Password: password123"
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement Cuisine Preference Quick Filters for the Deld restaurant
+    app. Users want quick access t...
+  intent: 6
+checklist_items:
+- Logged-in users with saved cuisine preferences see a horizontal scrollable bar of
+  up to 5 cuisine chips below the search bar on the home page, each showing the cuisine's
+  display name, and clicking a chip toggles that cuisine filter in the current search
+  results with a visually distinct active/pressed state for selected chips.
+- A 'Customize' button appears at the end of the chips bar and opens a modal where
+  users can reorder their saved cuisines via drag-and-drop, remove individual cuisines,
+  and add new cuisines from a dropdown that only lists cuisines not already saved
+  — with a hard cap of 10 cuisines that disables the dropdown and shows a limit message
+  when reached.
+- Saving changes in the customize modal persists the updated ordered list to localStorage
+  under a user-specific key, closes the modal, and automatically removes any deleted
+  cuisine preferences from the active URL filters; canceling discards all changes
+  and restores the list to its pre-edit state.
+- Logged-in users who have no saved preferences see a 'Set Cuisine Preferences' link
+  in place of the chips bar that opens the customize modal, and once preferences are
+  saved the chips bar replaces that link immediately.
+- On each restaurant detail page, if a logged-in user's saved cuisine preferences
+  overlap with the restaurant's cuisine tags, a 'Matches Your Taste' badge with a
+  heart icon and individual matching cuisine tags appear near the restaurant name
+  — and the badge is completely absent when there is no overlap or the user has no
+  preferences.
+- All cuisine preference UI elements — the chips bar, setup link, customize button,
+  and taste-match badge — are completely hidden for logged-out users and do not appear
+  in the page.
+- 'Cuisine preferences are isolated per user account: logging out and logging in as
+  a different user shows only that user''s saved preferences (or hides the bar if
+  they have none), with no bleed-through between accounts.'
+- Preferences persist across full page refreshes and navigation between the home page
+  and restaurant detail pages without loss of data or ordering.
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: playwright_test
+  args:
+    score_name: corrupted_localstorage_gracefully_falls_back_to_setup_state_without_crashing
+    checklist_label: Corrupted localstorage gracefully falls back to setup state without
+      crashing
+    source_test_file: tests/corrupted_localstorage_gracefully_falls_back_to_setup_state_without_crashing.spec.ts
+    destination_test_file: /workdir/app/__tests__/corrupted_localstorage_gracefully_falls_back_to_setup_state_without_crashing.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: removing_an_active_cuisine_from_modal_also_removes_it_from_url_categories_param_on_save
+    checklist_label: Removing an active cuisine from modal also removes it from url
+      categories param on save
+    source_test_file: tests/removing_an_active_cuisine_from_modal_also_removes_it_from_url_categories_param_on_save.spec.ts
+    destination_test_file: /workdir/app/__tests__/removing_an_active_cuisine_from_modal_also_removes_it_from_url_categories_param_on_save.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: switching_users_shows_second_user_preferences_and_hides_first_user_data
+    checklist_label: Switching users shows second user preferences and hides first
+      user data
+    source_test_file: tests/switching_users_shows_second_user_preferences_and_hides_first_user_data.spec.ts
+    destination_test_file: /workdir/app/__tests__/switching_users_shows_second_user_preferences_and_hides_first_user_data.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: logged_in_user_with_no_saved_preferences_sees_setup_link_instead_of_chips_bar
+    checklist_label: Logged in user with no saved preferences sees setup link instead
+      of chips bar
+    source_test_file: tests/logged_in_user_with_no_saved_preferences_sees_setup_link_instead_of_chips_bar.spec.ts
+    destination_test_file: /workdir/app/__tests__/logged_in_user_with_no_saved_preferences_sees_setup_link_instead_of_chips_bar.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: logged_out_user_sees_no_cuisine_preference_ui_elements_on_home_page_or_restaurant_detail_page
+    checklist_label: Logged out user sees no cuisine preference ui elements on home
+      page or restaurant detail page
+    source_test_file: tests/logged_out_user_sees_no_cuisine_preference_ui_elements_on_home_page_or_restaurant_detail_page.spec.ts
+    destination_test_file: /workdir/app/__tests__/logged_out_user_sees_no_cuisine_preference_ui_elements_on_home_page_or_restaurant_detail_page.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: saving_cuisine_preferences_then_navigating_to_matching_restaurant_shows_taste_badge_and_matched_cuisine_tags
+    checklist_label: Saving cuisine preferences then navigating to matching restaurant
+      shows taste badge and matched cuisine tags
+    source_test_file: tests/saving_cuisine_preferences_then_navigating_to_matching_restaurant_shows_taste_badge_and_matched_cuisine_tags.spec.ts
+    destination_test_file: /workdir/app/__tests__/saving_cuisine_preferences_then_navigating_to_matching_restaurant_shows_taste_badge_and_matched_cuisine_tags.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+extra_fields:
+  disable_graders:
+  - checklist_items

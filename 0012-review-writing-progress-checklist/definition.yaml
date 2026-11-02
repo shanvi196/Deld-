@@ -1,0 +1,237 @@
+problem_id: 0012-review-writing-progress-checklist
+app: deld
+task:
+  prompt: 'Implement a Review Writing Progress Checklist for the Deld restaurant review
+    app. Users need visual guidance on review form completion status.
+
+
+    **Feature Requirements**:
+
+
+    1. **Progress Bar Header**: Add a horizontal progress bar at the top of the review
+    form showing completion percentage (0-100%). The bar should fill based on completed
+    checklist items. Use primary color for filled portion. Include percentage text
+    label. Add data-testid="review-progress-bar" for the container and data-testid="review-progress-fill"
+    for the filled portion.
+
+
+    2. **Expandable Checklist Panel**: Add collapsible panel below progress bar with
+    completion checklist. Items: "Rating selected" (checked when rating > 0), "Review
+    text complete" (checked when >= 85 chars), "Title added" (checked when title has
+    content), "Visit details filled" (checked when visitType selected). Each item
+    shows checkmark icon and green color when complete. Use data-testid="review-checklist-panel"
+    for panel, data-testid="checklist-trigger" for expand button, data-testid="checklist-item-rating",
+    data-testid="checklist-item-text", data-testid="checklist-item-title", data-testid="checklist-item-visit"
+    for each item.
+
+
+    **Routes**: Write review page at /write-review/[restaurantId]
+
+
+    **Element Selectors**:
+    - Edit review button: `[data-testid="edit-review-button"]`
+    - Rating star 5: `[data-testid="rating-star-5"]`
+    - Review title input: `[data-testid="review-title-input"]`
+    - Rating star 4: `[data-testid="rating-star-4"]`
+    - Rating star 3: `[data-testid="rating-star-3"]`
+    - Visit type dine in: `#visit-type-dine-in`'
+hint: '**Files**: ~4 files (progress bar component, checklist panel component, integration
+  in write-review-form, form schema update if needed)
+
+
+  **Authentication**: Required - users must be logged in to access review form'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Review Writing Progress Checklist for the Deld restaurant
+    review app. Users need visu...
+  intent: 5
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_show_0_progress_when_form_is_empty
+    checklist_label: Show 0 progress when form is empty
+    source_test_file: tests/should_show_0_progress_when_form_is_empty.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_0_progress_when_form_is_empty.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_update_progress_to_25_when_rating_is_selected
+    checklist_label: Update progress to 25 when rating is selected
+    source_test_file: tests/should_update_progress_to_25_when_rating_is_selected.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_update_progress_to_25_when_rating_is_selected.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_expand_and_collapse_checklist_panel
+    checklist_label: Expand and collapse checklist panel
+    source_test_file: tests/should_expand_and_collapse_checklist_panel.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_expand_and_collapse_checklist_panel.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_reset_progress_when_using_browser_backforward
+    checklist_label: Reset progress when using browser backforward
+    source_test_file: tests/should_reset_progress_when_using_browser_backforward.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_reset_progress_when_using_browser_backforward.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_100_progress_when_all_requirements_are_met
+    checklist_label: Show 100 progress when all requirements are met
+    source_test_file: tests/should_show_100_progress_when_all_requirements_are_met.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_100_progress_when_all_requirements_are_met.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_decrement_progress_when_clearing_title_after_partial_completion
+    checklist_label: Decrement progress when clearing title after partial completion
+    source_test_file: tests/should_decrement_progress_when_clearing_title_after_partial_completion.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_decrement_progress_when_clearing_title_after_partial_completion.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_progress
+    screenshot_url: http://localhost:3000/write-review/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the progress bar at 50% completion on a scale of 0 to
+      1:
+
+
+      0 - Progress bar not visible or incorrect state: Progress bar missing, shows
+      wrong percentage (not ~50%), no visual fill indicator, checklist panel not displayed,
+      or fewer/more than 2 items show completion status.
+
+
+      1 - Progress bar correctly shows 50% completion: Progress bar visible at top
+      of form with approximately 50% fill using primary color, percentage text shows
+      around 50%, expanded checklist panel visible below progress bar showing exactly
+      2 completed items (rating and review text) with green checkmarks, and exactly
+      2 incomplete items (title and visit type) without checkmarks.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 5000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const pwInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (pwInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(pwInput, ''password123''); pwInput.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - (function() { const star = document.querySelector('[data-testid="rating-star-4"]');
+      if (star) star.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const textArea = document.querySelector(''[data-testid="review-textarea"],
+      textarea[name="text"], textarea''); if (textArea) { Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,
+      ''value'').set.call(textArea, ''This restaurant exceeded all my expectations
+      with incredible food and wonderful service throughout our meal.''); textArea.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const trigger = document.querySelector('[data-testid="checklist-trigger"]');
+      if (trigger) trigger.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_fully
+    screenshot_url: http://localhost:3000/write-review/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the fully completed checklist on a scale of 0 to 1:
+
+
+      0 - Checklist not fully completed or UI incorrect: Progress bar does not show
+      100%, checklist panel not visible, fewer than 4 items marked complete, missing
+      green checkmarks on completed items, or visual state does not clearly indicate
+      full completion.
+
+
+      1 - Checklist shows 100% completion with proper visual feedback: Progress bar
+      displays 100% fill with primary color and shows "100%" text label, expanded
+      checklist panel visible showing all 4 items (rating, title, review text, visit
+      type) with green checkmarks, clear visual distinction between complete state
+      with all items marked done.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 5000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const pwInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (pwInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(pwInput, ''password123''); pwInput.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - (function() { const star = document.querySelector('[data-testid="rating-star-5"]');
+      if (star) star.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const titleInput = document.querySelector(''[data-testid="review-title-input"],
+      input[name="title"], input[placeholder*="title" i]''); if (titleInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(titleInput, ''Amazing restaurant experience''); titleInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 300))
+    - '(function() { const textArea = document.querySelector(''[data-testid="review-textarea"],
+      textarea[name="text"], textarea''); if (textArea) { Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,
+      ''value'').set.call(textArea, ''This was an incredible dining experience with
+      excellent food and outstanding service!!!''); textArea.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const buttons = document.querySelectorAll('button[type="button"]'); for (const btn of buttons) { if (btn.textContent && btn.textContent.toLowerCase().includes('dine')) { btn.click(); break; } } })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const trigger = document.querySelector('[data-testid="checklist-trigger"]');
+      if (trigger) trigger.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - eslint
+  - tsc
+  - vlm.screenshot_10_rate_the_fully
+  - vlm.screenshot_9_rate_the_progress
+  - checklist_items
+  grader_weights:
+    should_decrement_progress_when_clearing_title_after_partial_completion: 0.1998
+    should_expand_and_collapse_checklist_panel: 0.2
+    should_reset_progress_when_using_browser_backforward: 0.0002
+    should_show_0_progress_when_form_is_empty: 0.2
+    should_show_100_progress_when_all_requirements_are_met: 0.2
+    should_update_progress_to_25_when_rating_is_selected: 0.2

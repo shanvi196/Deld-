@@ -1,0 +1,206 @@
+problem_id: 0028-menu-item-availability-toggle
+app: deld
+task:
+  prompt: 'Implement Menu Item Availability Tracking for the Deld restaurant detail
+    page. Users should see all menu items with availability status badges, filter
+    items by status, change statuses (authenticated only), and reset statuses in bulk.
+    Status changes must be user-isolated, persist across page navigation, and keep
+    all UI surfaces in sync.
+
+
+    **Feature Requirements**:
+
+
+    1. **Menu Items Section with Sorted Status Badges**: Add a new "Menu Items" section
+    (`data-testid="menu-items-section"`) below the existing Menu photos carousel on
+    the restaurant detail page (`/restaurants/[id]`). Display each menu item from
+    the restaurant''s `menu` array as a card (`data-testid="menu-item-card-{itemId}"`)
+    showing: item name, price formatted as `$X.XX` (e.g., `$9.95`), description truncated
+    to 80 characters with `…` appended if longer, a category label, and an availability
+    status badge. Status badges: "Available" (green background, `data-testid="status-badge-available"`),
+    "Limited" (yellow background, `data-testid="status-badge-limited"`), or "Sold
+    Out" (red background, `data-testid="status-badge-sold-out"`). The default status
+    for all items is "Available". Items must be **sorted by status priority**: Available
+    items first, then Limited, then Sold Out. Within each status group, items are
+    sorted **alphabetically by name**. The sort order must update immediately when
+    any item''s status changes. When the restaurant has no menu items, show "No menu
+    items available" (`data-testid="menu-items-empty"`). The section header displays
+    the text "Menu Items" and a sold-out counter badge (`data-testid="sold-out-count-badge"`)
+    showing "{N} Sold Out" when N > 0. This badge must be hidden when no items are
+    sold out (N === 0).
+
+
+    2. **Status Filter Bar with Counts**: Add a filter bar (`data-testid="status-filter-bar"`)
+    directly above the menu item cards inside the Menu Items section. The bar contains
+    four filter chips: "All" (`data-testid="filter-chip-all"`), "Available ({N})"
+    (`data-testid="filter-chip-available"`), "Limited ({N})" (`data-testid="filter-chip-limited"`),
+    "Sold Out ({N})" (`data-testid="filter-chip-sold-out"`), where {N} is the count
+    of items in that status. The "All" chip does not display a count. "All" is selected
+    by default. Only one chip can be active at a time; the active chip must have visually
+    distinct styling (e.g., filled/solid background vs outline for inactive). Clicking
+    a chip immediately filters the displayed cards to only show items matching that
+    status. The counts on each chip must update in real time when item statuses change.
+    When the active filter matches zero items, display "No items match the selected
+    filter" (`data-testid="filter-empty-state"`) in place of the cards grid.
+
+
+    3. **Availability Status Dropdown (Auth-Gated, User-Isolated)**: Authenticated
+    users see a dropdown trigger button (`data-testid="status-dropdown-trigger-{itemId}"`)
+    on each menu item card. Clicking the trigger opens a dropdown menu with three
+    options: "Available" (`data-testid="status-option-available"`), "Limited" (`data-testid="status-option-limited"`),
+    "Sold Out" (`data-testid="status-option-sold-out"`). Selecting an option immediately:
+    (a) updates the status badge on that card, (b) re-sorts the entire items list
+    by the sort rules in Requirement 1, (c) updates all filter chip counts in the
+    filter bar, (d) updates the sold-out counter badge in the section header, and
+    (e) if a filter is active and the item no longer matches the active filter, removes
+    the item from the visible list. **The dropdown trigger must NOT be rendered at
+    all for unauthenticated users** — they see the status badge in read-only mode
+    with no interactive elements. Status data is stored in localStorage under the
+    key `deld-menu-availability-{userId}` (e.g., `deld-menu-availability-user_0001`).
+    The stored JSON structure is: `{ "[restaurantId]": { "[itemId]": "available" |
+    "limited" | "sold-out" } }`. Items with no entry in localStorage default to `"available"`.
+    **Status changes must persist across page navigation** — navigating to the home
+    page and back to the same restaurant must retain all status selections.
+
+
+    4. **Bulk Reset with Confirmation Dialog**: When at least one menu item for the
+    current restaurant has a status other than "available" in localStorage, display
+    a "Reset All" button (`data-testid="reset-all-button"`) next to the sold-out counter
+    badge in the section header. This button is **only visible to authenticated users**
+    and **only when modifications exist** for the current restaurant. Clicking "Reset
+    All" opens a confirmation dialog (`data-testid="reset-confirm-dialog"`) with the
+    message "Reset all menu item statuses to Available?" and two buttons: "Cancel"
+    (`data-testid="reset-cancel-button"`) and "Confirm" (`data-testid="reset-confirm-button"`).
+    Clicking "Confirm": removes the current restaurant''s key from the localStorage
+    object (preserving other restaurants'' data), resets all status badges to "Available",
+    re-sorts the list, updates all filter chip counts, hides the sold-out counter
+    badge (since N becomes 0), and hides the "Reset All" button. Clicking "Cancel"
+    closes the dialog with no side effects.
+
+
+    **Routes**: `/restaurants/[id]` (existing restaurant detail page)
+
+
+    **Auth**: Login required for status changes (Requirement 3) and bulk reset (Requirement
+    4). Unauthenticated users see the Menu Items section, status badges, and filter
+    bar in read-only mode — no dropdown triggers, no Reset All button. Each authenticated
+    user has independent status data keyed by their user ID.
+
+
+    **State**: localStorage key pattern `deld-menu-availability-{userId}`. JSON structure:
+    `{ "[restaurantId]": { "[itemId]": "available" | "limited" | "sold-out" } }`.
+    Default status is `"available"` (inferred when no localStorage entry exists).
+    Data must persist across in-app navigation (e.g., navigating to home page via
+    logo click and returning to the restaurant page).'
+hint: "**Preferred Account**: If login is required, please use the following credentials:\n\
+  \  - Login: sarah.chen@email.com\n  - Password: password123"
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement Menu Item Availability Status for the Deld restaurant detail
+    page. Users need to see wh...
+  intent: 33
+checklist_items:
+- The restaurant detail page displays a 'Menu Items' section below the menu photos
+  carousel, showing each menu item as a card with its name, price formatted as $X.XX,
+  description (truncated at 80 characters with ellipsis if longer), category label,
+  and a color-coded availability badge (green for Available, yellow for Limited, red
+  for Sold Out), with all items defaulting to Available status.
+- Menu item cards are sorted by status priority (Available first, then Limited, then
+  Sold Out), with items within each status group sorted alphabetically by name, and
+  this sort order updates immediately whenever any item's status is changed.
+- A filter bar with four chips (All, Available, Limited, Sold Out) appears above the
+  menu cards, each status chip showing a live count of items in that status; clicking
+  a chip filters the visible cards to only that status, and selecting a filter with
+  zero matching items shows an appropriate empty state message.
+- Authenticated users see a dropdown on each menu item card that allows changing its
+  status to Available, Limited, or Sold Out; selecting a new status immediately updates
+  the card's badge, the sort order, all filter chip counts, and the sold-out counter
+  in the section header — and if a filter is active, items that no longer match are
+  removed from view.
+- Unauthenticated users see the full Menu Items section with badges and filter bar
+  in read-only mode, with no status-change dropdowns rendered and no Reset All button
+  visible anywhere on the page.
+- Status changes are stored per user in localStorage and persist across page navigation
+  — navigating away to the home page and returning to the same restaurant retains
+  all previously set statuses, and logging in as a different user shows that user's
+  independent status selections.
+- A 'Reset All' button appears in the section header only for authenticated users
+  when at least one item has been changed from Available; clicking it opens a confirmation
+  dialog, and confirming resets all items for that restaurant back to Available, hides
+  the sold-out counter badge and the Reset All button, and updates all filter counts
+  — while canceling closes the dialog with no changes.
+- The section header displays a sold-out counter badge showing the number of sold-out
+  items (e.g., '2 Sold Out') that updates in real time as statuses change, and this
+  badge is completely hidden when no items are sold out.
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: playwright_test
+  args:
+    score_name: should_display_empty_state_message_when_restaurant_has_no_menu_items
+    checklist_label: Display empty state message when restaurant has no menu items
+    source_test_file: tests/should_display_empty_state_message_when_restaurant_has_no_menu_items.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_empty_state_message_when_restaurant_has_no_menu_items.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_persist_all_status_changes_across_page_navigation_and_restore_them_on_return
+    checklist_label: Persist all status changes across page navigation and restore
+      them on return
+    source_test_file: tests/should_persist_all_status_changes_across_page_navigation_and_restore_them_on_return.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_persist_all_status_changes_across_page_navigation_and_restore_them_on_return.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_hide_all_interactive_controls_for_unauthenticated_users_while_showing_read_only_status_badges_and_filters
+    checklist_label: Hide all interactive controls for unauthenticated users while
+      showing read only status badges and filters
+    source_test_file: tests/should_hide_all_interactive_controls_for_unauthenticated_users_while_showing_read_only_status_badges_and_filters.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_hide_all_interactive_controls_for_unauthenticated_users_while_showing_read_only_status_badges_and_filters.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_reset_all_statuses_to_available_and_update_every_ui_surface_when_reset_all_is_confirmed
+    checklist_label: Reset all statuses to available and update every ui surface when
+      reset all is confirmed
+    source_test_file: tests/should_reset_all_statuses_to_available_and_update_every_ui_surface_when_reset_all_is_confirmed.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_reset_all_statuses_to_available_and_update_every_ui_surface_when_reset_all_is_confirmed.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_isolate_status_data_per_user_so_one_user_changes_are_invisible_to_another_user
+    checklist_label: Isolate status data per user so one user changes are invisible
+      to another user
+    source_test_file: tests/should_isolate_status_data_per_user_so_one_user_changes_are_invisible_to_another_user.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_isolate_status_data_per_user_so_one_user_changes_are_invisible_to_another_user.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_close_reset_confirmation_dialog_with_no_side_effects_when_cancel_is_clicked_and_preserve_all_modified_statuses
+    checklist_label: Close reset confirmation dialog with no side effects when cancel
+      is clicked and preserve all modified statuses
+    source_test_file: tests/should_close_reset_confirmation_dialog_with_no_side_effects_when_cancel_is_clicked_and_preserve_all_modified_statuses.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_close_reset_confirmation_dialog_with_no_side_effects_when_cancel_is_clicked_and_preserve_all_modified_statuses.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+extra_fields:
+  disable_graders:
+  - checklist_items

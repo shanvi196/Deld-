@@ -1,0 +1,161 @@
+problem_id: 0034-empty-state-for-no-search-results
+app: deld
+task:
+  prompt: 'Implement an Empty Search State component for the restaurant search. When
+    a search with filters returns zero restaurants, display a friendly empty state
+    instead of an empty list.
+
+
+    **Feature Requirements**:
+
+
+    1. **EmptySearchState Component**: Create `src/components/organisms/restaurants-list/empty-search-state.tsx`.
+    Display centered layout with: placeholder image from `/placeholder.svg` with data-testid="empty-state-image",
+    heading "No restaurants found" with data-testid="empty-state-heading", subtext
+    "Try adjusting your filters" with data-testid="empty-state-subtext", and a "Clear
+    filters" button with data-testid="clear-filters-button" that calls clearFilters
+    from RestaurantsSearchContext.
+
+
+    2. **Integration with Search Results**: Modify `src/components/organisms/restaurants-list/client-side.tsx`
+    to render EmptySearchState with data-testid="empty-search-state" when restaurants.length
+    === 0 AND at least one filter is active (check price, categories, features, openNow,
+    distance, or query params). Existing NoResultsForLocation/NoResultsForSearchTerm
+    remain for location-specific cases.
+
+
+    **Routes**: Homepage search at `/` (localhost:3000)
+
+
+    **Element Selectors**:
+    - Price filter 1: `[data-testid="price-filter-1"]`
+    - Category filter italian: `[data-testid="category-filter-italian"]`'
+hint: '**Files**: ~3 (create empty-search-state.tsx, modify client-side.tsx, reference
+  restaurants-search-context.tsx)
+
+
+  **Authentication**: Not required
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement an Empty Search State component for the restaurant search.
+    When a search with filters r...
+  intent: 40
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: displays_empty_state_when_filters_yield_no_results
+    checklist_label: Displays empty state when filters yield no results
+    source_test_file: tests/displays_empty_state_when_filters_yield_no_results.spec.ts
+    destination_test_file: /workdir/app/__tests__/displays_empty_state_when_filters_yield_no_results.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: displays_placeholder_image_in_empty_state
+    checklist_label: Displays placeholder image in empty state
+    source_test_file: tests/displays_placeholder_image_in_empty_state.spec.ts
+    destination_test_file: /workdir/app/__tests__/displays_placeholder_image_in_empty_state.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clear_filters_button_is_visible_and_labeled_correctly
+    checklist_label: Clear filters button is visible and labeled correctly
+    source_test_file: tests/clear_filters_button_is_visible_and_labeled_correctly.spec.ts
+    destination_test_file: /workdir/app/__tests__/clear_filters_button_is_visible_and_labeled_correctly.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clicking_clear_filters_resets_search_and_shows_restaurants
+    checklist_label: Clicking clear filters resets search and shows restaurants
+    source_test_file: tests/clicking_clear_filters_resets_search_and_shows_restaurants.spec.ts
+    destination_test_file: /workdir/app/__tests__/clicking_clear_filters_resets_search_and_shows_restaurants.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: empty_state_does_not_appear_when_restaurants_exist_with_no_filters
+    checklist_label: Empty state does not appear when restaurants exist with no filters
+    source_test_file: tests/empty_state_does_not_appear_when_restaurants_exist_with_no_filters.spec.ts
+    destination_test_file: /workdir/app/__tests__/empty_state_does_not_appear_when_restaurants_exist_with_no_filters.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: empty_state_appears_with_multiple_combined_filters_returning_zero_results
+    checklist_label: Empty state appears with multiple combined filters returning
+      zero results
+    source_test_file: tests/empty_state_appears_with_multiple_combined_filters_returning_zero_results.spec.ts
+    destination_test_file: /workdir/app/__tests__/empty_state_appears_with_multiple_combined_filters_returning_zero_results.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_evaluate_the_empty
+    screenshot_url: http://localhost:3000/?categories=gastropub&price=%24%24%24%24
+    evaluation_rubric: 'Evaluate the empty search state display on a scale of 0 to
+      1:
+
+
+      0 - Empty state not visible or broken: No empty state container shown, error
+      messages displayed, broken layout, missing components, or still showing restaurant
+      cards despite filter combination
+
+
+      1 - Empty state correctly displayed: Empty state container visible and vertically
+      centered in content area, placeholder image displayed above heading, ''No restaurants
+      found'' heading visible below image, ''Try adjusting your filters'' subtext
+      visible below heading, ''Clear filters'' button visible below subtext, clean
+      centered layout with proper spacing between elements'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+- name: vlm
+  args:
+    score_name: screenshot_10_evaluate_the_state
+    screenshot_url: http://localhost:3000/?categories=gastropub&price=%24%24%24%24
+    evaluation_rubric: 'Evaluate the state after clicking Clear filters button on
+      a scale of 0 to 1:
+
+
+      0 - Failed to clear filters: Empty search state still visible, no restaurant
+      cards displayed, URL still contains filter parameters, error state shown, or
+      page not responding to button click
+
+
+      1 - Filters cleared successfully: Empty search state no longer visible, restaurant
+      cards displayed in a grid layout, at least one restaurant card visible with
+      data-testid starting with ''restaurant-card'', URL no longer contains ''categories=gastropub''
+      or ''price=%24%24%24%24'' parameters, normal search results layout restored'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - (function() { const btn = document.querySelector('[data-testid="clear-filters-button"]');
+      if (btn) btn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))

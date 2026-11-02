@@ -1,0 +1,145 @@
+problem_id: 0030-price-alert-for-menu-items
+app: deld
+task:
+  prompt: 'Implement a price alert feature for menu items. Users want to track when menu item prices change.
+
+
+    **Feature Requirements**:
+
+
+    1. **Alert Button & Modal**: Add an ''Alert me'' button (data-testid=''alert-me-button'') next to each menu item price on the restaurant detail page menu section. Clicking opens a modal (data-testid=''price-alert-modal'') with an input for target price (data-testid=''target-price-input'') and save button (data-testid=''save-alert-button''). Validation: target price must be below current price - if not, show error ''Target price must be below current price'' and don''t save. Save to localStorage key ''priceAlerts'' as array of {restaurantId, menuItemId, menuItemName, targetPrice, currentPrice, createdAt}.
+
+
+    2. **Alerts Management Page**: Create /user/alerts route (auth required) showing all saved alerts in a list (data-testid=''alerts-list''). Each alert card (data-testid=''alert-card'') displays: menu item name, restaurant name, current price, target price, and status indicator (data-testid=''alert-status'') showing ''Price dropped!'' if currentPrice <= targetPrice, else ''Watching''. Include delete button (data-testid=''delete-alert-button'') to remove alerts.
+
+
+    **Routes**: /user/alerts (new, authenticated)
+
+
+    **Element Selectors**:
+
+    - Menu item: `[data-testid^="menu-item-"]`'
+hint: '**Files**: ~4 (menu item component, alert modal, alerts page, localStorage utility)
+
+
+  **Authentication**: Required for /user/alerts page
+
+
+  **localStorage** use following keys in localStorage:
+
+  - `priceAlerts`'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a price alert feature for menu items. Users want to track when menu item prices change.
+  intent: 35
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_open_price_alert_modal_from_menu_item
+    checklist_label: Open price alert modal from menu item
+    source_test_file: tests/should_open_price_alert_modal_from_menu_item.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_open_price_alert_modal_from_menu_item.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_save_price_alert_to_localstorage
+    checklist_label: Save price alert to localstorage
+    source_test_file: tests/should_save_price_alert_to_localstorage.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_save_price_alert_to_localstorage.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_alerts_on_user_alerts_page_with_status_indicator
+    checklist_label: Display alerts on user alerts page with status indicator
+    source_test_file: tests/should_display_alerts_on_user_alerts_page_with_status_indicator.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_alerts_on_user_alerts_page_with_status_indicator.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_delete_alert_from_alerts_page_and_update_localstorage_immediately
+    checklist_label: Delete alert from alerts page and update localstorage immediately
+    source_test_file: tests/should_delete_alert_from_alerts_page_and_update_localstorage_immediately.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_delete_alert_from_alerts_page_and_update_localstorage_immediately.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_reject_target_price_equal_to_current_price_with_validation_error
+    checklist_label: Reject target price equal to current price with validation error
+    source_test_file: tests/should_reject_target_price_equal_to_current_price_with_validation_error.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_reject_target_price_equal_to_current_price_with_validation_error.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_price_dropped_status_when_current_price_meets_target
+    checklist_label: Show price dropped status when current price meets target
+    source_test_file: tests/should_show_price_dropped_status_when_current_price_meets_target.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_price_dropped_status_when_current_price_meets_target.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_price
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the price alert modal display on a scale of 0 to 1:
+
+
+      0 - Modal not visible or severely broken: No modal appears after clicking alert button, or modal is completely malformed with missing essential elements, no backdrop visible, or content unreadable
+
+
+      1 - Modal correctly displayed: A centered modal dialog is visible with semi-transparent backdrop darkening the page behind it, modal contains a clearly labeled target price input field (with dollar sign prefix or currency indicator), and a prominently styled save button that is visually distinct and clickable'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - '(function() { const menuSection = document.querySelector(''[data-testid="menu-section"]'') || document.querySelector(''section''); if (menuSection) menuSection.scrollIntoView({ behavior: ''instant'', block: ''center'' }); })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const alertBtn = document.querySelector('[data-testid="alert-me-button"]'); if (alertBtn) alertBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_alerts
+    screenshot_url: http://localhost:3000/user/alerts
+    evaluation_rubric: 'Rate the alerts management page display on a scale of 0 to 1:
+
+
+      0 - Page not working or severely broken: Page shows 404 error, authentication redirect loop, empty page with no content, or completely missing alert cards despite localStorage containing alerts
+
+
+      1 - Alerts page correctly displayed: Page shows a list of alert cards with menu item names displayed prominently (in bold or larger text), current and target prices are clearly labeled and distinguishable, status indicators show distinct visual styling for ''Watching'' versus ''Price dropped!'' states (different colors, icons, or badges), and each card has a visible delete button positioned consistently'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - '(function() { const alerts = [ { restaurantId: ''25047088-5a40-4fab-be5c-3ee9a54fb980'', menuItemId: ''menu-001'', menuItemName: ''Margherita Pizza'', targetPrice: 8.00, currentPrice: 12.99, createdAt: new Date().toISOString() }, { restaurantId: ''25047088-5a40-4fab-be5c-3ee9a54fb980'', menuItemId: ''menu-002'', menuItemName: ''Caesar Salad'', targetPrice: 15.00, currentPrice: 10.00, createdAt: new Date().toISOString() } ]; localStorage.setItem(''priceAlerts'', JSON.stringify(alerts)); })()'
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]'); if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 4000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]''); if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const passInput = document.querySelector(''[data-testid="login-password-input"]''); if (passInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(passInput, ''password123''); passInput.dispatchEvent(new Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]'); if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - await new Promise(resolve => setTimeout(resolve, 2500))

@@ -1,0 +1,130 @@
+problem_id: 0020-price-range-visual-indicator
+app: deld
+task:
+  prompt: 'Implement a PriceScale visual indicator component for the Deld app. Replace
+    text-based price indicators (''$'', ''$$'', etc.) with a visual scale showing
+    filled and unfilled dollar signs.
+
+
+    **Feature Requirements**:
+
+
+    1. **PriceScale Atom Component**: Create a reusable `PriceScale` atom in `src/components/atoms/price-scale/price-scale.tsx`.
+    Display 4 dollar signs where filled signs represent the price level and unfilled
+    signs show remaining scale. Props: `level: 1|2|3|4`. Use `data-testid="price-scale"`
+    for container, `data-testid="price-scale-filled"` for filled indicators, `data-testid="price-scale-empty"`
+    for empty indicators.
+
+
+    2. **Tooltip with Price Range**: Add hover tooltip showing dollar range per person.
+    Level 1: "Under $15", Level 2: "$15-$30", Level 3: "$30-$60", Level 4: "Over $60".
+    Use `data-testid="price-scale-tooltip"` for tooltip content. Integrate into RestaurantCard
+    molecule replacing current text price display.
+
+
+    **Routes**: No new routes
+
+    **Auth**: Not required'
+hint: '**Files**: ~4 (price-scale atom, tooltip integration, restaurant-card update,
+  types)
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a PriceScale visual indicator component for the Deld app.
+    Replace text-based price indi...
+  intent: 19
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_correct_number_of_filled_indicators_for_level_2
+    checklist_label: Display correct number of filled indicators for level 2
+    source_test_file: tests/should_display_correct_number_of_filled_indicators_for_level_2.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_correct_number_of_filled_indicators_for_level_2.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_correct_number_of_filled_indicators_for_level_4
+    checklist_label: Display correct number of filled indicators for level 4
+    source_test_file: tests/should_display_correct_number_of_filled_indicators_for_level_4.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_correct_number_of_filled_indicators_for_level_4.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_correct_price_range_tooltip_on_hover_for_level_1
+    checklist_label: Show correct price range tooltip on hover for level 1
+    source_test_file: tests/should_show_correct_price_range_tooltip_on_hover_for_level_1.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_correct_price_range_tooltip_on_hover_for_level_1.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_correct_price_range_tooltip_on_hover_for_level_3
+    checklist_label: Show correct price range tooltip on hover for level 3
+    source_test_file: tests/should_show_correct_price_range_tooltip_on_hover_for_level_3.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_correct_price_range_tooltip_on_hover_for_level_3.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_hide_tooltip_when_mouse_leaves_pricescale
+    checklist_label: Hide tooltip when mouse leaves pricescale
+    source_test_file: tests/should_hide_tooltip_when_mouse_leaves_pricescale.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_hide_tooltip_when_mouse_leaves_pricescale.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_render_consistently_across_multiple_restaurant_cards_with_different_price_levels
+    checklist_label: Render consistently across multiple restaurant cards with different
+      price levels
+    source_test_file: tests/should_render_consistently_across_multiple_restaurant_cards_with_different_price_levels.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_render_consistently_across_multiple_restaurant_cards_with_different_price_levels.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_pricescale
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the PriceScale visual indicator display on restaurant
+      cards on a scale of 0 to 1:
+
+
+      0 - PriceScale not implemented correctly: No visual price scale visible on restaurant
+      cards, OR price is still displayed as text dollar signs ($, $$, etc.), OR missing
+      data-testid="price-scale" containers, OR fewer than 4 indicator elements per
+      card, OR indicators are not distinguishable as filled vs empty
+
+
+      1 - PriceScale correctly implemented: Each restaurant card displays a visual
+      price scale with exactly 4 dollar sign indicators, filled indicators use a solid/highlighted
+      style that is visually distinct from empty indicators (different color, opacity,
+      or weight), the price scale is horizontally aligned within the restaurant card
+      metadata section, at least 3 restaurant cards are visible with properly rendered
+      price scales showing different fill levels'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))

@@ -1,0 +1,179 @@
+problem_id: 0019-review-reaction-emoji-system
+app: deld
+task:
+  prompt: 'Implement a Review Reaction Emoji System for the Deld restaurant app. Users should be able to react to reviews
+    with emoji reactions to provide quick feedback.
+
+
+    **Feature Requirements**:
+
+
+    1. **Reaction Buttons Component**: Add a row of emoji reaction buttons below each review card. Include four reaction types:
+    👍 (Helpful), 😋 (Made Me Hungry), 📸 (Great Photos), 💡 (Useful Tips). Each button displays the emoji and its count. Clicking
+    a button toggles the user''s reaction on/off. Active reactions must have `aria-pressed="true"` attribute and a visually
+    highlighted background. Use data-testid="reaction-buttons-{reviewId}" for the container, data-testid="reaction-btn-helpful-{reviewId}",
+    data-testid="reaction-btn-hungry-{reviewId}", data-testid="reaction-btn-photos-{reviewId}", data-testid="reaction-btn-tips-{reviewId}"
+    for individual buttons.
+
+
+    2. **Reaction State Persistence**: Store reactions in localStorage under key ''review-reactions''. Structure: { [reviewId]:
+    reactionType } where reactionType is ''helpful''|''hungry''|''photos''|''tips''|null. Display aggregated counts per reaction
+    type. Counts should update immediately when user toggles reaction. Use data-testid="reaction-count-{type}-{reviewId}"
+    for count displays.
+
+
+    **Routes**: Restaurant detail page at /restaurants/[id] (existing route)'
+hint: '**Files**: ~3-4 files (new ReactionButtons component, ReviewCard integration, localStorage utility)
+
+
+  **Authentication**: Not required - reactions work for all users
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password:
+  password123
+
+
+  **localStorage** use following keys in localStorage:
+
+  - `review-reactions`'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Review Reaction Emoji System for the Deld restaurant app. Users should be able to rea...
+  intent: 16
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_reaction_buttons_on_review_cards
+    checklist_label: Display reaction buttons on review cards
+    source_test_file: tests/should_display_reaction_buttons_on_review_cards.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_reaction_buttons_on_review_cards.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_toggle_reaction_on_button_click
+    checklist_label: Toggle reaction on button click
+    source_test_file: tests/should_toggle_reaction_on_button_click.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_toggle_reaction_on_button_click.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_persist_reactions_in_localstorage_after_page_reload
+    checklist_label: Persist reactions in localstorage after page reload
+    source_test_file: tests/should_persist_reactions_in_localstorage_after_page_reload.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_persist_reactions_in_localstorage_after_page_reload.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_replace_previous_reaction_when_switching_between_reaction_types_on_same_review
+    checklist_label: Replace previous reaction when switching between reaction types on same review
+    source_test_file: tests/should_replace_previous_reaction_when_switching_between_reaction_types_on_same_review.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_replace_previous_reaction_when_switching_between_reaction_types_on_same_review.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_handle_corrupted_localstorage_data_without_errors
+    checklist_label: Handle corrupted localstorage data without errors
+    source_test_file: tests/should_handle_corrupted_localstorage_data_without_errors.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_handle_corrupted_localstorage_data_without_errors.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_maintain_independent_reaction_states_across_multiple_reviews
+    checklist_label: Maintain independent reaction states across multiple reviews
+    source_test_file: tests/should_maintain_independent_reaction_states_across_multiple_reviews.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_maintain_independent_reaction_states_across_multiple_reviews.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_visual
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the visual appearance of reaction buttons in their default inactive state on a scale of 0 to
+      1:
+
+
+      0 - Reaction buttons not visible: No emoji reaction buttons are displayed below review cards, or buttons are missing
+      entirely from the reviews section, or the page failed to load reviews.
+
+
+      1 - Reaction buttons correctly displayed in inactive state: A horizontal row of 4 emoji reaction buttons (👍 😋 📸 💡) is
+      visible below the review text. All buttons appear in a muted/inactive visual style with no highlight or selection indicator.
+      Each button shows its emoji followed by the count "0". Buttons are evenly spaced with consistent gaps between them.
+      The reaction buttons row is aligned with the review card content.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980'
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]''); if (reviewsSection)
+      { reviewsSection.scrollIntoView({ behavior: ''instant'', block: ''start'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - window.scrollBy(0, 500);
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_visual
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the visual appearance of active versus inactive reaction button states on a scale of 0 to 1:
+
+
+      0 - No visual distinction between active and inactive states: The clicked "Helpful" (👍) button looks identical to the
+      other buttons, or no buttons are visible, or the click did not register any visual change.
+
+
+      1 - Clear visual distinction between active and inactive states: The "Helpful" (👍) button is visually highlighted with
+      a distinct background color, border, or emphasis that differentiates it from the inactive buttons. The count next to
+      the "Helpful" emoji displays "1" instead of "0". The other 3 reaction buttons (😋 📸 💡) remain in the muted/inactive visual
+      style. The active button has noticeably higher visual prominence through color contrast or styling compared to the inactive
+      buttons.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - localStorage.removeItem('review-reactions')
+    - window.location.href = 'http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980'
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]''); if (reviewsSection)
+      { reviewsSection.scrollIntoView({ behavior: ''instant'', block: ''start'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - window.scrollBy(0, 500);
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const helpfulBtn = document.querySelector('[data-testid^="reaction-btn-helpful-"]'); if (helpfulBtn) {
+      helpfulBtn.click(); } })()
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - checklist_items
+  - eslint
+  - playwright_test.should_display_reaction_buttons_on_review_cards
+  - playwright_test.should_toggle_reaction_on_button_click
+  - tsc
+  - vlm.screenshot_10_rate_the_visual
+  - vlm.screenshot_9_rate_the_visual
+  grader_weights:
+    should_handle_corrupted_localstorage_data_without_errors: 0.125
+    should_maintain_independent_reaction_states_across_multiple_reviews: 0.2595
+    should_persist_reactions_in_localstorage_after_page_reload: 0.4905
+    should_replace_previous_reaction_when_switching_between_reaction_types_on_same_review: 0.125

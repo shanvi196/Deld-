@@ -1,0 +1,143 @@
+problem_id: 0042-menu-item-photo-request-button
+app: deld
+task:
+  prompt: 'Implement a ''Request Photo'' feature for menu items without photos. When viewing a restaurant''s menu section, items that lack photos should display a ''Request Photo'' button. Clicking it stores a request in localStorage under ''photo-requests'' as an array of objects with {restaurantId, menuItemId, timestamp}. After requesting, show a badge with the count of requests for that item.
+
+
+    **Feature Requirements**:
+
+
+    1. **Request Photo Button**: Add a clickable button with text ''Request Photo'' (data-testid=''request-photo-btn-{menuItemId}'') on menu items missing photos. Button uses outline variant styling. On click, save request to localStorage key ''photo-requests'' with structure {restaurantId: string, menuItemId: string, timestamp: number}. Button should be disabled after clicking with text ''Requested'' (data-testid=''photo-requested-badge-{menuItemId}'').
+
+
+    2. **Request Count Badge**: Display a count badge (data-testid=''photo-request-count-{menuItemId}'') showing total requests for each item from localStorage. Badge appears next to the button. Uses Tag atom component. Count updates on page load by reading localStorage.
+
+
+    **Routes**: /restaurants/[id] (existing restaurant detail page)
+
+
+    **Element Selectors**:
+    - Photo request count: `[data-testid="photo-request-count-${menuItemId}"]`
+    - Request photo btn: `[data-testid="request-photo-btn-${menuItem2}"]`
+    - Photo requested badge: `[data-testid="photo-requested-badge-${menuItemId}"]`
+    - Photo request count: `[data-testid="photo-request-count-${menuItem2}"]`
+    - Menu section: `[data-testid="menu-section"]`'
+hint: '**Files**: ~3-4 (restaurant menu component modification, new photo-request-button component, localStorage utility)
+
+
+  **Authentication**: Not required
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password: password123
+
+
+  **localStorage** use following keys in localStorage:
+
+  - `photo-requests`'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a 'Request Photo' feature for menu items without photos. When viewing a restaurant's me...
+  intent: 50
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_request_photo_button_on_menu_items_without_photos
+    checklist_label: Display request photo button on menu items without photos
+    source_test_file: tests/should_display_request_photo_button_on_menu_items_without_photos.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_request_photo_button_on_menu_items_without_photos.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_save_request_to_localstorage_with_correct_structure_when_clicking_button
+    checklist_label: Save request to localstorage with correct structure when clicking button
+    source_test_file: tests/should_save_request_to_localstorage_with_correct_structure_when_clicking_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_save_request_to_localstorage_with_correct_structure_when_clicking_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_change_button_to_disabled_requested_state_after_clicking
+    checklist_label: Change button to disabled requested state after clicking
+    source_test_file: tests/should_change_button_to_disabled_requested_state_after_clicking.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_change_button_to_disabled_requested_state_after_clicking.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_correct_count_badge_from_localstorage_data
+    checklist_label: Display correct count badge from localstorage data
+    source_test_file: tests/should_display_correct_count_badge_from_localstorage_data.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_correct_count_badge_from_localstorage_data.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_maintain_separate_request_counts_for_different_menu_items
+    checklist_label: Maintain separate request counts for different menu items
+    source_test_file: tests/should_maintain_separate_request_counts_for_different_menu_items.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_maintain_separate_request_counts_for_different_menu_items.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_only_show_requests_for_current_restaurant
+    checklist_label: Only show requests for current restaurant
+    source_test_file: tests/should_only_show_requests_for_current_restaurant.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_only_show_requests_for_current_restaurant.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_request
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the Request Photo button styling in the menu section on a scale of 0 to 1:
+
+
+      0 - Request Photo buttons missing or incorrect: No ''Request Photo'' buttons visible on menu items without photos, OR buttons lack outline variant styling (should have visible border, not filled background), OR buttons are positioned incorrectly (not below menu item names), OR button styling is inconsistent across menu items (different sizes, fonts, or padding)
+
+
+      1 - Request Photo buttons correctly styled: ''Request Photo'' buttons are visible on menu items that lack photos, buttons use outline variant styling with visible border and transparent/light background, buttons are positioned consistently below menu item names, buttons have uniform padding and font size across all displayed menu items, menu items with existing photos do not show the request photo button'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - localStorage.removeItem('photo-requests')
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - '(function() { const menuSection = document.querySelector(''[data-testid="menu-section"]'') || document.querySelector(''section:has([data-testid^="request-photo-btn-"])'') || Array.from(document.querySelectorAll(''section'')).find(s => s.textContent && s.textContent.includes(''Menu'')); if (menuSection) { menuSection.scrollIntoView({ behavior: ''instant'', block: ''center'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_requested
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the requested state display with disabled button and count badge on a scale of 0 to 1:
+
+
+      0 - Requested state incorrect or missing: Buttons do not show ''Requested'' text for items with existing requests in localStorage, OR buttons with requests are not in a disabled/gray state, OR no count badge is visible next to buttons with requests, OR the badge does not display the correct count number, OR the badge styling does not use Tag component styling (should have contrasting background color to stand out)
+
+
+      1 - Requested state correctly displayed: Buttons for menu items with existing requests show text ''Requested'' in a disabled gray state (muted colors, not interactive appearance), a Tag-styled badge is visible next to or near buttons displaying the request count, the badge uses contrasting colors that stand out from the button (typically a colored background with white or dark text), the overall layout clearly indicates which items have been requested with request count visible'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - '(function() { const requests = []; const menuItemId = ''menu_001''; for (let i = 0; i < 5; i++) { requests.push({ restaurantId: ''25047088-5a40-4fab-be5c-3ee9a54fb980'', menuItemId: menuItemId, timestamp: Date.now() - (i * 1000) }); } localStorage.setItem(''photo-requests'', JSON.stringify(requests)); })()'
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - '(function() { const menuSection = document.querySelector(''[data-testid="menu-section"]'') || document.querySelector(''section:has([data-testid^="request-photo-btn-"])'') || Array.from(document.querySelectorAll(''section'')).find(s => s.textContent && s.textContent.includes(''Menu'')); if (menuSection) { menuSection.scrollIntoView({ behavior: ''instant'', block: ''center'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))

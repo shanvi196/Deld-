@@ -1,0 +1,170 @@
+problem_id: 0011-recently-viewed-restaurants-sidebar
+app: deld
+task:
+  prompt: 'Implement a Recently Viewed Restaurants sidebar for the Deld app. Users want quick access to restaurants they''ve
+    recently browsed during their session.
+
+
+    **Feature Requirements**:
+
+
+    1. **Session History Tracking**: When a user views a restaurant details page, automatically save that restaurant to sessionStorage
+    under key ''deld-recent-views''. Store: restaurantId, name, cuisine (first item), and timestamp. Limit to last 8 unique
+    restaurants (newest first, no duplicates - if restaurant already exists, update its timestamp and move to front).
+
+
+    2. **Recent Views Sidebar**: Add a collapsible sidebar on the right side of the home page (data-testid="recent-views-sidebar").
+    Show thumbnail cards with restaurant name and cuisine (data-testid="recent-view-card-{restaurantId}"). Include collapse/expand
+    toggle button (data-testid="recent-views-toggle") that persists collapsed state to sessionStorage key ''deld-recent-views-collapsed''.
+    Show "No recent views" when empty (data-testid="recent-views-empty"). Clicking a card navigates to that restaurant''s
+    details page and updates the view order.
+
+
+    **Routes**: Home page (/) with new sidebar component
+
+
+    **Element Selectors**: - Recent view card rest_0001: `[data-testid="recent-view-card-rest_0001"]` - Recent view card rest_0002:
+    `[data-testid="recent-view-card-rest_0002"]`'
+hint: '**Files**: ~4 (restaurant detail page tracking, sidebar component, sessionStorage utility, home page layout)
+
+
+  **Authentication**: Not required (works for all users)
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password:
+  password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Recently Viewed Restaurants sidebar for the Deld app. Users want quick access to rest...
+  intent: 4
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_save_restaurant_to_sessionstorage_when_viewing_details_page
+    checklist_label: Save restaurant to sessionstorage when viewing details page
+    source_test_file: tests/should_save_restaurant_to_sessionstorage_when_viewing_details_page.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_save_restaurant_to_sessionstorage_when_viewing_details_page.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_limit_recent_views_to_8_unique_restaurants
+    checklist_label: Limit recent views to 8 unique restaurants
+    source_test_file: tests/should_limit_recent_views_to_8_unique_restaurants.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_limit_recent_views_to_8_unique_restaurants.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_not_duplicate_restaurants_update_timestamp_instead
+    checklist_label: Not duplicate restaurants update timestamp instead
+    source_test_file: tests/should_not_duplicate_restaurants_update_timestamp_instead.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_not_duplicate_restaurants_update_timestamp_instead.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_recent_views_sidebar_on_home_page
+    checklist_label: Display recent views sidebar on home page
+    source_test_file: tests/should_display_recent_views_sidebar_on_home_page.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_recent_views_sidebar_on_home_page.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_collapse_and_expand_sidebar_and_persist_state_in_sessionstorage
+    checklist_label: Collapse and expand sidebar and persist state in sessionstorage
+    source_test_file: tests/should_collapse_and_expand_sidebar_and_persist_state_in_sessionstorage.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_collapse_and_expand_sidebar_and_persist_state_in_sessionstorage.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_navigate_to_restaurant_from_sidebar_card_and_update_order
+    checklist_label: Navigate to restaurant from sidebar card and update order
+    source_test_file: tests/should_navigate_to_restaurant_from_sidebar_card_and_update_order.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_navigate_to_restaurant_from_sidebar_card_and_update_order.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_recently
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the Recently Viewed Restaurants sidebar with populated data on a scale of 0 to 1:
+
+
+      0 - Sidebar missing or broken: No sidebar visible on the right side of the page, or sidebar exists but shows no restaurant
+      cards despite sessionStorage having 8 entries, or major visual/layout issues preventing proper display
+
+
+      1 - Sidebar correctly displays populated state: Sidebar visible on right side with data-testid=''recent-views-sidebar'',
+      8 restaurant cards displayed vertically showing names (Golden Dragon, Pasta Palace, Sushi Master, etc.) and cuisine
+      types, collapse/expand toggle button present with data-testid=''recent-views-toggle'', cards are clickable and display
+      restaurant information clearly'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - '(async () => { const mockData = [{ restaurantId: ''25047088-5a40-4fab-be5c-3ee9a54fb980'', name: ''Marisco Grill'',
+      cuisine: ''Chinese'', timestamp: Date.now() }, { restaurantId: ''4f3833e0-ef7d-44fe-ba19-a31447f4d493'', name: ''The
+      Franklin Room'', cuisine: ''Italian'', timestamp: Date.now() - 1000 }, { restaurantId: ''rest_0003'', name: ''Sushi
+      Master'', cuisine: ''Japanese'', timestamp: Date.now() - 2000 }, { restaurantId: ''25047088-5a40-4fab-be5c-3ee9a54fb980'',
+      name: ''Marisco Grill'', cuisine: ''Mexican'', timestamp: Date.now() - 3000 }, { restaurantId: ''25047088-5a40-4fab-be5c-3ee9a54fb980'',
+      name: ''Marisco Grill'', cuisine: ''American'', timestamp: Date.now() - 4000 }, { restaurantId: ''25047088-5a40-4fab-be5c-3ee9a54fb980'',
+      name: ''Marisco Grill'', cuisine: ''Indian'', timestamp: Date.now() - 5000 }, { restaurantId: ''25047088-5a40-4fab-be5c-3ee9a54fb980'',
+      name: ''Marisco Grill'', cuisine: ''Italian'', timestamp: Date.now() - 6000 }, { restaurantId: ''25047088-5a40-4fab-be5c-3ee9a54fb980'',
+      name: ''Marisco Grill'', cuisine: ''Thai'', timestamp: Date.now() - 7000 }]; sessionStorage.setItem(''deld-recent-views'',
+      JSON.stringify(mockData)); })();'
+    - await new Promise(resolve => setTimeout(resolve, 3000));
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_empty
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the empty state of the Recently Viewed Restaurants sidebar on a scale of 0 to 1:
+
+
+      0 - Empty state incorrect or missing: Sidebar not visible at all, or no empty state message displayed when sessionStorage
+      is empty, or sidebar shows restaurant cards despite empty sessionStorage, or layout is broken
+
+
+      1 - Empty state correctly displayed: Sidebar visible with data-testid=''recent-views-sidebar'', element with data-testid=''recent-views-empty''
+      shows ''No recent views'' message prominently, sidebar maintains proper width and layout on right side of page, toggle
+      button may or may not be visible in empty state'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - sessionStorage.removeItem('deld-recent-views');
+    - await new Promise(resolve => setTimeout(resolve, 3000));
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - eslint
+  - tsc
+  - vlm.screenshot_10_rate_the_empty
+  - vlm.screenshot_9_rate_the_recently
+  - checklist_items
+  grader_weights:
+    should_navigate_to_restaurant_from_sidebar_card_and_update_order: 1.0
+  gating_graders:
+  - playwright_test.should_collapse_and_expand_sidebar_and_persist_state_in_sessionstorage
+  - playwright_test.should_display_recent_views_sidebar_on_home_page
+  - playwright_test.should_limit_recent_views_to_8_unique_restaurants
+  - playwright_test.should_not_duplicate_restaurants_update_timestamp_instead
+  - playwright_test.should_save_restaurant_to_sessionstorage_when_viewing_details_page

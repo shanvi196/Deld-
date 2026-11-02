@@ -1,0 +1,107 @@
+```gherkin
+Feature: Menu Item Availability Status
+  As a user browsing restaurant menus
+  I want to see availability status for menu items
+  So that I know what dishes are currently available before ordering
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And restaurant "rest_0001" has menu items in its data
+
+  @unit-test @priority-high
+  Scenario: Menu items list renders with correct structure
+    Given I am on the restaurant detail page "/restaurants/rest_0001"
+    And I wait for the page to fully load
+    When I scroll to the Menu Items section
+    Then I should see at least one element with data-testid matching "menu-item-card-"
+    And each menu item card should display the item name
+    And each menu item card should display the item price
+    And each menu item card should have a status badge visible
+
+  @unit-test @priority-high
+  Scenario: Status dropdown opens for authenticated users
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the restaurant detail page "/restaurants/rest_0001"
+    And I wait for the page to fully load
+    When I click on the status dropdown trigger for the first menu item
+    Then the dropdown menu should be visible
+    And I should see option with data-testid="status-option-available" containing "Available"
+    And I should see option with data-testid="status-option-limited" containing "Limited"
+    And I should see option with data-testid="status-option-sold-out" containing "Sold Out"
+
+  @unit-test @authenticated @integration
+  Scenario: Status change persists in localStorage after page reload
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the restaurant detail page "/restaurants/rest_0001"
+    And I wait for the page to fully load
+    And I note the first menu item's ID
+    When I click on the status dropdown trigger for the first menu item
+    And I select the "Sold Out" option from the dropdown
+    And I reload the page
+    And I wait for the page to fully load
+    Then the first menu item should show "Sold Out" status badge with data-testid="status-badge-sold-out"
+    And localStorage key "menuItemStatus" should contain the restaurant ID "rest_0001"
+    And the stored status for the menu item should be "sold-out"
+
+  @unit-test @edge-case @boundary
+  Scenario: Corrupted localStorage gracefully defaults to available status
+    Given I am on the restaurant detail page "/restaurants/rest_0001"
+    And localStorage key "menuItemStatus" contains invalid JSON "{malformed"
+    When I wait for the page to fully load
+    And I scroll to the Menu Items section
+    Then the first menu item should show "Available" status badge with data-testid="status-badge-available"
+    And no JavaScript errors should appear in the console related to JSON parsing
+
+  @unit-test @integration @cross-tab
+  Scenario: Status changes sync across browser tabs via storage event
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the restaurant detail page "/restaurants/rest_0001"
+    And I wait for the page to fully load
+    And the first menu item shows "Available" status badge
+    When another tab updates localStorage "menuItemStatus" to set the first menu item of "rest_0001" to "limited"
+    And a storage event is dispatched
+    Then the first menu item should show "Limited" status badge with data-testid="status-badge-limited"
+    And no page reload should have occurred
+
+  @unit-test @integration @state-management
+  Scenario: Multiple menu items maintain independent status states
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the restaurant detail page "/restaurants/rest_0001"
+    And I wait for the page to fully load
+    And at least 3 menu item cards are visible
+    When I set the first menu item status to "Sold Out"
+    And I set the second menu item status to "Limited"
+    And I set the third menu item status to "Available"
+    Then the first menu item should show "Sold Out" status badge with data-testid="status-badge-sold-out"
+    And the second menu item should show "Limited" status badge with data-testid="status-badge-limited"
+    And the third menu item should show "Available" status badge with data-testid="status-badge-available"
+    And localStorage key "menuItemStatus" under "rest_0001" should contain exactly 3 item entries
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of menu items section with all three status badge variants
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the restaurant detail page "/restaurants/rest_0001"
+    And I wait for the page to fully load
+    And I set the first menu item status to "Available"
+    And I set the second menu item status to "Limited"
+    And I set the third menu item status to "Sold Out"
+    When I scroll to the Menu Items section
+    Then the page should visually show menu item cards in a grid or list layout
+    And the first card should display a green "Available" badge
+    And the second card should display a yellow "Limited" badge
+    And the third card should display a red "Sold Out" badge
+    And the section should have a "Menu Items" heading
+
+  @screenshot-test @authenticated @priority-medium
+  Scenario: Visual validation of status dropdown menu positioning and options
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the restaurant detail page "/restaurants/rest_0001"
+    And I wait for the page to fully load
+    When I click on the status dropdown trigger for the first menu item
+    Then the dropdown should be visually displayed directly below the trigger button
+    And the dropdown should contain exactly 3 options in order: "Available", "Limited", "Sold Out"
+    And the "Available" option should have a green indicator icon
+    And the "Limited" option should have a yellow indicator icon
+    And the "Sold Out" option should have a red indicator icon
+    And the dropdown should not overflow outside the viewport
+```

@@ -1,0 +1,78 @@
+```gherkin
+Feature: Review Reading Time Estimate Badge
+  As a user browsing restaurant reviews
+  I want to see an estimated reading time for each review
+  So that I can gauge how long a review will take to read before diving in
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Reading time badge displays on review cards
+    Given I am on restaurant details page "/restaurants/rest_0001"
+    And the page has fully loaded with reviews visible
+    When I look at the first review card
+    Then I should see an element with data-testid="reading-time-badge"
+    And the reading time badge should contain text matching pattern "\d+ min read"
+    And the badge should appear in the same row as the review date
+
+  @unit-test @priority-high
+  Scenario: Reading time calculates correctly for medium-length reviews
+    Given I am on restaurant details page "/restaurants/rest_0001"
+    And the page has fully loaded with reviews visible
+    When I examine a review with approximately 400 words of text
+    Then the reading time badge should display "2 min read"
+    And the badge should use the Tag component styling (neutral-100 background, neutral-500 text)
+
+  @unit-test @priority-high
+  Scenario: Short reviews show minimum 1 minute reading time
+    Given I am on restaurant details page "/restaurants/rest_0001"
+    And there is a review with less than 200 words
+    When I view that review's reading time badge
+    Then the badge with data-testid="reading-time-badge" should display "1 min read"
+    And not display "0 min read" or fractional minutes
+
+  @unit-test @priority-medium
+  Scenario: Reading time badge appears on all review cards in list
+    Given I am on restaurant details page "/restaurants/rest_0001"
+    And the reviews list section is visible
+    When I count elements with data-testid="reading-time-badge"
+    Then each visible review card should have exactly one reading time badge
+    And the count of badges should equal the count of review cards
+
+  @unit-test @edge-case
+  Scenario: Reading time badge persists after review list refresh
+    Given I am on restaurant details page "/restaurants/rest_0001"
+    And I can see 3 review cards with reading time badges displayed
+    When I trigger a page refresh by pressing F5
+    And the page reloads and reviews section becomes visible again
+    Then all 3 review cards should still display their reading time badges
+    And the badge values should match the original calculated times
+
+  @unit-test @edge-case
+  Scenario: Reading time badge renders correctly when navigating between restaurant pages
+    Given I am on restaurant details page "/restaurants/rest_0001"
+    And the first review shows a reading time badge with data-testid="reading-time-badge"
+    When I navigate to a different restaurant page "/restaurants/rest_0002"
+    And the new page loads with its reviews section visible
+    Then the reading time badges should display values calculated from the new restaurant's reviews
+    And no stale badge data from "/restaurants/rest_0001" should appear
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of reading time badge on restaurant reviews
+    Given I navigate directly to "http://localhost:3000/restaurants/rest_0001"
+    And I wait for the page to fully load with reviews visible
+    When I scroll to the reviews section
+    Then the page should visually show reading time badges next to review dates
+    And badges should appear as small neutral-colored tags
+    And the layout should show stars, date, and reading time badge in a horizontal row
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of reading time badge styling
+    Given I navigate directly to "http://localhost:3000/restaurants/rest_0002"
+    And I wait for the reviews section to load
+    When I examine the review card layout
+    Then the reading time badge should be visually consistent with the Tag component design
+    And the badge should not disrupt the existing review card layout
+    And text should be readable with appropriate font size and contrast
+```

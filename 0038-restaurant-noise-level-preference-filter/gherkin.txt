@@ -1,0 +1,75 @@
+```gherkin
+Feature: Restaurant Noise Level Filter
+  As a user searching for restaurants
+  I want to filter by noise level preference
+  So that I can find restaurants that match my desired atmosphere
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Select quiet noise level filter
+    Given I am on the home page with all filters cleared
+    And the noise filter section with data-testid "noise-filter" is visible
+    When I click the "Quiet" radio button with data-testid "noise-filter-quiet"
+    Then the URL should contain "noise=quiet"
+    And the "Quiet" radio button should be selected
+    And the restaurant list should update to show only restaurants with noise level "quiet"
+
+  @unit-test @priority-high
+  Scenario: Select lively noise level filter
+    Given I am on the home page with all filters cleared
+    And the noise filter section is visible
+    When I click the "Lively" radio button with data-testid "noise-filter-lively"
+    Then the URL should contain "noise=lively"
+    And the "Lively" radio button should be selected
+
+  @unit-test @priority-high
+  Scenario: Toggle noise filter off by clicking same option
+    Given I am on the home page with "noise=moderate" in the URL
+    And the "Moderate" radio button with data-testid "noise-filter-moderate" is selected
+    When I click the "Moderate" radio button again
+    Then the URL should NOT contain "noise="
+    And no noise filter radio button should be selected
+
+  @unit-test @edge-case
+  Scenario: Noise filter cleared when using clear all filters
+    Given I am on the home page with "noise=quiet" in the URL
+    And the "Quiet" noise filter is selected
+    When I click the "Clear All" button with data-testid "clear-all-filters"
+    Then the URL should NOT contain "noise="
+    And no noise filter radio button should be selected
+
+  @unit-test @edge-case
+  Scenario: Invalid noise parameter in URL is ignored
+    Given I navigate directly to the home page with "noise=invalid-value" in the URL
+    Then no noise filter radio button should be selected
+    And the URL should NOT contain "noise=invalid-value"
+    And the restaurant list should display all available restaurants without noise filtering
+
+  @unit-test @edge-case
+  Scenario: Noise filter persists with other filters applied
+    Given I am on the home page with "distance=5&cuisine=italian" in the URL
+    And the distance filter shows "5 miles" selected
+    And the cuisine filter shows "Italian" selected
+    When I click the "Quiet" radio button with data-testid "noise-filter-quiet"
+    Then the URL should contain "noise=quiet"
+    And the URL should contain "distance=5"
+    And the URL should contain "cuisine=italian"
+    And the applied filters section should show exactly 3 filter chips: "5 miles", "Italian", "Quiet"
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of noise filter UI with selection
+    Given I am on the home page
+    When I select the "Moderate" noise filter with data-testid "noise-filter-moderate"
+    Then the page should display the noise filter section after the Distance filter
+    And the "Moderate" option should be visually highlighted as selected
+    And restaurant cards should be visible in the results area
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of noise filter in default state
+    Given I am on the home page with all filters cleared
+    Then the noise filter section should be visible with title "Noise Level"
+    And three radio options should be displayed: "Quiet", "Moderate", "Lively"
+    And no option should be selected by default
+```

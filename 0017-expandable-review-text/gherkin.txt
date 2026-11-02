@@ -1,0 +1,81 @@
+```gherkin
+Feature: Expandable Review Text
+  As a user browsing restaurant reviews
+  I want long reviews to be truncated with a Read more option
+  So that the page is scannable while still allowing me to read full reviews
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am on the restaurant details page "/restaurants/rest_0001"
+    And the reviews section is visible
+
+  @unit-test @priority-high
+  Scenario: Short review displays fully without Read more button
+    Given I am viewing a review with exactly 299 characters of text
+    When the review card renders
+    Then the full review text should be visible without truncation
+    And no element with data-testid "review-read-more" should be present for that review
+    And no ellipsis "..." should appear at the end of the text
+
+  @unit-test @priority-high
+  Scenario: Long review is truncated with Read more button visible
+    Given I am viewing a review with exactly 301 characters of text
+    When the review card renders
+    Then the review text should be truncated with CSS class "line-clamp-4"
+    And an element with data-testid "review-read-more" should be visible
+    And the button text should read exactly "Read more"
+
+  @unit-test @priority-high
+  Scenario: Clicking Read more expands review to show full text
+    Given I am viewing a truncated review with 500 characters
+    And the element with data-testid "review-read-more" is visible
+    When I click the element with data-testid "review-read-more"
+    Then the review text should display all 500 characters without truncation
+    And the CSS class "line-clamp-4" should be removed from the text element
+    And the element with data-testid "review-read-more" should no longer be visible
+
+  @unit-test @priority-high
+  Scenario: Clicking Show less collapses review back to truncated state
+    Given I have expanded a review with 500 characters by clicking "Read more"
+    And the element with data-testid "review-show-less" is visible
+    When I click the element with data-testid "review-show-less"
+    Then the review text should have CSS class "line-clamp-4" applied
+    And the element with data-testid "review-read-more" should be visible with text "Read more"
+    And the element with data-testid "review-show-less" should no longer be visible
+
+  @unit-test @priority-high
+  Scenario: Review with exactly 300 characters displays without truncation
+    Given I am viewing a review with exactly 300 characters of text
+    When the review card renders
+    Then the full review text of 300 characters should be visible without truncation
+    And no element with data-testid "review-read-more" should be present
+    And no CSS class "line-clamp-4" should be applied to the text element
+
+  @unit-test @edge-case
+  Scenario: Multiple reviews maintain independent expanded states
+    Given I am viewing a reviews list with at least 2 reviews exceeding 300 characters each
+    And both reviews display elements with data-testid "review-read-more"
+    When I click the "Read more" button on the first review only
+    Then the first review should display element with data-testid "review-show-less"
+    And the first review text should not have CSS class "line-clamp-4"
+    And the second review should still display element with data-testid "review-read-more"
+    And the second review text should have CSS class "line-clamp-4" applied
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of truncated reviews with Read more
+    Given I am on the restaurant page "/restaurants/rest_0001"
+    And the reviews section contains at least 1 review exceeding 300 characters
+    When the reviews section loads completely
+    Then the truncated review should display exactly 4 visible lines of text
+    And the "Read more" link should appear in blue text below the truncated content
+    And all review cards should have consistent maximum height when truncated
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of expanded review with Show less
+    Given I am on the restaurant page "/restaurants/rest_0001"
+    And I click the first element with data-testid "review-read-more"
+    When the CSS transition completes after 300ms
+    Then the expanded review card should display the complete review text
+    And the "Show less" link should appear in blue text at the end of the review
+    And the expanded card height should be greater than the truncated card height
+```

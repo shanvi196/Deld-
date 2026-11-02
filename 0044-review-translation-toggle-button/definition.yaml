@@ -1,0 +1,170 @@
+problem_id: 0044-review-translation-toggle-button
+app: deld
+task:
+  prompt: 'Implement a Review Translation Toggle feature for the Deld app. Users viewing
+    reviews written in non-English languages should be able to see a translated version.
+
+
+    **Feature Requirements**:
+
+
+    1. **Translation Button**: Add a ''Translate'' button (data-testid="review-translate-button")
+    below reviews detected as non-English. Detect non-English by checking if review
+    text contains non-ASCII characters (charCode > 127). Button shows "Translate"
+    initially, changes to "Show Original" when translation is displayed.
+
+
+    2. **Translation Display**: When clicked, toggle between original review text
+    and a placeholder translated version. Show translated text in a distinct container
+    (data-testid="review-translated-text") with a subtle background (e.g., bg-gray-50
+    or bg-muted). Translation state managed in React component state. Display format:
+    "[Translated] {original text reversed as placeholder}".
+
+
+    **Routes**: Restaurant detail page at /restaurant/[id] (e.g., /restaurant/25047088-5a40-4fab-be5c-3ee9a54fb980)
+
+
+    **Test Data Note**: Seed data contains reviews with non-ASCII characters. Tests
+    use restaurant 25047088-5a40-4fab-be5c-3ee9a54fb980.'
+hint: '**Files**: ~3 (review-card component, review-text component or new translation
+  component)
+
+
+  **Authentication**: Not required
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Review Translation Toggle feature for the Deld app. Users
+    viewing reviews written in ...
+  intent: 52
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: translate_button_appears_for_reviews_with_non_english_text
+    checklist_label: Translate button appears for reviews with non english text
+    source_test_file: tests/translate_button_appears_for_reviews_with_non_english_text.spec.ts
+    destination_test_file: /workdir/app/__tests__/translate_button_appears_for_reviews_with_non_english_text.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clicking_translate_button_shows_translated_text_container
+    checklist_label: Clicking translate button shows translated text container
+    source_test_file: tests/clicking_translate_button_shows_translated_text_container.spec.ts
+    destination_test_file: /workdir/app/__tests__/clicking_translate_button_shows_translated_text_container.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: button_text_changes_to_show_original_after_clicking_translate
+    checklist_label: Button text changes to show original after clicking translate
+    source_test_file: tests/button_text_changes_to_show_original_after_clicking_translate.spec.ts
+    destination_test_file: /workdir/app/__tests__/button_text_changes_to_show_original_after_clicking_translate.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clicking_show_original_hides_translated_text_and_restores_button
+    checklist_label: Clicking show original hides translated text and restores button
+    source_test_file: tests/clicking_show_original_hides_translated_text_and_restores_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/clicking_show_original_hides_translated_text_and_restores_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: translated_text_contains_translated_prefix
+    checklist_label: Translated text contains translated prefix
+    source_test_file: tests/translated_text_contains_translated_prefix.spec.ts
+    destination_test_file: /workdir/app/__tests__/translated_text_contains_translated_prefix.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: translated_text_container_has_distinct_background_styling
+    checklist_label: Translated text container has distinct background styling
+    source_test_file: tests/translated_text_container_has_distinct_background_styling.spec.ts
+    destination_test_file: /workdir/app/__tests__/translated_text_container_has_distinct_background_styling.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_translate
+    screenshot_url: http://localhost:3000/restaurants/285e4e71-fe48-4e5e-bff1-ffa88a2de5a6
+    evaluation_rubric: 'Rate the translate button implementation on a scale of 0 to
+      1:
+
+
+      0 - Translate button NOT visible: No button with text ''Translate'' appears
+      near review content, or reviews section is not visible, or page failed to load
+      properly.
+
+
+      1 - Translate button visible and properly styled: A ''Translate'' button is
+      visible near review text content in the reviews section. The button should be
+      styled appropriately (not a plain unstyled link), positioned below or near the
+      review text, and visually distinct but not overly prominent compared to the
+      review content.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - (function() { window.scrollTo(0, 600); })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_translated
+    max_height: 4000
+    screenshot_url: http://localhost:3000/restaurants/285e4e71-fe48-4e5e-bff1-ffa88a2de5a6
+    evaluation_rubric: 'Rate the translated content display on a scale of 0 to 1:
+
+
+      0 - Translation toggle NOT working: After clicking translate button, no translated
+      text container appears, or button text did not change to ''Show Original'',
+      or translated text does not include ''[Translated]'' prefix, or the translated
+      container lacks distinct styling.
+
+
+      1 - Translation toggle working correctly: After clicking the translate button:
+      (1) A translated text container with data-testid ''review-translated-text''
+      is visible with distinct styling such as a subtle background color or border
+      distinguishing it from the original review, (2) The ''[Translated]'' prefix
+      is visible at the start of the translated text, (3) The button text has changed
+      from ''Translate'' to ''Show Original'', (4) The original review text remains
+      visible above or near the translated container.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - |
+      (function() {
+        const element = document.querySelector('[data-testid="review-translate-button"]');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const btn = document.querySelector('[data-testid="review-translate-button"]');
+      if (btn) btn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))

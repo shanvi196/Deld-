@@ -1,0 +1,206 @@
+problem_id: 0014-review-helpfulness-acknowledgment
+app: deld
+task:
+  prompt: 'Implement Review Helpfulness Acknowledgment for the Deld restaurant reviews
+    app. Users want to mark reviews as helpful and track their votes.
+
+
+    **Feature Requirements**:
+
+
+    1. **Helpful Vote Button**: Add a ''Helpful'' button (data-testid=''review-helpful-button'')
+    below each review in ReviewCard. When clicked: show toast ''Thanks for the feedback!''
+    (data-testid=''helpful-toast''), store the review ID in localStorage key ''deld-helpful-votes''
+    as JSON array, and disable the button showing ''You found this helpful'' text
+    (data-testid=''review-helpful-voted''). Button should check localStorage on mount
+    to show voted state for previously voted reviews. Each review card must have data-testid=''review-card''
+    and data-review-id attribute with the review''s ID.
+
+
+    2. **Hide Voted Reviews Filter**: Add checkbox filter (data-testid=''hide-helpful-filter'')
+    in the reviews section header (data-testid=''recommended-reviews-section'') that
+    says ''Hide reviews I found helpful''. When checked, filter out reviews whose
+    IDs are in the ''deld-helpful-votes'' localStorage array. Filter state should
+    be local (not URL-persisted). When all reviews are hidden, show empty state message
+    (data-testid=''no-reviews-message'') with text ''No reviews to display''.
+
+
+    **Routes**: Restaurant detail page /restaurants/[id]'
+hint: '**Files**: ~4 (ReviewCard component, reviews list section, localStorage utility,
+  filter component)
+
+
+  **Authentication**: Not required - localStorage tracks votes anonymously
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123
+
+
+    **localStorage** use following keys in localStorage:
+
+    - `deld-helpful-votes`'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement Review Helpfulness Acknowledgment for the Deld restaurant
+    reviews app. Users want to ma...
+  intent: 8
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: click_helpful_button_shows_toast_notification
+    checklist_label: Click helpful button shows toast notification
+    source_test_file: tests/click_helpful_button_shows_toast_notification.spec.ts
+    destination_test_file: /workdir/app/__tests__/click_helpful_button_shows_toast_notification.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: helpful_vote_persists_in_localstorage
+    checklist_label: Helpful vote persists in localstorage
+    source_test_file: tests/helpful_vote_persists_in_localstorage.spec.ts
+    destination_test_file: /workdir/app/__tests__/helpful_vote_persists_in_localstorage.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: voted_reviews_show_disabled_helpful_button_state
+    checklist_label: Voted reviews show disabled helpful button state
+    source_test_file: tests/voted_reviews_show_disabled_helpful_button_state.spec.ts
+    destination_test_file: /workdir/app/__tests__/voted_reviews_show_disabled_helpful_button_state.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: hide_helpful_filter_removes_voted_reviews_from_display
+    checklist_label: Hide helpful filter removes voted reviews from display
+    source_test_file: tests/hide_helpful_filter_removes_voted_reviews_from_display.spec.ts
+    destination_test_file: /workdir/app/__tests__/hide_helpful_filter_removes_voted_reviews_from_display.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: multiple_votes_across_different_reviews_accumulate_in_localstorage
+    checklist_label: Multiple votes across different reviews accumulate in localstorage
+    source_test_file: tests/multiple_votes_across_different_reviews_accumulate_in_localstorage.spec.ts
+    destination_test_file: /workdir/app/__tests__/multiple_votes_across_different_reviews_accumulate_in_localstorage.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: filter_shows_empty_state_when_all_reviews_are_voted_and_hidden
+    checklist_label: Filter shows empty state when all reviews are voted and hidden
+    source_test_file: tests/filter_shows_empty_state_when_all_reviews_are_voted_and_hidden.spec.ts
+    destination_test_file: /workdir/app/__tests__/filter_shows_empty_state_when_all_reviews_are_voted_and_hidden.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_helpful
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the helpful button states display on a scale of 0 to
+      1:
+
+
+      0 - Incorrect display: No helpful buttons visible on review cards, OR all buttons
+      show the same state (all ''Helpful'' or all ''You found this helpful''), OR
+      buttons missing entirely from review cards, OR no visual distinction between
+      voted and non-voted states.
+
+
+      1 - Correct display: At least one review card shows a grayed-out/disabled button
+      with text ''You found this helpful'' (voted state), AND at least one other review
+      card shows an active ''Helpful'' button (non-voted state), AND a checkbox labeled
+      ''Hide reviews I found helpful'' is visible above/near the reviews section.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = "http://localhost:3000"
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function () { const restaurants = document.querySelectorAll('[data-testid^="restaurant-card-link-"]');
+      if (restaurants.length > 0) { const randomIndex = Math.floor(Math.random() * restaurants.length);
+        restaurants[randomIndex].click(); } })()
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - (function() { const firstReviewCard = document.querySelector('[data-testid="review-card"]');
+      if (firstReviewCard) { const reviewId = firstReviewCard.getAttribute('data-review-id')
+      || 'review-001'; localStorage.setItem('deld-helpful-votes', JSON.stringify([reviewId]));
+      } })()
+    - window.location.reload()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]'');
+      if (reviewsSection) { reviewsSection.scrollIntoView({ behavior: ''instant'',
+      block: ''start'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_empty
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the empty reviews state with filter applied on a scale
+      of 0 to 1:
+
+
+      0 - Incorrect display: Review cards are still visible after filter is checked,
+      OR no empty state message shown, OR filter checkbox not visible or not checked,
+      OR page shows error state instead of graceful empty state.
+
+
+      1 - Correct display: No review cards are visible in the reviews section, AND
+      a centered message ''No reviews to display'' (or similar empty state text) is
+      shown, AND the filter checkbox with label ''Hide reviews I found helpful'' appears
+      checked, AND the page layout remains intact without breaking.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = "http://localhost:3000"
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - (function () { const restaurants = document.querySelectorAll('[data-testid^="restaurant-card-link-"]');
+      if (restaurants.length > 0) { const randomIndex = Math.floor(Math.random() * restaurants.length);
+        restaurants[randomIndex].click(); } })()
+    - await new Promise(resolve => setTimeout(resolve, 4000))
+    - (function() { const reviewCards = document.querySelectorAll('[data-testid="review-card"]');
+      const reviewIds = []; reviewCards.forEach(function(card) { const id = card.getAttribute('data-review-id');
+      if (id) reviewIds.push(id); }); if (reviewIds.length > 0) { localStorage.setItem('deld-helpful-votes',
+      JSON.stringify(reviewIds)); } })()
+    - window.location.reload()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const checkbox = document.querySelector('[data-testid="hide-helpful-filter"]');
+      if (checkbox && !checkbox.checked) { checkbox.click(); } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]'');
+      if (reviewsSection) { reviewsSection.scrollIntoView({ behavior: ''instant'',
+      block: ''start'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - checklist_items
+  - eslint
+  - tsc
+  - vlm.screenshot_10_rate_the_empty
+  - vlm.screenshot_9_rate_the_helpful
+  grader_weights:
+    click_helpful_button_shows_toast_notification: 0.45
+    filter_shows_empty_state_when_all_reviews_are_voted_and_hidden: 0.0952
+    helpful_vote_persists_in_localstorage: 0.0798
+    hide_helpful_filter_removes_voted_reviews_from_display: 0.0952
+    multiple_votes_across_different_reviews_accumulate_in_localstorage: 0.0798
+    voted_reviews_show_disabled_helpful_button_state: 0.2

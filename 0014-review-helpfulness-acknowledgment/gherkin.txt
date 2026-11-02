@@ -1,0 +1,83 @@
+```gherkin
+Feature: Review Helpfulness Acknowledgment
+  As a user browsing restaurant reviews
+  I want to mark reviews as helpful and track my votes
+  So that I can provide feedback and filter out reviews I've already found helpful
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Click helpful button shows toast notification
+    Given I am on restaurant "rest_0001" details page with reviews visible
+    And the first review has a helpful button with data-testid "review-helpful-button"
+    When I click the helpful button on the first review
+    Then a toast notification with exact text "Thanks for the feedback!" should appear within 500ms
+    And the toast should have data-testid "helpful-toast"
+
+  @unit-test @priority-high
+  Scenario: Helpful vote persists in localStorage
+    Given I am on restaurant "rest_0001" details page with reviews visible
+    And localStorage key "deld-helpful-votes" does not exist
+    When I click the helpful button on the first review with ID "review-001"
+    Then localStorage key "deld-helpful-votes" should contain a JSON array with exactly 1 element
+    And the array should include the string "review-001"
+
+  @unit-test @priority-high
+  Scenario: Voted reviews show disabled helpful button state
+    Given localStorage "deld-helpful-votes" contains JSON array ["review-001"]
+    When I navigate to restaurant "rest_0001" details page
+    And I locate the review with ID "review-001"
+    Then the helpful button should have attribute disabled="true"
+    And the button should display exact text "You found this helpful"
+    And the button should have data-testid "review-helpful-voted"
+
+  @unit-test @priority-high
+  Scenario: Hide helpful filter removes voted reviews from display
+    Given I am on restaurant "rest_0001" details page showing 5 reviews
+    And localStorage "deld-helpful-votes" contains JSON array ["review-001", "review-002"]
+    And the filter checkbox with data-testid "hide-helpful-filter" is unchecked
+    When I check the checkbox with data-testid "hide-helpful-filter"
+    Then exactly 3 review cards should be visible
+    And review with ID "review-001" should not be present in the DOM
+    And review with ID "review-002" should not be present in the DOM
+
+  @unit-test @priority-medium
+  Scenario: Multiple votes across different reviews accumulate in localStorage
+    Given I am on restaurant "rest_0001" details page with at least 3 reviews visible
+    And localStorage "deld-helpful-votes" contains JSON array ["review-001"]
+    When I click the helpful button on review with ID "review-002"
+    And I click the helpful button on review with ID "review-003"
+    Then localStorage key "deld-helpful-votes" should contain a JSON array with exactly 3 elements
+    And the array should include the strings "review-001", "review-002", and "review-003"
+    And all three reviews should display buttons with text "You found this helpful"
+
+  @unit-test @edge-case
+  Scenario: Filter shows empty state when all reviews are voted and hidden
+    Given I am on restaurant "rest_0001" details page showing exactly 3 reviews
+    And localStorage "deld-helpful-votes" contains JSON array ["review-001", "review-002", "review-003"]
+    And the filter checkbox with data-testid "hide-helpful-filter" is unchecked
+    When I check the checkbox with data-testid "hide-helpful-filter"
+    Then exactly 0 review cards should be visible
+    And an element with data-testid "no-reviews-message" should display text "No reviews to display"
+    And the filter checkbox should remain checked and enabled
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of helpful button states on review cards
+    Given I am on restaurant "rest_0001" details page
+    And the page has fully loaded with at least 3 reviews visible
+    And localStorage "deld-helpful-votes" contains JSON array ["review-001"]
+    When I scroll to the reviews section
+    Then the review with ID "review-001" should display a grayed-out button with text "You found this helpful"
+    And reviews with IDs "review-002" and "review-003" should display buttons with text "Helpful" and a visible border
+    And the checkbox with label "Hide reviews I found helpful" should be visible above the first review card
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of empty reviews state with filter applied
+    Given I am on restaurant "rest_0001" details page showing exactly 2 reviews
+    And localStorage "deld-helpful-votes" contains JSON array ["review-001", "review-002"]
+    When I check the checkbox with data-testid "hide-helpful-filter"
+    Then the reviews section should display centered text "No reviews to display"
+    And the filter checkbox should appear checked with label "Hide reviews I found helpful"
+    And no review cards should be visible in the reviews container
+```

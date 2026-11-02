@@ -1,0 +1,86 @@
+```gherkin
+Feature: Photo Lightbox with Navigation
+  As a user browsing restaurant reviews
+  I want to click on review photos to view them in a fullscreen lightbox
+  So that I can see photos at larger size with easy navigation
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Open lightbox by clicking review photo
+    Given I am on restaurant details page "/restaurant/rest_0001"
+    And I scroll to the reviews section
+    And there is at least one review with photos visible
+    When I click on the first photo in a review card
+    Then the lightbox modal with data-testid="photo-lightbox-modal" should be visible
+    And the lightbox should display an image with data-testid="lightbox-photo"
+    And a close button with data-testid="lightbox-close-button" should be visible
+
+  @unit-test @priority-high
+  Scenario: Close lightbox with close button
+    Given I am on restaurant details page "/restaurant/rest_0001"
+    And I have opened the lightbox by clicking a review photo
+    And the lightbox modal with data-testid="photo-lightbox-modal" is visible
+    When I click the close button with data-testid="lightbox-close-button"
+    Then the lightbox modal should not be visible
+    And the restaurant page content should be visible behind
+
+  @unit-test @priority-high
+  Scenario: Close lightbox with Escape key
+    Given I am on restaurant details page "/restaurant/rest_0001"
+    And I have opened the lightbox by clicking a review photo
+    And the lightbox modal with data-testid="photo-lightbox-modal" is visible
+    When I press the "Escape" key
+    Then the lightbox modal should not be visible
+    And the restaurant page content should be visible
+
+  @unit-test @priority-medium
+  Scenario: Navigate to next photo with right arrow key
+    Given I am on restaurant details page "/restaurant/rest_0001"
+    And I find a review with at least 3 photos
+    And I have opened the lightbox on the first photo of that review
+    And the photo counter with data-testid="lightbox-photo-counter" shows "1 of 3"
+    When I press the "ArrowRight" key
+    Then the photo counter should show "2 of 3"
+    And a different photo should be displayed in the lightbox
+
+  @unit-test @priority-medium
+  Scenario: Navigate to previous photo with left arrow key
+    Given I am on restaurant details page "/restaurant/rest_0001"
+    And I find a review with at least 3 photos
+    And I have opened the lightbox and navigated to the second photo
+    And the photo counter with data-testid="lightbox-photo-counter" shows "2 of 3"
+    When I press the "ArrowLeft" key
+    Then the photo counter should show "1 of 3"
+    And the first photo should be displayed in the lightbox
+
+  @unit-test @edge-case
+  Scenario: Lightbox state resets when opening different review photos
+    Given I am on restaurant details page "/restaurant/rest_0001"
+    And I find a review with at least 3 photos
+    And I have opened the lightbox and navigated to "3 of 3"
+    And I close the lightbox by pressing the "Escape" key
+    When I click on the first photo of a different review card
+    Then the lightbox modal with data-testid="photo-lightbox-modal" should be visible
+    And the photo counter with data-testid="lightbox-photo-counter" should show "1 of" followed by that review's photo count
+    And the displayed photo should be the first photo from the newly clicked review
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of lightbox modal appearance
+    Given I am on restaurant details page "/restaurant/rest_0001"
+    And I scroll to the reviews section with photos
+    When I click on a review photo to open the lightbox
+    Then the page should visually show a centered modal overlay with semi-transparent backdrop
+    And the photo should be displayed prominently in the center
+    And a close button should be visible in the corner
+    And a photo counter should be visible showing position
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of lightbox with photo counter
+    Given I am on restaurant details page "/restaurant/rest_0001"
+    And I find a review with at least 2 photos
+    When I open the lightbox on that review's photos
+    Then the page should visually show the lightbox with photo counter in "X of Y" format
+    And the counter should be clearly visible against the modal background
+```

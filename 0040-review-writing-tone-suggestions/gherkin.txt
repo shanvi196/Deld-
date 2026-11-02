@@ -1,0 +1,90 @@
+```gherkin
+Feature: Review Writing Tone Suggestions
+  As a user writing a restaurant review
+  I want to receive constructive suggestions when I use negative language
+  So that I can write more helpful and balanced reviews
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am logged in as "sarah.chen@email.com" with password "password123"
+
+  @unit-test @authenticated @priority-high
+  Scenario: Popover appears when typing negative language
+    Given I am on the add review page for restaurant "rest_0001"
+    And the review textarea with data-testid="review-textarea" is empty
+    When I type "The food was terrible and the service was awful" into the textarea
+    Then the tone suggestion popover with data-testid="tone-suggestion-popover" should be visible
+    And the popover should display the matched phrase "terrible" highlighted
+    And the popover should display a constructive alternative suggestion text
+
+  @unit-test @authenticated @priority-high
+  Scenario: Apply suggestion replaces negative text and maintains cursor position
+    Given I am on the add review page for restaurant "rest_0001"
+    And I have typed "The food was terrible" into the review textarea
+    And the tone suggestion popover is visible showing suggestion for "terrible"
+    When I click the "Apply Suggestion" button with data-testid="apply-suggestion-button"
+    Then the popover with data-testid="tone-suggestion-popover" should not be visible
+    And the review textarea should not contain the word "terrible"
+    And the review textarea should contain the constructive alternative text from the suggestion
+    And the cursor should be positioned at the end of the replaced text
+
+  @unit-test @authenticated @priority-medium
+  Scenario: Dismiss suggestion closes popover and preserves exact textarea content
+    Given I am on the add review page for restaurant "rest_0001"
+    And I have typed "worst ever experience" into the review textarea
+    And the tone suggestion popover is visible
+    When I click the "Dismiss" button with data-testid="dismiss-suggestion-button"
+    Then the popover with data-testid="tone-suggestion-popover" should not be visible
+    And the review textarea should contain exactly "worst ever experience"
+    And the textarea should retain focus
+
+  @unit-test @authenticated @priority-medium
+  Scenario: Popover state persists correctly when switching between add and edit review pages
+    Given I am on the add review page for restaurant "rest_0001"
+    And I have typed "terrible food" into the review textarea
+    And the tone suggestion popover with data-testid="tone-suggestion-popover" is visible
+    When I navigate to the edit review page for an existing review with id "rev_0001"
+    Then the tone suggestion popover with data-testid="tone-suggestion-popover" should not be visible
+    And the review textarea should contain the original review text from "rev_0001"
+    And no popover should appear until new negative text is typed
+
+  @unit-test @authenticated @edge-case
+  Scenario: No popover for positive or neutral text
+    Given I am on the add review page for restaurant "rest_0001"
+    And the review textarea with data-testid="review-textarea" is empty
+    When I type "The pasta was delicious and the staff was friendly" into the review textarea
+    Then the tone suggestion popover with data-testid="tone-suggestion-popover" should not be visible
+    And the review textarea should contain exactly "The pasta was delicious and the staff was friendly"
+
+  @unit-test @authenticated @edge-case
+  Scenario: Popover closes and does not reappear when negative text is deleted
+    Given I am on the add review page for restaurant "rest_0001"
+    And I have typed "The food was terrible" into the review textarea
+    And the tone suggestion popover with data-testid="tone-suggestion-popover" is visible showing suggestion for "terrible"
+    When I select all text in the textarea and delete it
+    Then the review textarea should be empty
+    And the tone suggestion popover with data-testid="tone-suggestion-popover" should not be visible
+    When I type "The food was great" into the review textarea
+    Then the tone suggestion popover with data-testid="tone-suggestion-popover" should not be visible
+
+  @screenshot-test @authenticated @priority-medium
+  Scenario: Visual validation of tone suggestion popover appearance
+    Given I am on the add review page for restaurant "rest_0001"
+    And the review textarea with data-testid="review-textarea" is empty
+    When I type "The service was terrible" into the textarea with data-testid="review-textarea"
+    Then the tone suggestion popover with data-testid="tone-suggestion-popover" should be visible and anchored near the textarea
+    And the popover should display the matched phrase "terrible" in a highlighted style
+    And the popover should display a constructive alternative text below the matched phrase
+    And the "Apply Suggestion" button with data-testid="apply-suggestion-button" should be visible
+    And the "Dismiss" button with data-testid="dismiss-suggestion-button" should be visible
+
+  @screenshot-test @authenticated @priority-medium
+  Scenario: Visual validation after applying suggestion shows updated textarea without popover
+    Given I am on the add review page for restaurant "rest_0001"
+    And I have typed "The food was terrible" into the review textarea
+    And the tone suggestion popover with data-testid="tone-suggestion-popover" is visible
+    When I click the "Apply Suggestion" button with data-testid="apply-suggestion-button"
+    Then the tone suggestion popover with data-testid="tone-suggestion-popover" should not be visible
+    And the review textarea should display the updated text without "terrible"
+    And the character count indicator should display a number greater than 0 reflecting the new text length
+```

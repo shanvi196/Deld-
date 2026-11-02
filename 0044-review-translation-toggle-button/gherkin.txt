@@ -1,0 +1,86 @@
+```gherkin
+Feature: Review Translation Toggle Button
+  As a user browsing restaurant reviews
+  I want to translate reviews written in non-English languages
+  So that I can understand reviews regardless of the original language
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Translate button appears for reviews with non-English text
+    Given I am on restaurant detail page "/restaurant/rest_0001"
+    And the page has fully loaded with reviews visible
+    When I look at the reviews section
+    Then I should see translate buttons with data-testid "review-translate-button" near reviews containing non-English characters
+    And the button count should be greater than or equal to 1
+
+  @unit-test @priority-high
+  Scenario: Clicking translate button shows translated text container
+    Given I am on restaurant detail page "/restaurant/rest_0001"
+    And the page has fully loaded
+    And I can see a translate button with data-testid "review-translate-button"
+    When I click the first translate button
+    Then a container with data-testid "review-translated-text" should become visible within 500ms
+    And the translated text should contain the "[Translated]" prefix
+    And the button text should change from "Translate" to "Show Original"
+
+  @unit-test @priority-high
+  Scenario: Clicking Show Original hides translated text and restores button
+    Given I am on restaurant detail page "/restaurant/rest_0001"
+    And the page has fully loaded
+    And I have clicked the first translate button to show translation
+    And the button text shows "Show Original"
+    When I click the same button again
+    Then the container with data-testid "review-translated-text" should be hidden
+    And the button text should change back to "Translate"
+    And the original review text should remain visible unchanged
+
+  @unit-test @priority-medium @edge-case
+  Scenario: Multiple translate buttons maintain independent toggle states
+    Given I am on restaurant detail page "/restaurant/rest_0001"
+    And the page has fully loaded
+    And there are at least 2 translate buttons with data-testid "review-translate-button"
+    When I click the first translate button
+    Then the first button text should show "Show Original"
+    And the first review should display its translated text container
+    And the second button text should still show "Translate"
+    And the second review should not display a translated text container
+
+  @unit-test @priority-medium @edge-case
+  Scenario: Translation state resets when navigating away and returning
+    Given I am on restaurant detail page "/restaurant/rest_0001"
+    And I have clicked the first translate button to show translation
+    And the translated text container with data-testid "review-translated-text" is visible
+    When I navigate to "/restaurant/rest_0002"
+    And I navigate back to "/restaurant/rest_0001"
+    Then the translate button should show "Translate" as initial state
+    And no translated text container should be visible
+
+  @unit-test @priority-medium @edge-case
+  Scenario: No translate button appears for English-only reviews
+    Given I am on a restaurant detail page where all reviews contain only ASCII English text
+    And the page has fully loaded with reviews visible
+    When I look at the reviews section
+    Then exactly 0 elements with data-testid "review-translate-button" should be visible
+    And the review text should display without any translation controls
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of translate button in untranslated state
+    Given I am on restaurant detail page "/restaurant/rest_0001"
+    And the page has fully loaded with reviews visible
+    When I locate a review containing non-English characters
+    Then the "Translate" button should appear below the review text
+    And the button should have a clickable cursor style on hover
+    And the button should be visually distinct but not prominent compared to review content
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of translated content display with distinct styling
+    Given I am on restaurant detail page "/restaurant/rest_0001"
+    And the page has fully loaded
+    When I click the first translate button
+    Then the translated text container should have a subtle background color distinguishing it from the original review
+    And the "[Translated]" prefix should be visible at the start of the translated text
+    And the "Show Original" button text should be displayed
+    And the original review text should remain visible above the translated container
+```

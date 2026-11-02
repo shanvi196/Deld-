@@ -1,0 +1,100 @@
+```gherkin
+Feature: Review Comparison Side-by-Side View
+  As a user browsing restaurant reviews
+  I want to select and compare 2-3 reviews side-by-side
+  So that I can better evaluate dining choices based on different perspectives
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am on the restaurant details page for "rest_0001"
+
+  @unit-test @priority-high
+  Scenario: Compare button state transitions based on selection count
+    Given I am viewing the reviews section with at least 4 reviews displayed
+    And no reviews are currently selected
+    Then the "Compare Selected" button with data-testid "compare-selected-button" should not be visible
+    When I select the first review checkbox
+    Then the "Compare Selected" button should appear but be disabled
+    And the button text should display "Compare (1)"
+    When I select the second review checkbox
+    Then the button should become enabled
+    And the button text should display "Compare (2)"
+    When I select the third review checkbox
+    Then the button should remain enabled
+    And the button text should display "Compare (3)"
+    When I select a fourth review checkbox
+    Then the "Compare Selected" button should become disabled
+    And the button text should display "Compare (4) - Max 3"
+
+  @unit-test @priority-high
+  Scenario: Comparison modal displays reviews in side-by-side columns
+    Given I have selected exactly 2 reviews with IDs "review-001" and "review-002"
+    When I click the "Compare Selected" button
+    Then a modal with data-testid "review-comparison-modal" should be visible
+    And the modal should display exactly 2 columns with data-testid "comparison-review-column-0" and "comparison-review-column-1"
+    And column 0 should show a rating of 4 out of 5 stars
+    And column 0 should show the review text starting with the first 50 characters
+    And column 0 should show a "Dine-in" visit type badge
+    And the modal should have a close button with data-testid "comparison-modal-close"
+
+  @unit-test @priority-high
+  Scenario: Closing modal clears all selection state
+    Given I have selected 2 reviews and opened the comparison modal
+    And 2 review checkboxes are currently checked
+    When I click the close button with data-testid "comparison-modal-close"
+    Then the modal should close and not be visible within 300ms
+    And all review checkboxes should be unchecked
+    And no review cards should have the blue selection border
+    And the "Compare Selected" button should not be visible
+
+  @unit-test @priority-high
+  Scenario: Deselecting a review updates button count and removes highlight
+    Given I have selected 3 reviews
+    And the "Compare Selected" button displays "Compare (3)"
+    When I click the checkbox on the second selected review to deselect it
+    Then the second review checkbox should be unchecked
+    And the second review card should no longer have the blue selection border
+    And the "Compare Selected" button should display "Compare (2)"
+    And the button should remain enabled
+
+  @unit-test @priority-high
+  Scenario: Selection state persists when scrolling through paginated reviews
+    Given the restaurant has more than 10 reviews
+    And I am viewing the first page of reviews showing reviews 1-10
+    And I have selected reviews with IDs "review-001" and "review-003"
+    When I scroll down to load reviews 11-20
+    And I scroll back up to view reviews 1-10
+    Then the checkbox for "review-001" should still be checked
+    And the checkbox for "review-003" should still be checked
+    And "review-001" should still have the blue selection border
+    And the "Compare Selected" button should still display "Compare (2)"
+
+  @unit-test @priority-high
+  Scenario: Clicking outside modal backdrop closes modal and clears selection
+    Given I have selected 2 reviews and opened the comparison modal
+    And the modal backdrop with data-testid "comparison-modal-backdrop" is visible
+    When I click on the backdrop area outside the modal content
+    Then the modal should close within 300ms
+    And all review checkboxes should be unchecked
+    And the "Compare Selected" button should not be visible
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of review selection UI with multiple selections
+    Given I am on the restaurant details page for "rest_0001"
+    And the reviews section displays at least 4 reviews
+    When I select the first and third review checkboxes
+    Then the first review card should have a visible blue border highlight
+    And the third review card should have a visible blue border highlight
+    And the second and fourth review cards should have no selection highlight
+    And a "Compare (2)" button should be visible and enabled below the reviews section
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of comparison modal with 3 reviews
+    Given I have selected 3 reviews with varying content lengths
+    When I click the "Compare Selected" button
+    Then a modal should overlay the page with a semi-transparent backdrop
+    And the modal should display exactly 3 equal-width columns side-by-side
+    And each column should show: rating stars at top, review text in middle, visit type badge at bottom
+    And the close button should be visible in the top-right corner of the modal
+    And the modal should be horizontally centered on the page
+```

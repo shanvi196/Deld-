@@ -1,0 +1,94 @@
+```gherkin
+Feature: Photo Zoom and Pan Viewer
+  As a user viewing restaurant photos
+  I want to zoom in and pan around photos
+  So that I can inspect food and menu details more closely
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am on a restaurant details page "/restaurants/rest_0001"
+
+  @unit-test @priority-high
+  Scenario: Zoom controls are visible when photo dialog opens
+    Given the page has loaded with restaurant photos
+    When I click on a menu carousel slide to open the photo dialog
+    Then I should see the photo dialog with data-testid "menu-photo-dialog"
+    And I should see a zoom in button with data-testid "zoom-in-button"
+    And I should see a zoom out button with data-testid "zoom-out-button"
+    And I should see a zoom reset button with data-testid "zoom-reset-button"
+    And I should see a zoom level indicator with data-testid "zoom-level-indicator" showing "1.0x"
+
+  @unit-test @priority-high
+  Scenario: Zoom in button increases zoom level by 0.5x increments up to maximum
+    Given I have opened the photo dialog
+    And the zoom level indicator shows "1.0x"
+    When I click the zoom in button once
+    Then the zoom level indicator should show "1.5x"
+    When I click the zoom in button 3 more times
+    Then the zoom level indicator should show "3.0x"
+    And the zoom in button should be disabled
+    When I click the zoom in button again
+    Then the zoom level indicator should still show "3.0x"
+
+  @unit-test @priority-high
+  Scenario: Zoom out and reset buttons are disabled at minimum zoom (1x)
+    Given I have opened the photo dialog
+    And the zoom level is at default "1.0x"
+    Then the zoom out button should be disabled
+    And the zoom reset button should be disabled
+    When I click the zoom in button
+    Then the zoom out button should be enabled
+    And the zoom reset button should be enabled
+
+  @unit-test @priority-high
+  Scenario: Reset button returns zoom to 1x and resets pan position to center
+    Given I have opened the photo dialog
+    And I have zoomed in to "2.0x"
+    And I have panned the photo 100px right and 50px down
+    When I click the zoom reset button
+    Then the zoom level indicator should show "1.0x"
+    And the photo transform should be "scale(1) translate(0px, 0px)"
+    And the zoom out button should be disabled
+    And the zoom reset button should be disabled
+
+  @unit-test @priority-medium
+  Scenario: Zoom and pan state resets when navigating to different photo
+    Given I have opened the photo dialog
+    And I have zoomed in to "2.5x"
+    And I have panned the photo 150px left and 75px up
+    When I click the carousel navigation button to go to the next photo
+    Then the zoom level indicator should show "1.0x"
+    And the photo transform should be "scale(1) translate(0px, 0px)"
+    And the zoomable-photo-container should have cursor style "default"
+
+  @unit-test @priority-medium
+  Scenario: Zoom and pan state resets when closing and reopening photo dialog
+    Given I have opened the photo dialog
+    And I have zoomed in to "2.0x"
+    And I have panned the photo 50px left and 30px up
+    When I close the photo dialog by clicking the close button
+    And I click on the same menu carousel slide to reopen the photo dialog
+    Then the zoom level indicator should show "1.0x"
+    And the photo transform should be "scale(1) translate(0px, 0px)"
+    And the zoom out button should be disabled
+    And the zoom reset button should be disabled
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of zoom controls overlay at default state
+    Given I have opened the photo dialog
+    Then I should see zoom controls positioned in bottom-right corner above the photo counter
+    And the zoom in button should display a plus icon and appear enabled
+    And the zoom out button should display a minus icon and appear disabled with reduced opacity
+    And the zoom reset button should display an expand icon and appear disabled with reduced opacity
+    And the zoom level indicator should show "1.0x" in white text
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of zoomed and panned photo state at maximum zoom
+    Given I have opened the photo dialog
+    When I click the zoom in button 4 times to reach 3.0x zoom
+    Then the photo should appear cropped with CSS transform scale(3)
+    And the zoom level indicator should display "3.0x"
+    And the zoom in button should appear disabled with reduced opacity
+    And the zoom out and reset buttons should appear enabled
+    And the zoomable-photo-container should show a grab cursor
+```

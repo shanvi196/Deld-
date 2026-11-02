@@ -1,0 +1,68 @@
+```gherkin
+Feature: Photo Count Badge on Restaurant Card
+  As a user browsing restaurants
+  I want to see how many photos each restaurant has
+  So that I can gauge the content richness before clicking
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Photo count badge displays for restaurant with multiple photos
+    Given I am on the home page "/"
+    When I wait for restaurant cards to load
+    Then at least one restaurant card should have a photo count badge with data-testid "photo-count-badge"
+    And the badge should contain text matching the pattern "{number} photos"
+
+  @unit-test @priority-high
+  Scenario: Photo count badge shows correct count format
+    Given I am on the home page "/"
+    When I find a restaurant card with a visible photo count badge
+    Then the badge text should end with " photos"
+    And the badge should display a number greater than 1
+
+  @unit-test @priority-medium
+  Scenario: Photo count badge is positioned in bottom-right corner of image
+    Given I am on the home page "/"
+    When I locate a photo count badge with data-testid "photo-count-badge"
+    Then the badge should be positioned within the restaurant card image container
+    And the badge should use absolute positioning with classes "absolute bottom-2 right-2"
+
+  @unit-test @edge-case
+  Scenario: No badge displays for restaurant with exactly one photo
+    Given I am on the home page "/"
+    When I examine all restaurant cards on the page
+    Then restaurant cards with exactly 1 photo in photos.general should not contain an element with data-testid "photo-count-badge"
+    And the image container should render without any badge overlay element
+
+  @unit-test @edge-case
+  Scenario: No badge displays when photos.general is null or undefined
+    Given I am on the home page "/"
+    When I view restaurant cards where the restaurant data has photos set to null or photos.general set to undefined
+    Then those restaurant cards should not contain any element with data-testid "photo-count-badge"
+    And no JavaScript console errors should be logged related to "Cannot read properties of null" or "Cannot read properties of undefined"
+
+  @unit-test @integration
+  Scenario: Badge count updates correctly when restaurant data refreshes
+    Given I am on the home page "/"
+    And at least one restaurant card displays a photo count badge showing "5 photos"
+    When the restaurant data is refreshed with updated photo counts
+    Then the photo count badge should reflect the new count from the updated photos.general array length
+    And no stale photo count should be displayed
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of restaurant cards with photo count badges
+    Given I am on the home page "/"
+    When the page has fully loaded with at least 3 restaurant cards visible
+    Then restaurant cards with more than 1 photo should display photo count badges in the bottom-right corner of card images
+    And the badges should have dark semi-transparent backgrounds using bg-black/60 class with white text
+    And the badge text should be formatted as "{number} photos" where number matches the photos.general array length
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of badge positioning and styling consistency
+    Given I am on the home page "/"
+    When I scroll to view at least 5 restaurant cards
+    Then all photo count badges should be consistently positioned 8px from the bottom and right edges of their card images
+    And all badges should have identical font size, padding, and border-radius styling
+    And the white text should have sufficient contrast ratio against the semi-transparent black background
+```

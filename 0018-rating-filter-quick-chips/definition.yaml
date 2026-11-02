@@ -1,0 +1,152 @@
+problem_id: 0018-rating-filter-quick-chips
+app: deld
+task:
+  prompt: 'Implement Rating Filter Quick Chips for restaurant reviews. Users want to quickly filter displayed reviews by star
+    rating without reloading.
+
+
+    **Feature Requirements**:
+
+
+    1. **Rating Chips Component**: Add clickable rating filter chips below the reviews section header. Display three chips:
+    "5★", "4★+", "3★+". Each chip shows count of matching reviews in parentheses (e.g., "5★ (12)"). Chips styled as toggle
+    pills with data-testid="rating-chip-5", data-testid="rating-chip-4", data-testid="rating-chip-3". Active chip has highlighted
+    background. Clicking active chip deselects it (shows all reviews).
+
+
+    2. **Review Filtering Behavior**: When chip clicked, filter the currently displayed reviews client-side using React state.
+    Only show reviews with rating >= selected threshold. Update visible review count. Maintain current pagination when navigating
+    between pages.
+
+
+    **Routes**: Restaurant detail page `/restaurants/[id]` (existing)'
+hint: '**Files**: ~3-4 (reviews section component, rating chips component, review filtering hook)
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password:
+  password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement Rating Filter Quick Chips for restaurant reviews. Users want to quickly filter displaye...
+  intent: 15
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_filter_reviews_to_show_only_5_star_reviews_when_clicking_5_star_chip
+    checklist_label: Filter reviews to show only 5 star reviews when clicking 5 star chip
+    source_test_file: tests/should_filter_reviews_to_show_only_5_star_reviews_when_clicking_5_star_chip.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_filter_reviews_to_show_only_5_star_reviews_when_clicking_5_star_chip.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_filter_reviews_to_show_4_star_reviews_when_clicking_4_star_chip
+    checklist_label: Filter reviews to show 4 star reviews when clicking 4 star chip
+    source_test_file: tests/should_filter_reviews_to_show_4_star_reviews_when_clicking_4_star_chip.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_filter_reviews_to_show_4_star_reviews_when_clicking_4_star_chip.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_all_reviews_again_when_deselecting_active_5_star_chip
+    checklist_label: Show all reviews again when deselecting active 5 star chip
+    source_test_file: tests/should_show_all_reviews_again_when_deselecting_active_5_star_chip.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_all_reviews_again_when_deselecting_active_5_star_chip.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_correct_count_patterns_on_rating_chips
+    checklist_label: Display correct count patterns on rating chips
+    source_test_file: tests/should_display_correct_count_patterns_on_rating_chips.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_correct_count_patterns_on_rating_chips.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_switch_filter_directly_when_clicking_different_chip_without_deselection
+    checklist_label: Switch filter directly when clicking different chip without deselection
+    source_test_file: tests/should_switch_filter_directly_when_clicking_different_chip_without_deselection.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_switch_filter_directly_when_clicking_different_chip_without_deselection.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_maintain_filter_state_when_navigating_between_review_pages
+    checklist_label: Maintain filter state when navigating between review pages
+    source_test_file: tests/should_maintain_filter_state_when_navigating_between_review_pages.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_maintain_filter_state_when_navigating_between_review_pages.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_rating
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the rating filter chips display on a scale of 0 to 1:
+
+
+      0 - Chips missing or malformed: Rating filter chips not visible below reviews header, fewer than 3 chips displayed,
+      chips missing review counts in parentheses, chips not styled as pill-shaped buttons.
+
+
+      1 - Chips correctly displayed: Exactly 3 rating filter chips visible below reviews section header showing "5★ (N)",
+      "4★+ (N)", "3★+ (N)" where N is a number. All chips appear with light gray/neutral background indicating inactive state.
+      Chips styled as horizontally-aligned pill-shaped toggle buttons with rounded corners. Reviews list visible below the
+      chips.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const section = document.querySelector(''[data-testid="recommended-reviews-section"]''); if (section)
+      section.scrollIntoView({ behavior: ''instant'', block: ''start'' }); })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_active
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the active rating chip and filtered reviews display on a scale of 0 to 1:
+
+
+      0 - Chip not active or reviews not filtered: The 5-star rating chip does not have a highlighted/selected appearance,
+      other chips (4★+, 3★+) appear active, reviews are not filtered to show only 5-star reviews, no visual distinction between
+      active and inactive chip states.
+
+
+      1 - Chip active and reviews filtered: The "5★" chip displays with a highlighted/active state (blue or primary-colored
+      background clearly different from gray inactive chips). The "4★+" and "3★+" chips display with light gray inactive backgrounds.
+      Only review cards showing 5 filled star icons are visible in the reviews list. Active chip styling clearly differentiates
+      from inactive chips.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const section = document.querySelector(''[data-testid="recommended-reviews-section"]''); if (section)
+      section.scrollIntoView({ behavior: ''instant'', block: ''start'' }); })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const chip = document.querySelector('[data-testid="rating-chip-5"]'); if (chip) chip.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - window.scrollBy(0, 500);
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+extra_fields:
+  disable_graders:
+  - playwright_test.should_display_correct_count_patterns_on_rating_chips
+  - playwright_test.should_show_all_reviews_again_when_deselecting_active_5_star_chip
+  - playwright_test.should_switch_filter_directly_when_clicking_different_chip_without_deselection

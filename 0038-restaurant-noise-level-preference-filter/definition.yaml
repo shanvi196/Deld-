@@ -1,0 +1,152 @@
+problem_id: 0038-restaurant-noise-level-preference-filter
+app: deld
+task:
+  prompt: 'Implement a noise level filter for the restaurant search. Users want to
+    filter restaurants by atmosphere/noise level to find places that match their mood
+    - whether they prefer a quiet, moderate, or lively environment.
+
+
+    **Feature Requirements**:
+
+
+    1. **Noise Level Filter Component**: Add a single-select radio filter in RestaurantsListFilters
+    (after Distance filter) with three options: "Quiet" (data-testid="noise-filter-quiet"),
+    "Moderate" (data-testid="noise-filter-moderate"), "Lively" (data-testid="noise-filter-lively").
+    Use RadioGroup pattern from DistanceFilter. Filter section title: "Noise Level".
+    Container data-testid="noise-filter".
+
+
+    2. **URL State Integration**: Add noise parameter to search params using nuqs.
+    Values: "quiet", "moderate", "lively". URL format: ?noise=quiet. Include in clearFilters()
+    reset and appliedFilters tracking (type: "noise").
+
+
+    **Routes**: / (home page with filters)'
+hint: '**Files**: ~4 (noise-filter component, search-params, context actions, applied-filters)
+
+
+  **Authentication**: Not required
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a noise level filter for the restaurant search. Users want
+    to filter restaurants by atm...
+  intent: 45
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_select_quiet_noise_level_filter_and_update_url
+    checklist_label: Select quiet noise level filter and update url
+    source_test_file: tests/should_select_quiet_noise_level_filter_and_update_url.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_select_quiet_noise_level_filter_and_update_url.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_select_lively_noise_level_filter_and_update_url
+    checklist_label: Select lively noise level filter and update url
+    source_test_file: tests/should_select_lively_noise_level_filter_and_update_url.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_select_lively_noise_level_filter_and_update_url.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_toggle_noise_filter_off_when_clicking_same_option
+    checklist_label: Toggle noise filter off when clicking same option
+    source_test_file: tests/should_toggle_noise_filter_off_when_clicking_same_option.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_toggle_noise_filter_off_when_clicking_same_option.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_clear_noise_filter_when_using_clear_all_filters_button
+    checklist_label: Clear noise filter when using clear all filters button
+    source_test_file: tests/should_clear_noise_filter_when_using_clear_all_filters_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_clear_noise_filter_when_using_clear_all_filters_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_ignore_invalid_noise_parameter_in_url
+    checklist_label: Ignore invalid noise parameter in url
+    source_test_file: tests/should_ignore_invalid_noise_parameter_in_url.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_ignore_invalid_noise_parameter_in_url.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_persist_noise_filter_with_other_filters_applied
+    checklist_label: Persist noise filter with other filters applied
+    source_test_file: tests/should_persist_noise_filter_with_other_filters_applied.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_persist_noise_filter_with_other_filters_applied.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_noise
+    screenshot_url: http://localhost:3000/
+    evaluation_rubric: 'Rate the noise filter display with Moderate selection on a
+      scale of 0 to 1:
+
+
+      0 - Filter not properly implemented: Noise filter section is not visible, or
+      the Moderate option is not visually highlighted as selected, or the filter section
+      is not positioned after the Distance filter, or no restaurant cards are displayed
+      in the results area.
+
+
+      1 - Filter correctly implemented: Noise filter section is visible with title
+      "Noise Level", positioned after the Distance filter. The "Moderate" radio option
+      is clearly highlighted/selected (visually distinct from unselected options).
+      Restaurant cards are visible in the results area showing filtered results.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const radio = document.querySelector('[data-testid="noise-filter-moderate"]');
+      if (radio) radio.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_noise
+    screenshot_url: http://localhost:3000/
+    evaluation_rubric: 'Rate the noise filter default state display on a scale of
+      0 to 1:
+
+
+      0 - Filter not properly implemented: Noise filter section is not visible, or
+      does not have "Noise Level" as the section title, or does not display all three
+      radio options (Quiet, Moderate, Lively), or one or more options appear to be
+      pre-selected.
+
+
+      1 - Filter correctly implemented: Noise filter section is visible with title
+      "Noise Level". All three radio options are displayed: "Quiet", "Moderate", and
+      "Lively". No option is selected by default (all radio buttons appear in their
+      unselected/unchecked state).'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))

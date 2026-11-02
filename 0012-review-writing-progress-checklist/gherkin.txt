@@ -1,0 +1,105 @@
+```gherkin
+Feature: Review Writing Progress Checklist
+  As a user writing a restaurant review
+  I want to see a progress checklist showing completion status
+  So that I know what steps remain before I can submit my review
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am logged in as "sarah.chen@email.com" with password "password123"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Progress bar shows 0% when form is empty
+    Given I navigate to "/write-review/rest_0001"
+    And I wait for the page to load completely
+    Then the element with data-testid "review-progress-bar" should be visible
+    And the element with data-testid "review-progress-fill" should have width style of "0%"
+    And I should see "0%" text near the progress bar
+
+  @unit-test @priority-high @authenticated
+  Scenario: Progress bar updates to 25% when rating is selected
+    Given I navigate to "/write-review/rest_0001"
+    And I wait for the page to load completely
+    And the progress bar shows 0%
+    When I click the 4th star in the rating widget
+    Then the element with data-testid "review-progress-fill" should have width approximately "25%"
+    And the element with data-testid "checklist-item-rating" should have a checkmark icon
+    And the element with data-testid "checklist-item-rating" should have green styling
+
+  @unit-test @priority-high @authenticated
+  Scenario: Checklist panel expands and collapses
+    Given I navigate to "/write-review/rest_0001"
+    And I wait for the page to load completely
+    When I click the element with data-testid "checklist-trigger"
+    Then the element with data-testid "review-checklist-panel" should be expanded
+    And I should see exactly 4 checklist items visible
+    When I click the element with data-testid "checklist-trigger" again
+    Then the checklist panel content should be collapsed
+
+  @unit-test @priority-medium @authenticated
+  Scenario: Progress state persists when navigating away and returning via browser back button
+    Given I navigate to "/write-review/rest_0001"
+    And I wait for the page to load completely
+    When I click the 4th star in the rating widget
+    And I type a title "Great food"
+    Then the element with data-testid "review-progress-fill" should have width approximately "50%"
+    When I click the browser back button
+    And I click the browser forward button
+    And I wait for the page to load completely
+    Then the element with data-testid "review-progress-fill" should have width style of "0%"
+    And the rating widget should show 0 stars selected
+    And the title field should be empty
+
+  @unit-test @priority-medium @authenticated
+  Scenario: Progress bar shows 100% when all items complete
+    Given I navigate to "/write-review/rest_0001"
+    And I wait for the page to load completely
+    When I click the 5th star in the rating widget
+    And I type a title "Great dining experience"
+    And I type 90 characters of review text
+    And I select "dine-in" as the visit type
+    Then the element with data-testid "review-progress-fill" should have width of "100%"
+    And I should see "100%" text near the progress bar
+    And all 4 checklist items should have green styling with checkmarks
+
+  @unit-test @edge-case @authenticated
+  Scenario: Progress decrements correctly when clearing title field after partial completion
+    Given I navigate to "/write-review/rest_0001"
+    And I wait for the page to load completely
+    When I click the 3rd star in the rating widget
+    And I type a title "My Review"
+    Then the element with data-testid "review-progress-fill" should have width approximately "50%"
+    And the element with data-testid "checklist-item-rating" should have a checkmark icon
+    And the element with data-testid "checklist-item-title" should have a checkmark icon
+    When I clear the title field completely
+    Then the element with data-testid "review-progress-fill" should have width approximately "25%"
+    And the element with data-testid "checklist-item-title" should not have a checkmark icon
+    And the element with data-testid "checklist-item-title" should not have green styling
+    And the element with data-testid "checklist-item-rating" should still have a checkmark icon
+
+  @screenshot-test @priority-high @authenticated
+  Scenario: Visual validation of progress bar at 50% completion
+    Given I am logged in as "sarah.chen@email.com"
+    And I navigate to "/write-review/rest_0001"
+    And I wait for the page to load completely
+    When I click the 4th star in the rating widget
+    And I type 90 characters of review text into the review field
+    Then the progress bar should visually show approximately 50% filled with primary color
+    And the expanded checklist should show exactly 2 items with green checkmarks
+    And exactly 2 items should appear incomplete without checkmarks
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of fully completed checklist
+    Given I am logged in as "sarah.chen@email.com"
+    And I navigate to "/write-review/rest_0001"
+    And I wait for the page to load completely
+    When I complete all review form requirements:
+      | field      | value                                                                                    |
+      | rating     | 5 stars                                                                                  |
+      | title      | Amazing restaurant experience                                                            |
+      | reviewText | This was an incredible dining experience with excellent food and outstanding service!!! |
+      | visitType  | dine-in                                                                                  |
+    Then the progress bar should be fully filled at 100% with primary color
+    And all 4 checklist items should display green checkmarks
+    And the checklist panel should show clear visual distinction between complete state
+```

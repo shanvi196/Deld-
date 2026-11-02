@@ -1,0 +1,178 @@
+problem_id: 0050-review-reaction-quick-poll
+app: deld
+task:
+  prompt: 'Implement a Review Reaction Quick Poll for restaurant reviews. Users should
+    be able to vote on whether a review helped them decide.
+
+
+    **Feature Requirements**:
+
+
+    1. **Poll Buttons Component**: Add Yes/No buttons below each review asking "Did
+    this review help you decide?". Buttons render inline using data-testid="review-poll-{reviewId}"
+    container, with data-testid="poll-yes-btn-{reviewId}" and data-testid="poll-no-btn-{reviewId}".
+    Clicking stores vote in localStorage under key "review-polls" as object {[reviewId]:
+    "yes"|"no"}. Buttons disable after voting.
+
+
+    2. **Results Display**: After voting, replace buttons with animated result bar
+    showing percentage. Display "X% found helpful" with data-testid="poll-result-{reviewId}".
+    Bar fills to percentage width with CSS transition. Calculate from all votes for
+    that reviewId in localStorage. Show total vote count with data-testid="poll-count-{reviewId}".
+
+
+    **Routes**: Restaurant detail page /restaurants/[id] (existing)
+
+
+    **Existing Infrastructure**: Reviews render in data-testid="recommended-reviews-section"
+    with individual data-testid="review-card" elements
+
+
+    **Element Selectors**:
+    - Poll no btn: `[data-testid="poll-no-btn-${secondReviewId}"]`
+    - Poll yes btn: `[data-testid="poll-yes-btn-${secondReviewId}"]`
+    - Poll result: `[data-testid="poll-result-${firstReviewId}"]`
+    - Poll yes btn: `[data-testid="poll-yes-btn-${reviewId}"]`'
+hint: '**Files**: ~3-4 (review-poll component, review-card integration, localStorage
+  utility)
+
+
+  **Authentication**: Not required - anonymous voting allowed
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123
+
+
+    **localStorage** use following keys in localStorage:
+
+    - `review-polls`'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Review Reaction Quick Poll for restaurant reviews. Users
+    should be able to vote on wh...
+  intent: 65
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_poll_buttons_below_each_review
+    checklist_label: Display poll buttons below each review
+    source_test_file: tests/should_display_poll_buttons_below_each_review.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_poll_buttons_below_each_review.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_store_yes_vote_in_localstorage_when_clicking_yes_button
+    checklist_label: Store yes vote in localstorage when clicking yes button
+    source_test_file: tests/should_store_yes_vote_in_localstorage_when_clicking_yes_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_store_yes_vote_in_localstorage_when_clicking_yes_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_store_no_vote_in_localstorage_when_clicking_no_button
+    checklist_label: Store no vote in localstorage when clicking no button
+    source_test_file: tests/should_store_no_vote_in_localstorage_when_clicking_no_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_store_no_vote_in_localstorage_when_clicking_no_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_percentage_result_and_vote_count_after_voting_yes
+    checklist_label: Display percentage result and vote count after voting yes
+    source_test_file: tests/should_display_percentage_result_and_vote_count_after_voting_yes.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_percentage_result_and_vote_count_after_voting_yes.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_results_instead_of_buttons_for_previously_voted_reviews_on_page_load
+    checklist_label: Show results instead of buttons for previously voted reviews
+      on page load
+    source_test_file: tests/should_show_results_instead_of_buttons_for_previously_voted_reviews_on_page_load.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_results_instead_of_buttons_for_previously_voted_reviews_on_page_load.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_maintain_separate_poll_states_for_different_reviews
+    checklist_label: Maintain separate poll states for different reviews
+    source_test_file: tests/should_maintain_separate_poll_states_for_different_reviews.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_maintain_separate_poll_states_for_different_reviews.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_visual
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the visual display of poll buttons below a review on
+      a scale of 0 to 1:
+
+
+      0 - Poll not visible or broken: No Yes/No buttons visible below any review,
+      poll question text missing, buttons not styled or positioned incorrectly, no
+      review-poll container visible
+
+
+      1 - Poll correctly displayed: Clear "Did this review help you decide?" question
+      text visible below a review, Yes and No buttons displayed inline and clearly
+      clickable, buttons styled consistently with app design, poll container properly
+      positioned below review content'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - localStorage.removeItem('review-polls')
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - '(function() { const reviewSection = document.querySelector(''[data-testid="recommended-reviews-section"]'')
+      || document.querySelector(''[class*="review"]''); if (reviewSection) { reviewSection.scrollIntoView({
+      behavior: ''instant'', block: ''center'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_visual
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the visual display of the results bar after voting on
+      a scale of 0 to 1:
+
+
+      0 - Results not displayed or broken: Yes/No buttons still visible after clicking,
+      no percentage text shown, no result bar visible, no vote count displayed, poll
+      area unchanged after vote
+
+
+      1 - Results correctly displayed: Buttons replaced with animated result bar,
+      percentage text clearly visible showing "100% found helpful" or similar, result
+      bar shows filled percentage with CSS transition, vote count displayed near result
+      (showing "1" or "1 vote"), clear visual indication that vote was recorded'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - localStorage.removeItem('review-polls')
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - (function() { const yesBtn = document.querySelector('[data-testid^="poll-yes-btn-"]');
+      if (yesBtn) { yesBtn.click(); } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const resultEl = document.querySelector(''[data-testid^="poll-result-"]'');
+      if (resultEl) { resultEl.scrollIntoView({ behavior: ''instant'', block: ''center''
+      }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))

@@ -1,0 +1,145 @@
+problem_id: 0027-empty-state-illustrations-for-collection
+app: deld
+task:
+  prompt: 'Add friendly empty state illustrations for the Collections feature. When a user has no collections, show an empty state in the collections grid with an inline SVG illustration, descriptive text (''No collections yet''), and a CTA button (''Create your first collection''). When viewing a collection with no restaurants, enhance the existing empty state with an SVG illustration. Both empty states should use the existing Button component.
+
+
+    **Feature Requirements**:
+
+
+    1. **Empty Collections Grid**: When user has no collections, display empty state instead of returning null. Show an inline SVG illustration (simple folder/collection icon), heading text ''No collections yet'', description ''Start organizing your favorite restaurants'', and a Button with text ''Create your first collection'' that triggers the create collection dialog. Container uses data-testid=''empty-collections-state'', illustration uses data-testid=''empty-collections-illustration'', button uses data-testid=''create-first-collection-button''.
+
+
+    2. **Empty Collection Items Illustration**: Enhance the existing empty-collection-items-list.tsx to include an SVG illustration above the text. Add a simple plate/utensils icon SVG with data-testid=''empty-collection-items-illustration''. Keep existing text ''This collection is empty'' and ''Browse Restaurants'' button.
+
+
+    **Routes**: /user/collections (collections grid), /user/collections/[id] (collection detail)
+
+
+    **Element Selectors**:
+    - Collection tile: `[data-testid="collection-tile"]`
+    - Create collection dialog: `[data-testid="create-collection-dialog"]`'
+hint: '**Files**: ~2 files (client-side-collections-grid.tsx, empty-collection-items-list.tsx)
+
+
+  **Authentication**: Required (collections are user-specific)'
+problem_metadata:
+  task_type: feature-implementation
+  description: Add friendly empty state illustrations for the Collections feature. When a user has no collection...
+  intent: 32
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_empty_state_when_user_has_no_collections
+    checklist_label: Display empty state when user has no collections
+    source_test_file: tests/should_display_empty_state_when_user_has_no_collections.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_empty_state_when_user_has_no_collections.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_open_create_collection_dialog_when_clicking_create_first_collection_button
+    checklist_label: Open create collection dialog when clicking create first collection button
+    source_test_file: tests/should_open_create_collection_dialog_when_clicking_create_first_collection_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_open_create_collection_dialog_when_clicking_create_first_collection_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_empty_collection_items_illustration_when_collection_has_no_restaurants
+    checklist_label: Show empty collection items illustration when collection has no restaurants
+    source_test_file: tests/should_show_empty_collection_items_illustration_when_collection_has_no_restaurants.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_empty_collection_items_illustration_when_collection_has_no_restaurants.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_hide_empty_state_and_show_collections_grid_after_creating_first_collection
+    checklist_label: Hide empty state and show collections grid after creating first collection
+    source_test_file: tests/should_hide_empty_state_and_show_collections_grid_after_creating_first_collection.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_hide_empty_state_and_show_collections_grid_after_creating_first_collection.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_empty_state_after_deleting_the_last_collection
+    checklist_label: Show empty state after deleting the last collection
+    source_test_file: tests/should_show_empty_state_after_deleting_the_last_collection.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_empty_state_after_deleting_the_last_collection.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_update_collection_state_when_refreshing_second_tab_after_creating_collection_in_first_tab
+    checklist_label: Update collection state when refreshing second tab after creating collection in first tab
+    source_test_file: tests/should_update_collection_state_when_refreshing_second_tab_after_creating_collection_in_first_tab.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_update_collection_state_when_refreshing_second_tab_after_creating_collection_in_first_tab.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_empty
+    screenshot_url: http://localhost:3000/user/collections
+    evaluation_rubric: 'Rate the empty collections page visual layout on a scale of 0 to 1:
+
+
+      0 - Empty state not displayed correctly: Missing empty-collections-state container, no SVG illustration visible, text ''No collections yet'' not shown, ''Create your first collection'' button missing or not styled properly, layout not centered or has poor visual hierarchy
+
+
+      1 - Empty state displayed correctly: Element with data-testid=''empty-collections-state'' is visible and vertically centered in the viewport, SVG illustration with data-testid=''empty-collections-illustration'' is positioned above the heading text, heading ''No collections yet'' is clearly visible, description text ''Start organizing your favorite restaurants'' appears below the heading, Button with text ''Create your first collection'' is positioned below the description with proper spacing, the empty state container has balanced horizontal margins with adequate padding'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function(){ const loginBtn = document.querySelector('[data-testid="header-login-button"]'); if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function(){ const input = document.querySelector(''[data-testid="login-email-input"]''); if (input) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(input, ''sarah.chen@email.com''); input.dispatchEvent(new Event(''input'', { bubbles: true })); } })()'
+    - '(function(){ const input = document.querySelector(''[data-testid="login-password-input"]''); if (input) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(input, ''password123''); input.dispatchEvent(new Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function(){ const btn = document.querySelector('[data-testid="login-submit-button"]'); if (btn) btn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(async function() { try { const res = await fetch(''/api/collections''); if (res.ok) { const data = await res.json(); for (const c of (data.data?.collections || [])) { await fetch(''/api/collections?collectionId='' + c.id, { method: ''DELETE'' }); await new Promise(r => setTimeout(r, 300)); } } } catch (e) { console.error(e); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_empty
+    screenshot_url: http://localhost:3000/user/collections/
+    evaluation_rubric: 'Rate the empty collection items visual layout on a scale of 0 to 1:
+
+
+      0 - Empty state not displayed correctly: Missing no-collection-items-fallback container, no SVG illustration visible, text ''This collection is empty'' not shown, ''Browse Restaurants'' button missing or improperly positioned, layout not centered within the content area
+
+
+      1 - Empty state displayed correctly: Element with data-testid=''no-collection-items-fallback'' is visible and vertically centered within the content area below the collection header, SVG illustration with data-testid=''empty-collection-items-illustration'' is positioned above the empty state text, text ''This collection is empty'' is clearly visible, ''Browse Restaurants'' button is positioned below the empty state text with at least 16px vertical spacing, the empty state container has balanced horizontal margins on left and right sides'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function(){ const loginBtn = document.querySelector('[data-testid="header-login-button"]'); if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function(){ const input = document.querySelector(''[data-testid="login-email-input"]''); if (input) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(input, ''sarah.chen@email.com''); input.dispatchEvent(new Event(''input'', { bubbles: true })); } })()'
+    - '(function(){ const input = document.querySelector(''[data-testid="login-password-input"]''); if (input) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(input, ''password123''); input.dispatchEvent(new Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function(){ const btn = document.querySelector('[data-testid="login-submit-button"]'); if (btn) btn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - await new Promise(resolve => setTimeout(resolve, 3000))

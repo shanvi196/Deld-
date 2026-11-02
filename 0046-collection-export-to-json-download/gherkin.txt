@@ -1,0 +1,78 @@
+```gherkin
+Feature: Collection Export to JSON Download
+  As a user with restaurant collections
+  I want to export my collection as a JSON file
+  So that I can backup my data or share it with others
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am logged in as "sarah.chen@email.com" with password "password123"
+
+  @unit-test @priority-high
+  Scenario: Export button is visible on collection detail page
+    Given I navigate to "/user/collections"
+    And I wait for the page to load
+    When I click on the first collection tile
+    And I wait for the collection detail page to load
+    Then I should see an element with data-testid "export-collection-button"
+    And the export button should be visible
+
+  @unit-test @priority-high
+  Scenario: Export button has correct text label
+    Given I navigate to "/user/collections"
+    And I click on the first collection tile
+    When the collection detail page loads
+    Then the element with data-testid "export-collection-button" should contain text "Export" (case insensitive)
+
+  @unit-test @priority-high
+  Scenario: Clicking export triggers JSON file download with correct filename
+    Given I am on the collection detail page for a collection named "My Favorites"
+    When I click the element with data-testid "export-collection-button"
+    Then a file download should be triggered
+    And the downloaded filename should be "My Favorites.json"
+
+  @unit-test @priority-high
+  Scenario: Exported JSON contains collection name and createdAt fields
+    Given I am on a collection detail page
+    When I click the export button and capture the download
+    Then the downloaded JSON should have a "name" property that is a non-empty string
+    And the downloaded JSON should have a "createdAt" property that is a valid ISO 8601 date string
+
+  @unit-test @priority-high
+  Scenario: Exported JSON restaurants array contains all required fields with correct types
+    Given I am on a collection detail page with at least 1 restaurant
+    When I click the export button and capture the download
+    Then the downloaded JSON should have a "restaurants" property that is an array
+    And each restaurant object should have "id" as a string
+    And each restaurant object should have "name" as a string
+    And each restaurant object should have "cuisine" as a string containing only the first cuisine type
+    And each restaurant object should have "rating" as a number between 0 and 5
+    And each restaurant object should have "address" as a string formatted as "street, city, state"
+
+  @unit-test @priority-medium
+  Scenario: Export works correctly for empty collection with zero restaurants
+    Given I am on a collection detail page that contains exactly 0 restaurants
+    When I click the element with data-testid "export-collection-button"
+    Then a file download should be triggered
+    And the downloaded JSON should have a "restaurants" property that is an empty array with length 0
+    And the downloaded JSON should have a valid "name" string property
+    And the downloaded JSON should have a valid "createdAt" ISO 8601 date property
+
+  @screenshot-test @authenticated @priority-medium
+  Scenario: Visual validation of Export button placement and styling on collection detail page
+    Given I am logged in
+    And I navigate to the first collection detail page from "/user/collections"
+    When the page finishes loading
+    Then the Export button with data-testid "export-collection-button" should be visible in the collection info section
+    And the Export button should be positioned within 20px horizontally of other action buttons
+    And the Export button should use secondary button styling with consistent padding and border-radius
+
+  @screenshot-test @authenticated @priority-medium
+  Scenario: Visual validation of Export button hover and focus states
+    Given I am logged in
+    And I am on a collection detail page
+    When I hover over the element with data-testid "export-collection-button"
+    Then the Export button should display a visible hover state with color change
+    When I press Tab to focus the Export button
+    Then the Export button should display a visible focus ring outline
+```

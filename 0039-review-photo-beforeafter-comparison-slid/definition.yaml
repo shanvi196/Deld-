@@ -1,0 +1,163 @@
+problem_id: 0039-review-photo-beforeafter-comparison-slid
+app: deld
+task:
+  prompt: 'Implement a before/after photo comparison slider for restaurant reviews.
+    Users want to showcase food transformation (e.g., dish presentation vs. after
+    eating) using a draggable divider.
+
+
+    **Feature Requirements**:
+
+
+    1. **ComparisonSlider Component**: Create a reusable comparison slider component
+    that displays two images side-by-side with a draggable vertical divider. The slider
+    should have a handle with data-testid="comparison-slider-handle" that users can
+    drag horizontally to reveal more of either image. Left image shows "before" with
+    data-testid="comparison-before-image", right shows "after" with data-testid="comparison-after-image".
+    Container has data-testid="comparison-slider-container". Handle starts at 50%
+    position. Images should fill the container (300px width, 200px height).
+
+
+    2. **Comparison Toggle in Review Photos**: When a review has exactly 2 photos,
+    show a toggle button with data-testid="comparison-toggle-button" below the photos.
+    When toggled ON (text: "View as Comparison"), replace the photo grid with the
+    ComparisonSlider showing first photo as before, second as after. When toggled
+    OFF (text: "View as Grid"), show the standard photo grid. Toggle state is local
+    to the component.
+
+
+    **Routes**: No new routes needed. Feature displays on restaurant pages at `/restaurants/[id]`.'
+hint: '**Files**: ~4 files (ComparisonSlider component, ReviewPhotos modification,
+  types if needed, styles if needed).
+
+
+  **Authentication**: Not required - comparison view is available to all users viewing
+  reviews.
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a before/after photo comparison slider for restaurant reviews.
+    Users want to showcase f...
+  intent: 46
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: comparison_toggle_button_appears_for_reviews_with_exactly_2_photos
+    checklist_label: Comparison toggle button appears for reviews with exactly 2 photos
+    source_test_file: tests/comparison_toggle_button_appears_for_reviews_with_exactly_2_photos.spec.ts
+    destination_test_file: /workdir/app/__tests__/comparison_toggle_button_appears_for_reviews_with_exactly_2_photos.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: comparison_toggle_button_does_not_appear_for_reviews_with_1_3_or_4_photos
+    checklist_label: Comparison toggle button does not appear for reviews with 1 3
+      or 4 photos
+    source_test_file: tests/comparison_toggle_button_does_not_appear_for_reviews_with_1_3_or_4_photos.spec.ts
+    destination_test_file: /workdir/app/__tests__/comparison_toggle_button_does_not_appear_for_reviews_with_1_3_or_4_photos.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clicking_toggle_button_shows_comparisonslider_and_hides_photo_grid
+    checklist_label: Clicking toggle button shows comparisonslider and hides photo
+      grid
+    source_test_file: tests/clicking_toggle_button_shows_comparisonslider_and_hides_photo_grid.spec.ts
+    destination_test_file: /workdir/app/__tests__/clicking_toggle_button_shows_comparisonslider_and_hides_photo_grid.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clicking_toggle_again_returns_to_photo_grid_view
+    checklist_label: Clicking toggle again returns to photo grid view
+    source_test_file: tests/clicking_toggle_again_returns_to_photo_grid_view.spec.ts
+    destination_test_file: /workdir/app/__tests__/clicking_toggle_again_returns_to_photo_grid_view.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: comparison_slider_handle_is_draggable_and_changes_image_reveal
+    checklist_label: Comparison slider handle is draggable and changes image reveal
+    source_test_file: tests/comparison_slider_handle_is_draggable_and_changes_image_reveal.spec.ts
+    destination_test_file: /workdir/app/__tests__/comparison_slider_handle_is_draggable_and_changes_image_reveal.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: comparison_slider_starts_with_handle_at_50_position
+    checklist_label: Comparison slider starts with handle at 50 position
+    source_test_file: tests/comparison_slider_starts_with_handle_at_50_position.spec.ts
+    destination_test_file: /workdir/app/__tests__/comparison_slider_starts_with_handle_at_50_position.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_score_no
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Score 0: No comparison slider visible anywhere on the page.
+      Either the toggle button is missing, the slider component was not implemented,
+      or clicking the toggle did not activate comparison mode.
+
+
+      Score 1: ComparisonSlider is visible and functional. The slider container with
+      data-testid="comparison-slider-container" is displayed with approximate dimensions
+      of 300px width by 200px height. Two overlapping images are visible (before image
+      on left, after image on right). A vertical draggable handle/divider is positioned
+      at or near the horizontal center (approximately 50% position). The toggle button
+      displays "View as Grid" text indicating comparison mode is active. Both before
+      and after images are equally split at the center divider line.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsList = document.querySelector(''[data-testid="recommended-reviews-section"]'');
+      if (reviewsList) { reviewsList.scrollIntoView({ behavior: ''instant'', block:
+      ''center'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const toggleBtn = document.querySelector('[data-testid="comparison-toggle-button"]');
+      if (toggleBtn) { toggleBtn.click(); } })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_score_reviews
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Score 0: Reviews section is not visible on the page, or no
+      review photos are displayed, or no toggle button is present for reviews with
+      2 photos.
+
+
+      Score 1: Reviews section is clearly visible with review cards displayed. At
+      least one review card shows a photo grid with review photos. For any review
+      with exactly 2 photos, a "View as Comparison" toggle button is visible below
+      the photo grid. The toggle button text reads "View as Comparison" (not "View
+      as Grid"), indicating the standard grid view is currently active.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsList = document.querySelector(''[data-testid="recommended-reviews-section"]'');
+      if (reviewsList) { reviewsList.scrollIntoView({ behavior: ''instant'', block:
+      ''center'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1000))

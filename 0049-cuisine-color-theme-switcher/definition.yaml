@@ -1,0 +1,173 @@
+problem_id: 0049-cuisine-color-theme-switcher
+app: deld
+task:
+  prompt: 'Implement a Cuisine Color Theme Switcher for the Deld app. Users want to
+    personalize their browsing experience with cuisine-inspired color palettes.
+
+
+    **Feature Requirements**:
+
+
+    1. **Theme Selector Dropdown**: Add a dropdown in the header (next to user avatar
+    area) that allows users to select from three cuisine-inspired color themes: Italian
+    (red/green accents), Japanese (red/black/white), and Mexican (orange/yellow).
+    Each option should display its name with a small color swatch preview. Use data-testid="theme-switcher-trigger"
+    for the dropdown trigger button and data-testid="theme-option-{cuisine}" for each
+    option (e.g., theme-option-italian). The dropdown menu container should have data-testid="theme-switcher-menu".
+
+
+    2. **Theme Persistence & Application**: When a theme is selected, update CSS custom
+    properties (--primary, --accent) to reflect the chosen palette and persist the
+    selection to localStorage under key ''cuisine-theme''. On page load, restore the
+    saved theme. Default to the existing orange theme if no preference is saved. The
+    body element should have data-theme="{selected-theme}" attribute when a theme
+    is active.
+
+
+    **Routes**: No new routes required (header modification only)
+
+
+    **Element Selectors**:
+    - Theme option default: `[data-testid="theme-option-default"]`
+    - Theme option mexican: `[data-testid="theme-option-mexican"]`
+    - Theme option japanese: `[data-testid="theme-option-japanese"]`'
+hint: '**Files**: ~4 files (theme-switcher component, theme context/hook, globals.css
+  theme definitions, header integration)
+
+
+  **Authentication**: Not required - theme preference is anonymous/local
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123
+
+
+    **localStorage** use following keys in localStorage:
+
+    - `cuisine-theme`'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Cuisine Color Theme Switcher for the Deld app. Users want
+    to personalize their browsi...
+  intent: 64
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: theme_switcher_dropdown_displays_all_three_cuisine_theme_options
+    checklist_label: Theme switcher dropdown displays all three cuisine theme options
+    source_test_file: tests/theme_switcher_dropdown_displays_all_three_cuisine_theme_options.spec.ts
+    destination_test_file: /workdir/app/__tests__/theme_switcher_dropdown_displays_all_three_cuisine_theme_options.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: selecting_italian_theme_updates_data_theme_attribute_on_body
+    checklist_label: Selecting italian theme updates data theme attribute on body
+    source_test_file: tests/selecting_italian_theme_updates_data_theme_attribute_on_body.spec.ts
+    destination_test_file: /workdir/app/__tests__/selecting_italian_theme_updates_data_theme_attribute_on_body.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: selecting_japanese_theme_updates_data_theme_attribute_on_body
+    checklist_label: Selecting japanese theme updates data theme attribute on body
+    source_test_file: tests/selecting_japanese_theme_updates_data_theme_attribute_on_body.spec.ts
+    destination_test_file: /workdir/app/__tests__/selecting_japanese_theme_updates_data_theme_attribute_on_body.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: theme_selection_persists_to_localstorage_with_key_cuisine_theme
+    checklist_label: Theme selection persists to localstorage with key cuisine theme
+    source_test_file: tests/theme_selection_persists_to_localstorage_with_key_cuisine_theme.spec.ts
+    destination_test_file: /workdir/app/__tests__/theme_selection_persists_to_localstorage_with_key_cuisine_theme.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: saved_theme_is_restored_on_page_reload
+    checklist_label: Saved theme is restored on page reload
+    source_test_file: tests/saved_theme_is_restored_on_page_reload.spec.ts
+    destination_test_file: /workdir/app/__tests__/saved_theme_is_restored_on_page_reload.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: no_custom_data_theme_attribute_when_no_localstorage_value_exists
+    checklist_label: No custom data theme attribute when no localstorage value exists
+    source_test_file: tests/no_custom_data_theme_attribute_when_no_localstorage_value_exists.spec.ts
+    destination_test_file: /workdir/app/__tests__/no_custom_data_theme_attribute_when_no_localstorage_value_exists.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_theme
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the theme switcher dropdown visibility on a scale of
+      0 to 1:
+
+
+      0 - Theme switcher dropdown not visible: The dropdown menu is not displayed,
+      or the trigger button is missing, or fewer than 3 theme options are shown, or
+      color swatches/indicators are not present next to theme names.
+
+
+      1 - Theme switcher dropdown correctly displayed: The dropdown menu (data-testid="theme-switcher-menu")
+      is visible and properly positioned in the header area. All three cuisine theme
+      options are displayed: Italian, Japanese, and Mexican. Each option has a distinguishable
+      color swatch or visual indicator showing its theme colors. The menu is styled
+      consistently with the application design.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const trigger = document.querySelector('[data-testid="theme-switcher-trigger"]');
+      if (trigger) trigger.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_italian
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the Italian theme application on a scale of 0 to 1:
+
+
+      0 - Italian theme not applied: The page appears with default orange theme colors,
+      no visible color changes from baseline, header and buttons still show original
+      styling, or the body element does not reflect Italian theme styling.
+
+
+      1 - Italian theme correctly applied: The page displays Italian-inspired color
+      palette with red and green accent colors visible in UI elements. The header
+      background or accents show the Italian theme red color. Primary buttons or interactive
+      elements display the Italian green accent color. The overall color scheme is
+      distinctly different from the default orange theme, reflecting Italian flag-inspired
+      colors (red/green).'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const trigger = document.querySelector('[data-testid="theme-switcher-trigger"]');
+      if (trigger) trigger.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const italian = document.querySelector('[data-testid="theme-option-italian"]');
+      if (italian) italian.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))

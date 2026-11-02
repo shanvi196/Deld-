@@ -1,0 +1,156 @@
+problem_id: 0047-restaurant-page-print-friendly-view
+app: deld
+task:
+  prompt: 'Implement a print-friendly view for restaurant detail pages. Users want to print restaurant information for offline
+    reference when planning visits.
+
+
+    **Feature Requirements**:
+
+
+    1. **Print Button**: Add a ''Print'' button in the QuickActionButtons section (data-testid=''print-button''). Use outline
+    variant with Printer icon from lucide-react. Clicking triggers window.print().
+
+
+    2. **Print Stylesheet**: Create CSS @media print rules in globals.css. Hide navigation, map, sidebar elements. Show clean
+    layout with: restaurant name, full address, hours table, rating, phone/website. Use data-testid=''print-content'' wrapper
+    for printable area.
+
+
+    **Routes**: /restaurants/[id] (existing)
+
+
+    **Element Selectors**: - Map container: `[data-testid="map-container"]` - Main navigation: `[data-testid="main-navigation"]`'
+hint: '**Files**: ~4 (quick-action-buttons.tsx, print-button component, globals.css, restaurant detail page)
+
+
+  **Authentication**: Not required
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password:
+  password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a print-friendly view for restaurant detail pages. Users want to print restaurant infor...
+  intent: 56
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: print_button_is_visible_in_quickactionbuttons_section
+    checklist_label: Print button is visible in quickactionbuttons section
+    source_test_file: tests/print_button_is_visible_in_quickactionbuttons_section.spec.ts
+    destination_test_file: /workdir/app/__tests__/print_button_is_visible_in_quickactionbuttons_section.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: print_button_triggers_browser_print_dialog
+    checklist_label: Print button triggers browser print dialog
+    source_test_file: tests/print_button_triggers_browser_print_dialog.spec.ts
+    destination_test_file: /workdir/app/__tests__/print_button_triggers_browser_print_dialog.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: print_button_has_correct_styling_and_variant
+    checklist_label: Print button has correct styling and variant
+    source_test_file: tests/print_button_has_correct_styling_and_variant.spec.ts
+    destination_test_file: /workdir/app/__tests__/print_button_has_correct_styling_and_variant.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: print_styles_hide_navigation_elements
+    checklist_label: Print styles hide navigation elements
+    source_test_file: tests/print_styles_hide_navigation_elements.spec.ts
+    destination_test_file: /workdir/app/__tests__/print_styles_hide_navigation_elements.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: print_styles_show_essential_restaurant_information
+    checklist_label: Print styles show essential restaurant information
+    source_test_file: tests/print_styles_show_essential_restaurant_information.spec.ts
+    destination_test_file: /workdir/app/__tests__/print_styles_show_essential_restaurant_information.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: print_content_wrapper_exists_and_contains_essential_information
+    checklist_label: Print content wrapper exists and contains essential information
+    source_test_file: tests/print_content_wrapper_exists_and_contains_essential_information.spec.ts
+    destination_test_file: /workdir/app/__tests__/print_content_wrapper_exists_and_contains_essential_information.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_print
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the print button display in the QuickActionButtons section on a scale of 0 to 1:
+
+
+      0 - Print button missing or incorrectly placed: The quick action buttons section does not show a Print button, OR the
+      Print button is not visible in the action buttons area, OR no Printer icon is visible next to the ''Print'' text.
+
+
+      1 - Print button correctly implemented: The Print button is clearly visible in the quick action buttons section alongside
+      other action buttons (like Write Review or Save). The button has an outline style with visible border. The Printer icon
+      is visible to the left of the ''Print'' text label.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the print-content wrapper area on a scale of 0 to 1:
+
+
+      0 - Print content wrapper missing or incomplete: There is no visible print-content wrapper element on the page, OR the
+      wrapper does not contain essential restaurant information (name, address, hours, rating). The layout does not appear
+      structured for printing.
+
+
+      1 - Print content wrapper correctly implemented: A print-content wrapper area is visible containing the essential restaurant
+      information. The restaurant name is prominently displayed. Address information is visible. Opening hours information
+      is present. Rating information is shown. The content is laid out in a clean, structured format suitable for printing.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980';
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - (function () { const el = document.querySelector('[data-testid="print-button"]'); if (el) { el.click(); } })();
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - eslint
+  - playwright_test.print_button_has_correct_styling_and_variant
+  - playwright_test.print_button_is_visible_in_quickactionbuttons_section
+  - playwright_test.print_button_triggers_browser_print_dialog
+  - playwright_test.print_styles_show_essential_restaurant_information
+  - tsc
+  - vlm.screenshot_10_rate_the
+  - vlm.screenshot_9_rate_the_print
+  - checklist_items
+  grader_weights:
+    print_content_wrapper_exists_and_contains_essential_information: 0.7436
+    print_styles_hide_navigation_elements: 0.2564

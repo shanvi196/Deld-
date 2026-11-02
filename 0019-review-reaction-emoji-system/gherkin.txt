@@ -1,0 +1,112 @@
+```gherkin
+Feature: Review Reaction Emoji System
+  As a user reading restaurant reviews
+  I want to react to reviews with emoji reactions
+  So that I can quickly express feedback on helpful reviews
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Display reaction buttons on review cards
+    Given I navigate to "/restaurants/rest_0001"
+    And I wait for the page to load completely
+    When I scroll to the reviews section
+    Then I should see reaction buttons container with data-testid matching "reaction-buttons-" prefix
+    And each reaction button row should contain exactly 4 emoji buttons
+    And the buttons should include "👍", "😋", "📸", "💡" emojis
+
+  @unit-test @priority-high
+  Scenario: Toggle reaction on button click
+    Given I navigate to "/restaurants/rest_0001"
+    And I wait for reviews to load
+    And I locate the first review's helpful reaction button with data-testid containing "reaction-btn-helpful-"
+    When I click the helpful reaction button
+    Then the button should have a visually highlighted/active state
+    And the reaction count for helpful should increase by 1
+    When I click the same helpful reaction button again
+    Then the button should return to inactive state
+    And the reaction count for helpful should decrease by 1
+
+  @unit-test @priority-high
+  Scenario: Reactions persist in localStorage after page reload
+    Given I navigate to "/restaurants/rest_0001"
+    And I wait for reviews to load
+    And I identify the first review's reviewId from the DOM attribute data-testid
+    When I click the "Made Me Hungry" (😋) reaction button on the first review
+    Then localStorage key "review-reactions" should exist
+    And localStorage "review-reactions" should be valid JSON containing the identified reviewId with value "hungry"
+    When I reload the page
+    And I wait for reviews to load
+    Then the "Made Me Hungry" reaction button for the first review should have the active/highlighted CSS class
+    And the reaction count element with data-testid "reaction-count-hungry-{reviewId}" should display "1"
+
+  @unit-test @edge-case
+  Scenario: Switching between reaction types on same review replaces previous reaction
+    Given I navigate to "/restaurants/rest_0001"
+    And I wait for reviews to load
+    And I identify the first review's reviewId from the DOM
+    When I click the "Helpful" (👍) reaction button on the first review
+    Then the button with data-testid "reaction-btn-helpful-{reviewId}" should have active state
+    And the element with data-testid "reaction-count-helpful-{reviewId}" should display "1"
+    When I click the "Great Photos" (📸) reaction button on the same review
+    Then the button with data-testid "reaction-btn-photos-{reviewId}" should have active state
+    And the element with data-testid "reaction-count-photos-{reviewId}" should display "1"
+    And the button with data-testid "reaction-btn-helpful-{reviewId}" should have inactive state
+    And the element with data-testid "reaction-count-helpful-{reviewId}" should display "0"
+    And localStorage "review-reactions" should contain exactly one entry for that reviewId with value "photos"
+
+  @unit-test @edge-case
+  Scenario: Corrupted localStorage data resets to empty state without errors
+    Given I navigate to "/restaurants/rest_0001"
+    And I set localStorage key "review-reactions" to the invalid JSON string "{{not valid json}}"
+    When I reload the page
+    And I wait for reviews to load
+    Then all reaction buttons matching data-testid pattern "reaction-btn-*" should have inactive state
+    And all reaction count elements matching data-testid pattern "reaction-count-*" should display "0"
+    And the browser console should contain 0 uncaught JavaScript errors
+    When I click the "Helpful" (👍) reaction button on the first review
+    Then localStorage "review-reactions" should be parseable as valid JSON
+    And the "Helpful" button should have active state
+    And the corresponding reaction count should display "1"
+
+  @unit-test @integration
+  Scenario: Multiple reviews maintain independent reaction states
+    Given I navigate to "/restaurants/rest_0001"
+    And I wait for reviews to load
+    And at least 2 review cards are visible on the page
+    And I identify the first review's reviewId as "review1Id" and second review's reviewId as "review2Id"
+    When I click the "Helpful" (👍) reaction button on the first review
+    And I click the "Great Photos" (📸) reaction button on the second review
+    Then the button with data-testid "reaction-btn-helpful-{review1Id}" should have active state
+    And the button with data-testid "reaction-btn-photos-{review2Id}" should have active state
+    And localStorage "review-reactions" should contain entry for review1Id with value "helpful"
+    And localStorage "review-reactions" should contain entry for review2Id with value "photos"
+    And the element with data-testid "reaction-count-helpful-{review1Id}" should display "1"
+    And the element with data-testid "reaction-count-photos-{review2Id}" should display "1"
+    When I reload the page
+    And I wait for reviews to load
+    Then both reactions should remain in their active states as before reload
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of reaction buttons in default inactive state
+    Given I navigate to "/restaurants/rest_0001"
+    And I wait for the page to fully render including at least 1 review card
+    When I scroll the first review card into the viewport center
+    Then the page should visually show a horizontal row of 4 emoji reaction buttons (👍 😋 📸 💡) below the review text
+    And all 4 buttons should appear in a muted/inactive visual style with no highlight
+    And each button should display its emoji followed by the count "0"
+    And buttons should be evenly spaced with approximately 8-16px gaps between them
+    And the reaction buttons row should be left-aligned with the review card content
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of active versus inactive reaction button states
+    Given I navigate to "/restaurants/rest_0001"
+    And I wait for reviews to load
+    When I click the "Helpful" (👍) reaction button on the first visible review
+    And I wait 500ms for the UI animation to complete
+    Then the "Helpful" (👍) button should appear visually highlighted with a distinct background color or border
+    And the count next to the "Helpful" emoji should display "1"
+    And the other 3 reaction buttons (😋 📸 💡) should remain in the muted/inactive visual style
+    And the active button should have higher visual prominence than inactive buttons through color contrast
+```

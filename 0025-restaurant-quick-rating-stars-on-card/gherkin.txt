@@ -1,0 +1,101 @@
+```gherkin
+Feature: Restaurant Quick Rating Stars on Card
+  As a logged-in user browsing restaurants
+  I want to quickly rate a restaurant from its card on the homepage
+  So that I can share my rating without navigating to the detail page
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Show quick rating overlay on hover when logged in
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the homepage
+    When I hover over the first restaurant card
+    Then I should see the quick rating overlay with data-testid "quick-rating-overlay"
+    And I should see 5 interactive star buttons with data-testid "quick-rating-star-1" through "quick-rating-star-5"
+
+  @unit-test @priority-high @edge-case
+  Scenario: Hide quick rating overlay when logged out
+    Given I am not logged in
+    And I am on the homepage
+    When I hover over the first restaurant card
+    Then I should NOT see the quick rating overlay with data-testid "quick-rating-overlay"
+    And the restaurant card should display normally without rating stars
+
+  @unit-test @priority-high @authenticated
+  Scenario: Open confirmation dialog when clicking a star
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the homepage
+    And I hover over the first restaurant card
+    When I click on the 4-star rating button with data-testid "quick-rating-star-4"
+    Then I should see the rating confirmation dialog with data-testid "quick-rating-dialog"
+    And the dialog should display the restaurant name from the hovered card
+    And the dialog should show exactly 4 filled star icons and 1 empty star icon
+    And I should see a confirm button with data-testid "quick-rating-confirm" and text "Submit Rating"
+    And I should see a cancel button with data-testid "quick-rating-cancel" and text "Cancel"
+
+  @unit-test @priority-high @authenticated @integration
+  Scenario: Submit rating and show success toast when confirmed
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the homepage
+    And the first restaurant card displays a restaurant with id "rest-001"
+    And I hover over the first restaurant card
+    And I click on the 5-star rating button
+    And the rating confirmation dialog is visible
+    When I click the confirm button with data-testid "quick-rating-confirm"
+    Then the confirm button should show loading spinner for up to 3 seconds
+    And I should see a success toast with text "Rating submitted!"
+    And the rating confirmation dialog should close
+    And the restaurant card with id "rest-001" should display the updated average rating
+
+  @unit-test @priority-medium @authenticated @edge-case
+  Scenario: Show error toast when rating submission fails due to network error
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the homepage
+    And the API endpoint "/api/reviews" is configured to return a 500 error
+    And I hover over the first restaurant card
+    And I click on the 4-star rating button
+    And the rating confirmation dialog is visible
+    When I click the confirm button with data-testid "quick-rating-confirm"
+    Then I should see an error toast with text "Failed to submit rating. Please try again."
+    And the rating confirmation dialog should remain open
+    And the confirm button should be enabled for retry
+
+  @unit-test @priority-medium @authenticated @integration
+  Scenario: Rating persists after page navigation and return
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the homepage
+    And the first restaurant card displays a restaurant named "Bella Italia"
+    And I hover over the first restaurant card
+    And I click on the 4-star rating button
+    And I confirm the rating submission
+    And I see the success toast "Rating submitted!"
+    When I navigate to the restaurant detail page for "Bella Italia"
+    And I return to the homepage by clicking the logo
+    Then the restaurant card for "Bella Italia" should display my 4-star rating indicator
+    And hovering over the card should show my existing rating highlighted in the quick rating overlay
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of quick rating overlay on card hover
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the homepage
+    When I hover over the first restaurant card
+    Then the page should visually show the quick rating overlay with 5 star icons
+    And the overlay should be positioned at the bottom of the card image
+    And all 5 stars should be unfilled with gray color initially
+    And hovering over the 3rd star should fill stars 1 through 3 with gold color
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of rating confirmation dialog
+    Given I am logged in as "sarah.chen@email.com" with password "password123"
+    And I am on the homepage
+    And I hover over the first restaurant card
+    When I click on the 4-star rating button
+    Then the page should visually show the confirmation dialog centered on screen
+    And the dialog should display exactly 4 filled gold stars and 1 empty gray star
+    And the dialog should show the restaurant name in bold text above the stars
+    And the confirm button should be styled with primary blue background color
+    And the cancel button should be styled with secondary gray background color
+    And the page background should have a semi-transparent dark overlay
+```

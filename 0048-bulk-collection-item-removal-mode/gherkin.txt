@@ -1,0 +1,108 @@
+```gherkin
+Feature: Bulk Collection Item Removal Mode
+  As a user managing my restaurant collections
+  I want to select multiple restaurants and remove them at once
+  So that I can efficiently manage large collections
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am logged in as "sarah.chen@email.com" with password "password123"
+    And I have a collection with at least 3 restaurants
+
+  @unit-test @priority-high @authenticated
+  Scenario: Toggle selection mode on
+    Given I am on a collection detail page at "/user/collections/{collectionId}"
+    And selection mode is not active
+    And the "Select" button with data-testid "select-mode-toggle" displays text "Select"
+    When I click the "Select" button with data-testid "select-mode-toggle"
+    Then checkboxes with data-testid pattern "item-checkbox-{restaurantId}" should appear next to each restaurant item
+    And the button text should change to "Cancel"
+    And all checkboxes should be unchecked initially
+    And the floating action bar with data-testid "bulk-action-bar" should not be visible
+
+  @unit-test @priority-high @authenticated
+  Scenario: Select multiple items shows floating action bar
+    Given I am on a collection detail page with selection mode active
+    And I can see exactly 3 restaurant items with unchecked checkboxes
+    When I click the checkbox with data-testid "item-checkbox-{firstRestaurantId}" for the first restaurant item
+    And I click the checkbox with data-testid "item-checkbox-{secondRestaurantId}" for the second restaurant item
+    Then a floating action bar with data-testid "bulk-action-bar" should appear
+    And the "Remove Selected" button with data-testid "remove-selected-button" should display text "Remove Selected (2)"
+    And the floating action bar should be fixed positioned at the bottom of the viewport with bottom: 0
+
+  @unit-test @priority-high @authenticated
+  Scenario: Confirming removal removes items and updates list
+    Given I am on a collection detail page with selection mode active
+    And the collection has exactly 3 restaurants displayed
+    And I have selected exactly 2 restaurant items with IDs "{restaurantId1}" and "{restaurantId2}"
+    And the confirmation dialog with data-testid "bulk-remove-dialog" is open
+    When I click the confirm button with data-testid "bulk-remove-confirm"
+    Then the dialog should close within 500ms
+    And the collection should now show exactly 1 restaurant item
+    And restaurant items with IDs "{restaurantId1}" and "{restaurantId2}" should no longer appear in the list
+    And a success toast notification with text "2 restaurants removed from collection" should appear
+    And selection mode should be automatically deactivated
+
+  @unit-test @edge-case @authenticated
+  Scenario: Removing all items from collection shows empty state
+    Given I am on a collection detail page with selection mode active
+    And the collection has exactly 2 restaurants displayed
+    And I have selected all 2 restaurant items
+    And the confirmation dialog with data-testid "bulk-remove-dialog" is open
+    When I click the confirm button with data-testid "bulk-remove-confirm"
+    Then the dialog should close within 500ms
+    And the collection should show an empty state message "No restaurants in this collection"
+    And an "Add Restaurants" call-to-action button should be visible
+    And the "Select" button with data-testid "select-mode-toggle" should be disabled or hidden
+
+  @unit-test @edge-case @authenticated
+  Scenario: Deselecting all items hides floating action bar
+    Given I am on a collection detail page with selection mode active
+    And I have selected exactly 2 restaurant items with IDs "{restaurantId1}" and "{restaurantId2}"
+    And the floating action bar with data-testid "bulk-action-bar" is visible displaying "Remove Selected (2)"
+    When I click the checkbox with data-testid "item-checkbox-{restaurantId1}" to deselect the first item
+    Then the floating action bar should update to display "Remove Selected (1)"
+    When I click the checkbox with data-testid "item-checkbox-{restaurantId2}" to deselect the second item
+    Then the floating action bar with data-testid "bulk-action-bar" should not be visible
+    And all checkboxes should be unchecked
+    And selection mode should remain active with the "Cancel" button still visible
+
+  @unit-test @integration @authenticated
+  Scenario: Cancelling selection mode clears all selections and hides checkboxes
+    Given I am on a collection detail page with selection mode active
+    And I have selected exactly 2 restaurant items with IDs "{restaurantId1}" and "{restaurantId2}"
+    And the floating action bar with data-testid "bulk-action-bar" is visible displaying "Remove Selected (2)"
+    When I click the "Cancel" button with data-testid "select-mode-toggle"
+    Then checkboxes with data-testid pattern "item-checkbox-{restaurantId}" should not be visible
+    And the floating action bar with data-testid "bulk-action-bar" should not be visible
+    And the button with data-testid "select-mode-toggle" should display text "Select"
+    And the internal selection state should be cleared (Set<string> size equals 0)
+    When I click the "Select" button with data-testid "select-mode-toggle" again
+    Then all checkboxes should appear unchecked with no previously selected items remembered
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of selection mode with floating action bar
+    Given I am logged in and on a collection detail page at "/user/collections/{collectionId}"
+    And selection mode is active
+    And I have selected exactly 2 of 3 restaurant items
+    Then the page should visually show:
+      - Checkboxes visible to the left of each restaurant item
+      - Exactly 2 items with checked checkboxes (filled state)
+      - Exactly 1 item with unchecked checkbox (empty state)
+      - A floating action bar fixed at the bottom with semi-transparent background
+      - The "Remove Selected (2)" button in the action bar with red/danger styling
+      - The "Cancel" button visible in the header area
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of bulk remove confirmation dialog
+    Given I am logged in and on a collection detail page at "/user/collections/{collectionId}"
+    And selection mode is active with exactly 2 items selected
+    And the confirmation dialog with data-testid "bulk-remove-dialog" is open
+    Then the dialog should visually show:
+      - Modal overlay dimming the background with opacity approximately 0.5
+      - Dialog centered horizontally and vertically on screen
+      - Header text "Remove 2 restaurants from collection?" in bold
+      - A red/danger styled "Remove" confirm button on the right
+      - A gray/neutral styled "Cancel" button on the left
+      - Dialog width between 300px and 500px
+```

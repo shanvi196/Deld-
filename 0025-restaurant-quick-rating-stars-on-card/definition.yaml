@@ -1,0 +1,179 @@
+problem_id: 0025-restaurant-quick-rating-stars-on-card
+app: deld
+task:
+  prompt: 'Implement quick rating feature for restaurant cards on the homepage. When
+    logged in, users should be able to rate a restaurant directly from its card without
+    navigating to the detail page.
+
+
+    **Feature Requirements**:
+
+
+    1. **Quick Rating Stars on Card Hover**: When a logged-in user hovers over a restaurant
+    card, display an overlay with interactive star icons at `data-testid="quick-rating-overlay"`
+    containing 5 clickable stars with `data-testid="quick-rating-star-{1-5}"`. Stars
+    should highlight on hover (unfilled gray → filled gold). Stars should not appear
+    for logged-out users. Clicking a star opens a confirmation dialog.
+
+
+    2. **Rating Confirmation Dialog**: After clicking a star, show a Radix Dialog
+    with `data-testid="quick-rating-dialog"` displaying the selected rating as filled
+    stars, restaurant name, and confirm/cancel buttons (`data-testid="quick-rating-confirm"`
+    and `data-testid="quick-rating-cancel"`). Confirming submits a minimal review
+    via POST `/api/reviews` with just the rating value. Show toast on result.
+
+
+    **UI Text Strings (Exact Match Required)**:
+
+    - Confirm button: "Submit Rating"
+
+    - Cancel button: "Cancel"
+
+    - Success toast: "Rating submitted!"
+
+    - Error toast: "Failed to submit rating. Please try again."
+
+
+    **Routes**: Homepage `/` (existing)'
+hint: '**Files**: ~4 (restaurant-card.tsx modification, new quick-rating-overlay component,
+  dialog component, mutation integration)
+
+
+  **Authentication**: Required for rating functionality; logged-out users see no overlay'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement quick rating feature for restaurant cards on the homepage.
+    When logged in, users should...
+  intent: 28
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_show_quick_rating_overlay_on_hover_when_logged_in
+    checklist_label: Show quick rating overlay on hover when logged in
+    source_test_file: tests/should_show_quick_rating_overlay_on_hover_when_logged_in.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_quick_rating_overlay_on_hover_when_logged_in.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_not_show_quick_rating_overlay_when_logged_out
+    checklist_label: Not show quick rating overlay when logged out
+    source_test_file: tests/should_not_show_quick_rating_overlay_when_logged_out.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_not_show_quick_rating_overlay_when_logged_out.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_open_confirmation_dialog_when_clicking_a_star
+    checklist_label: Open confirmation dialog when clicking a star
+    source_test_file: tests/should_open_confirmation_dialog_when_clicking_a_star.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_open_confirmation_dialog_when_clicking_a_star.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_submit_rating_and_show_success_toast_when_confirmed
+    checklist_label: Submit rating and show success toast when confirmed
+    source_test_file: tests/should_submit_rating_and_show_success_toast_when_confirmed.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_submit_rating_and_show_success_toast_when_confirmed.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_close_dialog_when_cancel_is_clicked
+    checklist_label: Close dialog when cancel is clicked
+    source_test_file: tests/should_close_dialog_when_cancel_is_clicked.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_close_dialog_when_cancel_is_clicked.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_error_toast_when_rating_submission_fails
+    checklist_label: Show error toast when rating submission fails
+    source_test_file: tests/should_show_error_toast_when_rating_submission_fails.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_error_toast_when_rating_submission_fails.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_score_0_if
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: Score 0 if no quick rating overlay is visible on the restaurant
+      card, or if stars are not displayed in the overlay area. Score 1 if a quick
+      rating overlay with 5 interactive star icons is visible on the hovered restaurant
+      card, positioned appropriately within or near the card without completely obstructing
+      the card content.
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const btn = document.querySelector('[data-testid="header-login-button"]');
+      if (btn) btn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const passwordInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (passwordInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(passwordInput, ''password123''); passwordInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - (function() { const btn = document.querySelector('[data-testid="login-submit-button"]');
+      if (btn) btn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const firstCard = document.querySelector(''[data-testid^="restaurant-card-link-"]'');
+      if (firstCard) { firstCard.dispatchEvent(new MouseEvent(''mouseenter'', { bubbles:
+      true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_score_0_if
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: Score 0 if no rating confirmation dialog is visible on screen.
+      Score 1 if a rating confirmation dialog is visible displaying the selected rating
+      (4 stars indicated), restaurant name, and both confirm and cancel buttons with
+      clear styling and a semi-transparent backdrop overlay.
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const btn = document.querySelector('[data-testid="header-login-button"]');
+      if (btn) btn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const passwordInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (passwordInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(passwordInput, ''password123''); passwordInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - (function() { const btn = document.querySelector('[data-testid="login-submit-button"]');
+      if (btn) btn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const firstCard = document.querySelector(''[data-testid^="restaurant-card-link-"]'');
+      if (firstCard) { firstCard.dispatchEvent(new MouseEvent(''mouseenter'', { bubbles:
+      true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const star = document.querySelector('[data-testid="quick-rating-star-4"]');
+      if (star) star.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 500))

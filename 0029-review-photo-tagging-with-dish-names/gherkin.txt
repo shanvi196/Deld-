@@ -1,0 +1,86 @@
+```gherkin
+Feature: Review Photo Tagging with Dish Names
+  As a user writing a restaurant review
+  I want to tag my uploaded photos with specific dish names from the menu
+  So that other users can easily identify which dishes are shown in my photos
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am logged in as "sarah.chen@email.com" with password "password123"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Display dish selector after uploading a photo
+    Given I am on the write review page for restaurant "25047088-5a40-4fab-be5c-3ee9a54fb980"
+    And I have uploaded at least one photo
+    When I look at the photo thumbnails section
+    Then I should see a tag button with data-testid "photo-tag-button-0" for the first photo
+    And clicking the tag button should show a combobox with data-testid "photo-dish-selector-0"
+    And the combobox should contain menu items from the restaurant
+
+  @unit-test @priority-high @authenticated
+  Scenario: Select a dish tag for an uploaded photo
+    Given I am on the write review page for restaurant "25047088-5a40-4fab-be5c-3ee9a54fb980"
+    And I have uploaded at least one photo
+    When I click the tag button with data-testid "photo-tag-button-0"
+    And I select a dish from the combobox with data-testid "photo-dish-selector-0"
+    Then a dish name badge with data-testid "photo-dish-tag-0" should appear on the photo
+    And the badge should display the selected dish name
+
+  @unit-test @priority-medium @authenticated
+  Scenario: Remove a dish tag from a photo
+    Given I am on the write review page for restaurant "25047088-5a40-4fab-be5c-3ee9a54fb980"
+    And I have uploaded a photo with a dish tag already selected
+    When I click on the dish tag badge with data-testid "photo-dish-tag-0"
+    Then the dish tag should be removed from the photo
+    And the tag button with data-testid "photo-tag-button-0" should be visible again
+
+  @unit-test @priority-high @authenticated
+  Scenario: Display dish tag overlay on review photos in review card
+    Given there is a review with tagged photos for restaurant "25047088-5a40-4fab-be5c-3ee9a54fb980"
+    When I navigate to the restaurant details page "/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980"
+    And I scroll to the reviews section
+    Then I should see review photos with dish name badges
+    And the badge with data-testid "review-photo-dish-badge" should display the tagged dish name
+
+  @unit-test @priority-medium @authenticated
+  Scenario: Dish tags persist after form validation error and resubmission
+    Given I am on the write review page for restaurant "25047088-5a40-4fab-be5c-3ee9a54fb980"
+    And I have uploaded exactly 2 photos
+    And I have tagged the first photo with dish "Margherita Pizza" using data-testid "photo-tag-button-0"
+    And I have tagged the second photo with dish "Caesar Salad" using data-testid "photo-tag-button-1"
+    When I submit the review form without entering a review text
+    Then a validation error "Review text is required" should appear
+    And the badge with data-testid "photo-dish-tag-0" should still display "Margherita Pizza"
+    And the badge with data-testid "photo-dish-tag-1" should still display "Caesar Salad"
+    When I enter valid review text and submit the form
+    Then the review should be created with both dish tags preserved
+
+  @unit-test @edge-case @authenticated
+  Scenario: Dish selector closes when clicking outside without selecting
+    Given I am on the write review page for restaurant "25047088-5a40-4fab-be5c-3ee9a54fb980"
+    And I have uploaded at least one photo
+    And I have clicked the tag button with data-testid "photo-tag-button-0" to open the selector
+    And the combobox with data-testid "photo-dish-selector-0" is visible
+    When I click outside the combobox on the review form background
+    Then the combobox with data-testid "photo-dish-selector-0" should no longer be visible
+    And the tag button with data-testid "photo-tag-button-0" should remain visible
+    And no dish tag badge should appear on the first photo
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of photo tagging UI in write review form
+    Given I am on the write review page for restaurant "25047088-5a40-4fab-be5c-3ee9a54fb980"
+    And I have uploaded at least one photo
+    When I click the tag button to open the dish selector
+    Then the page should visually show the dish selector dropdown
+    And photo thumbnails should be visible with tag buttons
+    And the combobox should display menu items in a selectable list
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of tagged photo display on review card
+    Given there is a review with tagged photos for restaurant "25047088-5a40-4fab-be5c-3ee9a54fb980"
+    When I navigate to the restaurant details page "/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980"
+    And I scroll to the reviews section with tagged photos
+    Then the page should visually show dish name badges overlaid on review photos
+    And the badges should be positioned at the bottom of each tagged photo
+    And the dish name text should be readable on the badge
+```

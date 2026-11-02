@@ -1,0 +1,86 @@
+```gherkin
+Feature: Recently Viewed Restaurants Sidebar
+  As a user browsing restaurants on Deld
+  I want to see restaurants I've recently viewed during my session
+  So that I can quickly return to restaurants I was browsing
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Save restaurant to sessionStorage when viewing details page
+    Given I am on the home page with no recent views in sessionStorage
+    When I navigate to restaurant details page "/restaurants/rest_0001"
+    And the page loads completely
+    Then sessionStorage key "deld-recent-views" should contain exactly 1 entry
+    And the entry should have restaurantId "rest_0001"
+    And the entry should have properties "name", "cuisine", and "timestamp"
+
+  @unit-test @priority-high
+  Scenario: Limit recent views to 8 unique restaurants
+    Given I have visited 10 different restaurants in sequence from "rest_0001" to "rest_0010"
+    When I check the sessionStorage "deld-recent-views" data
+    Then the array should have exactly 8 entries
+    And the first entry should be the most recently visited restaurant "rest_0010"
+    And entries "rest_0001" and "rest_0002" should not be present in the array
+
+  @unit-test @priority-high
+  Scenario: No duplicate restaurants - update timestamp instead
+    Given I have visited restaurant "rest_0001" at timestamp "1700000000000" and it is saved in sessionStorage
+    When I visit restaurant "rest_0001" again at timestamp "1700000060000"
+    Then sessionStorage should contain exactly 1 entry for "rest_0001"
+    And the timestamp should be "1700000060000"
+
+  @unit-test @priority-high
+  Scenario: Display recent views sidebar on home page
+    Given sessionStorage contains recent views for "rest_0001" and "rest_0002"
+    When I navigate to the home page
+    And the page loads completely
+    Then the sidebar with data-testid "recent-views-sidebar" should be visible
+    And the sidebar should contain exactly 2 restaurant cards
+    And the card with data-testid "recent-view-card-rest_0001" should be visible
+    And the card with data-testid "recent-view-card-rest_0002" should be visible
+
+  @unit-test @priority-medium
+  Scenario: Collapse and expand sidebar persists state in sessionStorage
+    Given sessionStorage contains recent views for "rest_0001" and "rest_0002"
+    And I am on the home page with the sidebar visible and expanded
+    When I click the toggle with data-testid "recent-views-toggle"
+    Then the sidebar should collapse to show only the toggle button
+    And sessionStorage key "deld-recent-views-collapsed" should be "true"
+    When I refresh the page
+    Then the sidebar should remain collapsed
+    When I click the toggle with data-testid "recent-views-toggle"
+    Then the sidebar should expand to show all 2 restaurant cards
+    And sessionStorage key "deld-recent-views-collapsed" should be "false"
+
+  @unit-test @edge-case
+  Scenario: Navigate to restaurant from sidebar card and update order
+    Given sessionStorage contains recent views in order "rest_0003", "rest_0002", "rest_0001" with timestamps descending
+    And I am on the home page with the sidebar visible
+    When I click the card with data-testid "recent-view-card-rest_0001"
+    Then the URL should be "/restaurants/rest_0001"
+    And the page should display restaurant details for "rest_0001"
+    When I navigate back to the home page
+    Then sessionStorage "deld-recent-views" first entry should have restaurantId "rest_0001"
+    And the sidebar should show "rest_0001" as the first card at the top
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of populated sidebar with 8 restaurants
+    Given sessionStorage contains the maximum of 8 recent restaurant views
+    When I navigate to the home page
+    Then the sidebar should be visible on the right side of the page
+    And exactly 8 restaurant cards should be displayed vertically
+    And each card should show the restaurant name and cuisine type
+    And the "Clear Recent" button should be visible at the top of the sidebar
+    And the collapse toggle with data-testid "recent-views-toggle" should show the expanded icon
+
+  @screenshot-test @priority-low
+  Scenario: Visual validation of empty sidebar state
+    Given sessionStorage does not contain "deld-recent-views" key
+    When I navigate to the home page
+    Then the sidebar with data-testid "recent-views-sidebar" should be visible
+    And the element with data-testid "recent-views-empty" should display "No recent views"
+    And the "Clear Recent" button should not be visible
+    And the sidebar should occupy approximately 280px width on the right side
+```

@@ -1,0 +1,158 @@
+problem_id: 0032-dietary-compatibility-score
+app: deld
+task:
+  prompt: 'Implement a Dietary Compatibility Score feature for the Deld restaurant
+    discovery app. Users with dietary preferences want to quickly see how well a restaurant
+    matches their dietary needs.
+
+
+    **Feature Requirements**:
+
+
+    1. **Compatibility Score Calculation**: Create a client-side utility function
+    that calculates a dietary compatibility percentage (0-100%) by comparing the logged-in
+    user''s `preferences.dietaryRestrictions` array against the restaurant''s `dietaryOptions`
+    array. Score = (matched options / user restrictions) * 100. If user has no restrictions,
+    score is 100%. Store utility in `/src/utils/restaurants/calculate-dietary-score.ts`.
+    Function signature: `calculateDietaryScore(restaurant: Restaurant, userRestrictions:
+    string[]): number`.
+
+
+    2. **Score Display on Restaurant Cards**: Display the compatibility score as a
+    circular progress indicator on each restaurant card (visible only when user is
+    logged in and has dietary restrictions). Add component at `/src/components/atoms/dietary-score-badge/dietary-score-badge.tsx`.
+    Show percentage inside circle. Use green (>=70%), yellow (40-69%), red (<40%)
+    colors. Add `data-testid="dietary-score-badge"` to badge container, `data-testid="dietary-score-value"`
+    to percentage text.
+
+
+    **Routes**: Homepage `/` (where restaurant cards display)'
+hint: '**Files**: ~3-4 (utility function, badge component, restaurant card integration)
+
+
+  **Authentication**: Score only displays for logged-in users with dietary restrictions'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Dietary Compatibility Score feature for the Deld restaurant
+    discovery app. Users with...
+  intent: 37
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_not_display_dietary_score_badge_when_user_is_not_logged_in
+    checklist_label: Not display dietary score badge when user is not logged in
+    source_test_file: tests/should_not_display_dietary_score_badge_when_user_is_not_logged_in.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_not_display_dietary_score_badge_when_user_is_not_logged_in.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_dietary_score_badge_on_restaurant_cards_when_logged_in_user_has_dietary_restrictions
+    checklist_label: Display dietary score badge on restaurant cards when logged in
+      user has dietary restrictions
+    source_test_file: tests/should_display_dietary_score_badge_on_restaurant_cards_when_logged_in_user_has_dietary_restrictions.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_dietary_score_badge_on_restaurant_cards_when_logged_in_user_has_dietary_restrictions.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_percentage_value_inside_dietary_score_badge
+    checklist_label: Display percentage value inside dietary score badge
+    source_test_file: tests/should_display_percentage_value_inside_dietary_score_badge.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_percentage_value_inside_dietary_score_badge.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_not_display_dietary_score_badge_when_logged_in_user_has_empty_dietary_restrictions_array
+    checklist_label: Not display dietary score badge when logged in user has empty
+      dietary restrictions array
+    source_test_file: tests/should_not_display_dietary_score_badge_when_logged_in_user_has_empty_dietary_restrictions_array.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_not_display_dietary_score_badge_when_logged_in_user_has_empty_dietary_restrictions_array.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_percentage_value_between_0_and_100
+    checklist_label: Display percentage value between 0 and 100
+    source_test_file: tests/should_display_percentage_value_between_0_and_100.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_percentage_value_between_0_and_100.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_apply_appropriate_color_styling_to_badge_based_on_compatibility_score
+    checklist_label: Apply appropriate color styling to badge based on compatibility
+      score
+    source_test_file: tests/should_apply_appropriate_color_styling_to_badge_based_on_compatibility_score.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_apply_appropriate_color_styling_to_badge_based_on_compatibility_score.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_dietary
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the dietary score badge display on a scale of 0 to 1:
+
+
+      0 - Badges not visible or malformed: No circular dietary compatibility score
+      badges appear on restaurant cards, OR badges exist but don''t display percentage
+      values, OR badges are not properly positioned on cards, OR badges lack color
+      coding.
+
+
+      1 - Badges correctly displayed: Restaurant cards show circular dietary compatibility
+      score badges with percentage values (e.g., ''75%'', ''50%'', ''100%'') visible
+      inside each badge. Badges are properly positioned on the restaurant cards and
+      use appropriate color coding: green for high scores (>=70%), yellow/amber for
+      medium scores (40-69%), or red for low scores (<40%). Badges are visually distinct
+      with circular shape.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - '(function() { var user = { id: ''user_0001'', email: ''sarah.chen@email.com'',
+      preferences: { dietaryRestrictions: [''vegetarian'', ''gluten-free''] } }; document.cookie
+      = ''user='' + encodeURIComponent(JSON.stringify(user)) + ''; path=/''; })()'
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_whether_dietary
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate whether dietary score badges are correctly hidden for
+      logged out users on a scale of 0 to 1:
+
+
+      0 - Badges incorrectly shown: Dietary score badges with percentages are visible
+      on restaurant cards even though user is not logged in. This indicates the feature
+      is not properly checking authentication state.
+
+
+      1 - Badges correctly hidden: Restaurant cards are visible showing normal content
+      (restaurant image, name, rating, cuisine type, price range) but NO circular
+      dietary compatibility score badges or percentage indicators appear anywhere
+      on the cards. Cards display their standard layout without score overlays.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - (function() { document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00
+      GMT'; })()
+    - await new Promise(resolve => setTimeout(resolve, 2500))

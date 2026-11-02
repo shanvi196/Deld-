@@ -1,0 +1,155 @@
+problem_id: 0036-search-query-autocomplete-dropdown
+app: deld
+task:
+  prompt: 'Implement search query autocomplete dropdown for the Deld Restaurant Reviews app. Users need suggestions as they
+    type in the search input to quickly find popular search terms.
+
+
+    **Feature Requirements**:
+
+
+    1. **Autocomplete Dropdown**: Show dropdown below search-query-input with data-testid=''search-autocomplete-dropdown''
+    when user types. Filter hardcoded suggestions [''Pizza'', ''Sushi'', ''Breakfast'', ''Tacos'', ''Italian'', ''Chinese'',
+    ''Burgers'', ''Thai''] by input value (case-insensitive). Each suggestion item has data-testid=''autocomplete-item-{index}''.
+    Dropdown hidden when input is empty or no matches.
+
+
+    2. **Suggestion Selection**: Clicking suggestion fills search-query-input with selected text and closes dropdown. Pressing
+    Escape closes dropdown without selection. Dropdown closes when clicking outside. Selected text triggers existing search
+    debounce behavior.
+
+
+    **Routes**: Homepage at / (existing)
+
+
+    **Element Selectors**: - Autocomplete item 0: `[data-testid="autocomplete-item-0"]`'
+hint: '**Files**: ~3 (search-bar component modifications, autocomplete suggestions utility)
+
+
+  **Authentication**: Not required
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password:
+  password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement search query autocomplete dropdown for the Deld Restaurant Reviews app. Users need sugg...
+  intent: 42
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_show_autocomplete_dropdown_when_typing_matching_text
+    checklist_label: Show autocomplete dropdown when typing matching text
+    source_test_file: tests/should_show_autocomplete_dropdown_when_typing_matching_text.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_autocomplete_dropdown_when_typing_matching_text.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_hide_dropdown_when_input_is_cleared
+    checklist_label: Hide dropdown when input is cleared
+    source_test_file: tests/should_hide_dropdown_when_input_is_cleared.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_hide_dropdown_when_input_is_cleared.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_fill_input_and_close_dropdown_when_clicking_suggestion
+    checklist_label: Fill input and close dropdown when clicking suggestion
+    source_test_file: tests/should_fill_input_and_close_dropdown_when_clicking_suggestion.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_fill_input_and_close_dropdown_when_clicking_suggestion.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_close_dropdown_when_pressing_escape_key
+    checklist_label: Close dropdown when pressing escape key
+    source_test_file: tests/should_close_dropdown_when_pressing_escape_key.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_close_dropdown_when_pressing_escape_key.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_not_show_dropdown_when_no_suggestions_match
+    checklist_label: Not show dropdown when no suggestions match
+    source_test_file: tests/should_not_show_dropdown_when_no_suggestions_match.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_not_show_dropdown_when_no_suggestions_match.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_close_dropdown_when_clicking_outside
+    checklist_label: Close dropdown when clicking outside
+    source_test_file: tests/should_close_dropdown_when_clicking_outside.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_close_dropdown_when_clicking_outside.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_score_0_if
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: Score 0 if no dropdown visible below search input. Score 1 if dropdown is visible with at least one
+      suggestion item containing 'Sushi' text, positioned below the search query input field.
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000'
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const searchInput = document.querySelector(''[data-testid="search-query-input"]''); if (searchInput)
+      { const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set;
+      nativeInputValueSetter.call(searchInput, ''sushi''); searchInput.dispatchEvent(new Event(''input'', { bubbles: true
+      })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_score_0_if
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: Score 0 if dropdown still visible or input doesn't show 'Breakfast'. Score 1 if dropdown is closed
+      (not visible) and search input field contains the text 'Breakfast'.
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000'
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const searchInput = document.querySelector(''[data-testid="search-query-input"]''); if (searchInput)
+      { const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set;
+      nativeInputValueSetter.call(searchInput, ''break''); searchInput.dispatchEvent(new Event(''input'', { bubbles: true
+      })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - '(function() { const firstItem = document.querySelector(''[data-testid="autocomplete-item-0"]''); if (firstItem) {[''mousedown'',
+      ''mouseup'', ''click''].forEach(eventType => { const event = new MouseEvent(eventType, { bubbles: true, cancelable:
+      true, view: window });firstItem.dispatchEvent(event);});}})();'
+    - await new Promise(resolve => setTimeout(resolve, 300))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - checklist_items
+  - eslint
+  - playwright_test.should_not_show_dropdown_when_no_suggestions_match
+  - tsc
+  - vlm.screenshot_10_score_0_if
+  - vlm.screenshot_9_score_0_if
+  grader_weights:
+    should_close_dropdown_when_clicking_outside: 0.1375
+    should_close_dropdown_when_pressing_escape_key: 0.1375
+    should_fill_input_and_close_dropdown_when_clicking_suggestion: 0.45
+    should_hide_dropdown_when_input_is_cleared: 0.1375
+    should_show_autocomplete_dropdown_when_typing_matching_text: 0.1375

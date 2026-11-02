@@ -1,0 +1,84 @@
+```gherkin
+Feature: Neighborhood Quick Jump Navigation
+  As a user discovering restaurants
+  I want to browse restaurants by neighborhood
+  So that I can quickly find dining options in specific areas without typing
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Neighborhood section displays in sidebar with restaurant counts
+    Given I am on the search page
+    When the page loads completely
+    Then I should see a section with data-testid "neighborhood-section"
+    And the section should contain at least 3 neighborhood items with data-testid starting with "neighborhood-item-"
+    And each neighborhood item should display a count in parentheses matching the pattern "(N)" where N is a positive integer
+
+  @unit-test @priority-high
+  Scenario: Clicking neighborhood applies location filter and updates URL
+    Given I am on the search page with no filters applied
+    And the URL does not contain "location=" parameter
+    When I click the first neighborhood item with data-testid starting with "neighborhood-item-"
+    Then the URL should contain "location=" parameter with the clicked neighborhood name
+    And the restaurant list should update to show only restaurants from that neighborhood
+
+  @unit-test @priority-high
+  Scenario: Clicking active neighborhood clears the location filter
+    Given I am on the search page
+    And I have clicked the neighborhood item with data-testid "neighborhood-item-mission-district"
+    And the URL contains "location=Mission%20District"
+    When I click the same neighborhood item with data-testid "neighborhood-item-mission-district" again
+    Then the URL should no longer contain "location=" parameter
+    And the restaurant list should show all restaurants without location filtering
+
+  @unit-test @priority-medium
+  Scenario: Neighborhood filter persists and syncs with RestaurantsSearchContext state
+    Given I am on the search page
+    And the RestaurantsSearchContext location state is initially null
+    When I click the neighborhood item with data-testid "neighborhood-item-soma"
+    Then the RestaurantsSearchContext location state should equal "SOMA"
+    And the URL should contain "location=SOMA"
+    When I navigate to a different page and return to the search page with "?location=SOMA" in the URL
+    Then the neighborhood item with data-testid "neighborhood-item-soma" should appear highlighted
+    And the RestaurantsSearchContext location state should equal "SOMA"
+
+  @unit-test @priority-medium
+  Scenario: Neighborhood filter combines with existing search filters without conflict
+    Given I am on the search page
+    And I have applied a cuisine filter with value "Italian" via URL parameter "cuisine=Italian"
+    And the restaurant list shows 8 Italian restaurants
+    When I click the neighborhood item with data-testid "neighborhood-item-north-beach"
+    Then the URL should contain both "cuisine=Italian" and "location=North%20Beach" parameters
+    And the restaurant list should show only Italian restaurants in North Beach
+    And the count should be less than or equal to 8 restaurants
+    When I click the neighborhood item with data-testid "neighborhood-item-north-beach" again to clear
+    Then the URL should contain "cuisine=Italian" but not "location=" parameter
+    And the restaurant list should return to showing 8 Italian restaurants
+
+  @unit-test @priority-medium
+  Scenario: Direct URL navigation with location parameter highlights corresponding neighborhood
+    Given I navigate directly to the search page with URL "/?location=Mission%20District"
+    When the page loads completely
+    Then the neighborhood item with data-testid "neighborhood-item-mission-district" should have a highlighted background color
+    And the restaurant list should display only restaurants with "Mission District" in their location field
+    And the RestaurantsSearchContext location state should equal "Mission District"
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of neighborhood section in sidebar
+    Given I am on the search page
+    When the page is fully loaded
+    Then the sidebar should visually show an "Explore by Neighborhood" heading
+    And the section should display at least 5 clickable neighborhood names in a vertical list
+    And each name should have a count in parentheses aligned to the right of the neighborhood name
+    And the section should have a chevron icon button for collapse/expand functionality
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of active neighborhood state
+    Given I am on the search page
+    And no neighborhood is currently selected
+    When I click on the neighborhood item with data-testid "neighborhood-item-mission-district"
+    Then the "Mission District" neighborhood should appear visually highlighted with a distinct background color
+    And the restaurant results area should show only restaurants with "Mission District" in their location
+    And the URL bar should display "location=Mission%20District"
+```

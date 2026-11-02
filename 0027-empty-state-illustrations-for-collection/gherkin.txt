@@ -1,0 +1,93 @@
+```gherkin
+Feature: Empty State Illustrations for Collections
+  As a user browsing my collections
+  I want to see friendly empty state UI with illustrations
+  So that I understand when I have no collections or when a collection is empty
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am logged in as "sarah.chen@email.com" with password "password123"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Display empty state when user has no collections
+    Given I have deleted all my collections
+    When I navigate to "/user/collections"
+    Then I should see an element with data-testid "empty-collections-state"
+    And I should see an SVG element with data-testid "empty-collections-illustration"
+    And I should see the text "No collections yet"
+    And I should see the text "Start organizing your favorite restaurants"
+    And I should see a button with data-testid "create-first-collection-button" containing text "Create your first collection"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Create first collection button opens dialog
+    Given I have no collections
+    And I am on the "/user/collections" page
+    When I click the button with data-testid "create-first-collection-button"
+    Then I should see the new collection dialog with data-testid "create-collection-dialog"
+    And the dialog should contain an input field with data-testid "collection-name-input"
+    And the input field should have an empty value and be focused
+
+  @unit-test @priority-high @authenticated
+  Scenario: Empty collection items list shows illustration
+    Given I have a collection named "Test Collection" with no restaurants
+    When I navigate to that collection's detail page
+    Then I should see an element with data-testid "no-collection-items-fallback"
+    And I should see an SVG element with data-testid "empty-collection-items-illustration"
+    And I should see the text "This collection is empty"
+    And I should see a button containing text "Browse Restaurants"
+
+  @unit-test @edge-case @authenticated
+  Scenario: Empty state disappears when collection is created
+    Given I have no collections
+    And I am viewing the empty collections state at "/user/collections"
+    When I click the button with data-testid "create-first-collection-button"
+    And I enter "My New Collection" as the collection name
+    And I submit the form
+    Then the element with data-testid "empty-collections-state" should no longer be visible
+    And I should see the element with data-testid "collections-grid"
+    And the collections grid should contain exactly 1 collection tile with data-testid "collection-tile"
+    And the first collection tile should display the name "My New Collection"
+
+  @unit-test @edge-case @authenticated
+  Scenario: Empty state reappears after deleting last collection
+    Given I have exactly 1 collection named "My Only Collection"
+    And I am on the "/user/collections" page
+    And I should see the element with data-testid "collections-grid" containing exactly 1 collection tile
+    When I click the delete button with data-testid "delete-collection-button" on the collection named "My Only Collection"
+    And I confirm the deletion in the confirmation dialog
+    Then the element with data-testid "collections-grid" should no longer be visible
+    And I should see an element with data-testid "empty-collections-state"
+    And I should see the text "No collections yet"
+
+  @unit-test @integration @authenticated
+  Scenario: Collection state updates across browser tabs
+    Given I have no collections
+    And I am viewing the empty collections state at "/user/collections"
+    And I open a second browser tab at "/user/collections"
+    When in the first tab I click the button with data-testid "create-first-collection-button"
+    And I enter "Cross Tab Collection" as the collection name
+    And I submit the form
+    And I switch to the second browser tab
+    And I refresh the page
+    Then in the second tab I should see the element with data-testid "collections-grid"
+    And the collections grid should contain exactly 1 collection tile with the name "Cross Tab Collection"
+    And the element with data-testid "empty-collections-state" should not be present
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of empty collections page
+    Given I have no collections
+    When I navigate to "/user/collections"
+    Then the element with data-testid "empty-collections-state" should be vertically centered in the viewport
+    And the SVG with data-testid "empty-collections-illustration" should be positioned above the text "No collections yet"
+    And the button with data-testid "create-first-collection-button" should be positioned below the description text "Start organizing your favorite restaurants"
+    And the empty state container should have equal horizontal margins on left and right with at least 16px padding
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of empty collection items
+    Given I have created a collection named "Empty Test" with no restaurants
+    When I navigate to that collection's detail page
+    Then the element with data-testid "no-collection-items-fallback" should be vertically centered within the content area below the collection header
+    And the SVG with data-testid "empty-collection-items-illustration" should be positioned above the text "This collection is empty"
+    And the "Browse Restaurants" button should be positioned below the empty state text with at least 16px vertical spacing
+    And the empty state container should have equal horizontal margins on left and right
+```

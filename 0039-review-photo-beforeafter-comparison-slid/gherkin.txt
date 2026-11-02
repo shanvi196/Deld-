@@ -1,0 +1,95 @@
+```gherkin
+Feature: Review Photo Before/After Comparison Slider
+  As a user viewing restaurant reviews
+  I want to see before/after photo comparisons using a draggable slider
+  So that I can compare food presentation (e.g., dish arrival vs. after eating)
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Comparison toggle button appears for reviews with exactly 2 photos
+    Given I am on the restaurant details page "/restaurants/rest_0001"
+    And the reviews list with data-testid="reviews-list" is visible
+    When I locate the first review card with exactly 2 photos
+    Then I should see a toggle button with data-testid="comparison-toggle-button"
+    And the toggle button should display text "View as Comparison"
+
+  @unit-test @priority-high @edge-case
+  Scenario: Comparison toggle button does NOT appear for reviews with 1, 3, or 4 photos
+    Given I am on the restaurant details page "/restaurants/rest_0001"
+    And the reviews list with data-testid="reviews-list" is visible
+    When I locate review cards with 1, 3, or 4 photos
+    Then those review cards should NOT have a toggle button with data-testid="comparison-toggle-button"
+    And photos should display in standard grid format
+
+  @unit-test @priority-high
+  Scenario: Clicking toggle button shows ComparisonSlider and hides photo grid
+    Given I am on the restaurant details page "/restaurants/rest_0001"
+    And I locate the first review with exactly 2 photos and visible toggle button
+    When I click the toggle button with data-testid="comparison-toggle-button"
+    Then the toggle button text should change to "View as Grid"
+    And the comparison slider with data-testid="comparison-slider-container" should be visible
+    And the before image with data-testid="comparison-before-image" should be visible
+    And the after image with data-testid="comparison-after-image" should be visible
+    And the standard photo grid should be hidden
+
+  @unit-test @priority-medium
+  Scenario: Clicking toggle again returns to standard photo grid view
+    Given I am on the restaurant details page "/restaurants/rest_0001"
+    And I have toggled comparison mode ON for the first review with 2 photos
+    And the comparison slider with data-testid="comparison-slider-container" is visible
+    When I click the toggle button with data-testid="comparison-toggle-button" again
+    Then the toggle button text should change back to "View as Comparison"
+    And the comparison slider should be hidden
+    And the standard photo grid with exactly 2 photo thumbnails should be visible
+
+  @unit-test @priority-high
+  Scenario: Comparison slider handle maintains independent state across multiple reviews
+    Given I am on the restaurant details page "/restaurants/rest_0001"
+    And there are at least 2 reviews each with exactly 2 photos
+    When I activate comparison mode on the first review with 2 photos
+    And I drag the first review's slider handle to 25% position
+    And I activate comparison mode on the second review with 2 photos
+    Then the first review's slider handle should remain at 25% position
+    And the second review's slider handle should be at the default 50% position
+    And both comparison sliders should operate independently
+
+  @unit-test @priority-high @edge-case
+  Scenario: Comparison slider handles rapid toggle state changes without visual glitches
+    Given I am on the restaurant details page "/restaurants/rest_0001"
+    And I locate the first review with exactly 2 photos
+    And the toggle button displays "View as Comparison"
+    When I click the toggle button 5 times in rapid succession within 1 second
+    Then the final toggle state should be "View as Grid" (comparison mode ON)
+    And the comparison slider with data-testid="comparison-slider-container" should be visible
+    And no duplicate comparison sliders or photo grids should be rendered
+    And the slider handle should be positioned at exactly 50%
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of comparison slider in active state at 50% position
+    Given I am on the restaurant details page "/restaurants/rest_0001"
+    And the reviews section is scrolled into view
+    When I activate comparison mode by clicking the toggle button on the first review with 2 photos
+    Then the page should visually show:
+      - A comparison slider container with dimensions 300px width by 200px height
+      - Two overlapping images with the before image on the left half and after image on the right half
+      - A vertical draggable handle/divider positioned exactly at the horizontal center (150px from left)
+      - The toggle button displaying "View as Grid" text below the slider
+      - Both images equally split at the 50% divider line
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of comparison slider at extreme handle positions (0% and 100%)
+    Given I am on the restaurant details page "/restaurants/rest_0001"
+    And I have activated comparison mode for the first review with 2 photos
+    When I drag the slider handle to 0% position (leftmost)
+    Then the page should visually show:
+      - The "after" image fully visible at 100% width (300px)
+      - The "before" image completely hidden (0px visible width)
+      - The slider handle flush against the left edge of the container
+    When I drag the slider handle to 100% position (rightmost)
+    Then the page should visually show:
+      - The "before" image fully visible at 100% width (300px)
+      - The "after" image completely hidden (0px visible width)
+      - The slider handle flush against the right edge of the container
+```

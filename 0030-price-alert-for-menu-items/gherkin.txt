@@ -1,0 +1,87 @@
+```gherkin
+Feature: Price Alert for Menu Items
+  As a price-conscious user
+  I want to set price alerts on menu items
+  So that I can track when prices drop to my target
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Open price alert modal from menu item
+    Given I am on restaurant "rest_0001" details page
+    And the menu section is visible with at least 1 menu item
+    When I click the "Alert me" button with data-testid "alert-me-button" on the first menu item
+    Then a modal with data-testid "price-alert-modal" should be visible
+    And the modal should contain an input with data-testid "target-price-input" with empty value
+    And the modal should contain a button with data-testid "save-alert-button" in enabled state
+
+  @unit-test @priority-high
+  Scenario: Save price alert to localStorage
+    Given I am on restaurant "rest_0001" details page
+    And I have opened the price alert modal for a menu item with price "$12.99"
+    And localStorage key "priceAlerts" contains 0 items
+    When I enter "10.00" in the target price input with data-testid "target-price-input"
+    And I click the save button with data-testid "save-alert-button"
+    Then localStorage key "priceAlerts" should contain exactly 1 item
+    And the saved alert should have "targetPrice" equal to 10.00
+    And the saved alert should have "currentPrice" equal to 12.99
+    And the saved alert should have "menuItemId" as a non-empty string
+    And the saved alert should have "createdAt" as a valid ISO timestamp
+    And the modal with data-testid "price-alert-modal" should not be visible
+
+  @unit-test @priority-high @authenticated
+  Scenario: View alerts on user alerts page with status indicator
+    Given I am logged in as "sarah.chen@email.com"
+    And localStorage "priceAlerts" contains an alert for menu item "Margherita Pizza" with targetPrice 8.00 and currentPrice 12.99
+    When I navigate to "http://localhost:3000/user/alerts"
+    Then the page should display an alerts list with data-testid "alerts-list"
+    And exactly 1 alert card with data-testid "alert-card" should be visible
+    And the first alert card should display text "Margherita Pizza"
+    And the first alert card should display current price "$12.99"
+    And the first alert card should display target price "$8.00"
+    And the alert status with data-testid "alert-status" should display "Watching"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Delete alert from alerts page updates localStorage immediately
+    Given I am logged in as "sarah.chen@email.com"
+    And localStorage "priceAlerts" contains exactly 2 alerts
+    When I navigate to "http://localhost:3000/user/alerts"
+    Then exactly 2 alert cards with data-testid "alert-card" should be visible
+    When I click the delete button with data-testid "delete-alert-button" on the first alert card
+    Then localStorage "priceAlerts" should contain exactly 1 item
+    And exactly 1 alert card with data-testid "alert-card" should be visible
+
+  @unit-test @priority-medium
+  Scenario: Reject target price equal to current price with validation error
+    Given I am on restaurant "rest_0001" details page
+    And I have opened the price alert modal for a menu item with price "$12.99"
+    And localStorage key "priceAlerts" contains 0 items
+    When I enter "12.99" in the target price input with data-testid "target-price-input"
+    And I click the save button with data-testid "save-alert-button"
+    Then an error message with exact text "Target price must be below current price" should be visible within the modal
+    And localStorage key "priceAlerts" should still contain 0 items
+    And the modal with data-testid "price-alert-modal" should remain visible
+
+  @unit-test @priority-medium @authenticated
+  Scenario: Alert status shows price dropped when current price meets target
+    Given I am logged in as "sarah.chen@email.com"
+    And localStorage "priceAlerts" contains an alert for menu item "Caesar Salad" with targetPrice 10.00 and currentPrice 9.50
+    When I navigate to "http://localhost:3000/user/alerts"
+    Then the first alert card should display text "Caesar Salad"
+    And the alert status with data-testid "alert-status" on the first card should display "Price dropped!"
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of price alert modal
+    Given I am on restaurant "rest_0001" details page
+    And the menu section is visible with at least 1 menu item
+    When I click the "Alert me" button with data-testid "alert-me-button" on the first menu item
+    Then the page should visually show a centered modal dialog with semi-transparent backdrop, containing a labeled target price input field with dollar sign prefix and a prominently styled save button
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of alerts management page with mixed statuses
+    Given I am logged in as "sarah.chen@email.com"
+    And localStorage "priceAlerts" contains 2 alerts: one with targetPrice 8.00 and currentPrice 12.99 showing "Watching", and one with targetPrice 15.00 and currentPrice 10.00 showing "Price dropped!"
+    When I navigate to "http://localhost:3000/user/alerts"
+    Then the page should visually show a list of alert cards with menu item names in bold, current and target prices clearly labeled, status indicators with distinct colors for "Watching" versus "Price dropped!", and delete buttons positioned consistently on each card
+```

@@ -1,0 +1,98 @@
+```gherkin
+Feature: Collection Restaurant Route Planner
+  As a user with a restaurant collection
+  I want to plan an optimized visiting route for my saved restaurants
+  So that I can efficiently visit multiple restaurants on a food tour
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am logged in as "sarah.chen@email.com" with password "password123"
+
+  @unit-test @priority-high @authenticated
+  Scenario: Plan Route button click triggers route calculation and displays polyline
+    Given I have a collection with exactly 3 restaurants
+    And I am on the collection detail page at "/user/collections/{collectionId}"
+    And the map displays exactly 3 restaurant markers
+    When I click the "Plan Route" button with data-testid "plan-route-button"
+    Then a polyline with data-testid "route-polyline" should be visible on the map
+    And the polyline should have exactly 3 coordinate points connecting the markers
+    And the "Plan Route" button text should change to "Clear Route"
+
+  @unit-test @priority-high @authenticated @edge-case
+  Scenario: Plan Route button disabled with fewer than 2 restaurants
+    Given I have a collection with exactly 1 restaurant
+    And I am on the collection detail page at "/user/collections/{collectionId}"
+    Then the "Plan Route" button with data-testid "plan-route-button" should be disabled
+    And the button should have a title attribute containing "Not enough restaurants"
+    And no element with data-testid "route-polyline" should exist on the page
+
+  @unit-test @priority-high @authenticated
+  Scenario: Route stats panel displays correct stop count and distance format
+    Given I have a collection with exactly 4 restaurants
+    And I am on the collection detail page at "/user/collections/{collectionId}"
+    When I click the "Plan Route" button with data-testid "plan-route-button"
+    Then the route stats panel with data-testid "route-stats" should be visible
+    And the stats panel should contain the text "4 stops"
+    And the stats panel should display distance matching the pattern "\d+\.\d+ mi"
+
+  @unit-test @priority-medium @authenticated
+  Scenario: Clear Route button removes polyline and stats panel
+    Given I have a collection with exactly 3 restaurants
+    And I am on the collection detail page at "/user/collections/{collectionId}"
+    And I have clicked the "Plan Route" button with data-testid "plan-route-button"
+    And the polyline with data-testid "route-polyline" is visible
+    And the route stats panel with data-testid "route-stats" is visible
+    When I click the "Clear Route" button with data-testid "clear-route-button"
+    Then no element with data-testid "route-polyline" should exist on the page
+    And no element with data-testid "route-stats" should exist on the page
+    And the "Plan Route" button with data-testid "plan-route-button" should be visible and enabled
+
+  @unit-test @priority-medium @authenticated @edge-case
+  Scenario: Route state persists when navigating away and returning to collection page
+    Given I have a collection with exactly 3 restaurants
+    And I am on the collection detail page at "/user/collections/{collectionId}"
+    And I have clicked the "Plan Route" button with data-testid "plan-route-button"
+    And the polyline with data-testid "route-polyline" is visible
+    When I navigate to "/user/collections" to view all collections
+    And I click on the same collection to return to "/user/collections/{collectionId}"
+    Then no element with data-testid "route-polyline" should exist on the page
+    And no element with data-testid "route-stats" should exist on the page
+    And the "Plan Route" button with data-testid "plan-route-button" should be visible and enabled
+    And the button text should be "Plan Route" not "Clear Route"
+
+  @unit-test @priority-medium @authenticated @edge-case
+  Scenario: Removing a restaurant from collection while route is displayed clears the route
+    Given I have a collection with exactly 3 restaurants
+    And I am on the collection detail page at "/user/collections/{collectionId}"
+    And I have clicked the "Plan Route" button with data-testid "plan-route-button"
+    And the polyline with data-testid "route-polyline" is visible
+    And the route stats panel shows "3 stops"
+    When I click the remove button on the first restaurant card with data-testid "remove-restaurant-0"
+    Then no element with data-testid "route-polyline" should exist on the page
+    And no element with data-testid "route-stats" should exist on the page
+    And the map should display exactly 2 restaurant markers
+    And the "Plan Route" button should be visible with text "Plan Route"
+
+  @screenshot-test @priority-high @authenticated
+  Scenario: Visual validation of route polyline connecting restaurant markers
+    Given I am logged in as "sarah.chen@email.com"
+    And I navigate to a collection detail page with exactly 4 restaurants
+    When I click the "Plan Route" button with data-testid "plan-route-button"
+    And I wait for the element with data-testid "route-polyline" to be visible
+    Then the map should display:
+      - Exactly 4 restaurant markers at saved locations
+      - A blue polyline connecting all 4 markers in sequence
+      - Route stats panel in bottom-left showing "4 stops" and distance in miles
+      - "Clear Route" button visible below the collection info
+
+  @screenshot-test @priority-medium @authenticated
+  Scenario: Visual validation of disabled Plan Route button state
+    Given I am logged in as "sarah.chen@email.com"
+    And I navigate to a collection detail page with exactly 1 restaurant
+    Then the page should display:
+      - Collection name header at top of page
+      - "Plan Route" button with grayed-out disabled styling
+      - Tooltip text "Not enough restaurants" on button hover
+      - Single restaurant card in the list
+      - Map with exactly 1 marker and no polyline
+```

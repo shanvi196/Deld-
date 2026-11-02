@@ -1,0 +1,181 @@
+problem_id: 0033-review-comparison-side-by-side-view
+app: deld
+task:
+  prompt: 'Implement a Review Comparison feature for the Deld restaurant app. Users browsing restaurant reviews want to compare
+    2-3 reviews side-by-side to better evaluate dining choices.
+
+
+    **Feature Requirements**:
+
+
+    1. **Review Selection**: Add checkbox selection to review cards on the restaurant details page. Each review card displays
+    a checkbox (data-testid="review-select-checkbox-{reviewId}"). Selected reviews show a visual highlight (e.g., blue border).
+    A "Compare Selected" button (data-testid="compare-selected-button") appears when 1+ reviews selected, showing count like
+    "Compare (2)". Button is disabled when <2 or >3 selected.
+
+
+    2. **Comparison Modal**: Clicking "Compare Selected" opens a Radix Dialog modal (data-testid="review-comparison-modal")
+    with backdrop (data-testid="comparison-modal-backdrop"). Modal displays selected reviews in side-by-side columns (data-testid="comparison-review-column-0",
+    "comparison-review-column-1", etc.). Each column shows: rating stars, review text, visit type badge. Close button (data-testid="comparison-modal-close")
+    dismisses modal and clears selection. Clicking backdrop also closes modal and clears selection.
+
+
+    **Routes**: Restaurant details page at /restaurants/[id]
+
+
+    **Element Selectors**:
+
+    - Comparison review column 1: `[data-testid="comparison-review-column-1"]`'
+hint: '**Files**: ~4 (review card component, comparison modal component, selection state hook, restaurant reviews section)
+
+
+  **Authentication**: Not required - feature works for all users
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password:
+  password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Review Comparison feature for the Deld restaurant app. Users browsing restaurant revi...
+  intent: 38
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: compare_button_state_transitions_based_on_selection_count
+    checklist_label: Compare button state transitions based on selection count
+    source_test_file: tests/compare_button_state_transitions_based_on_selection_count.spec.ts
+    destination_test_file: /workdir/app/__tests__/compare_button_state_transitions_based_on_selection_count.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: comparison_modal_displays_reviews_in_side_by_side_columns
+    checklist_label: Comparison modal displays reviews in side by side columns
+    source_test_file: tests/comparison_modal_displays_reviews_in_side_by_side_columns.spec.ts
+    destination_test_file: /workdir/app/__tests__/comparison_modal_displays_reviews_in_side_by_side_columns.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: closing_modal_clears_all_selection_state
+    checklist_label: Closing modal clears all selection state
+    source_test_file: tests/closing_modal_clears_all_selection_state.spec.ts
+    destination_test_file: /workdir/app/__tests__/closing_modal_clears_all_selection_state.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: deselecting_a_review_updates_button_count
+    checklist_label: Deselecting a review updates button count
+    source_test_file: tests/deselecting_a_review_updates_button_count.spec.ts
+    destination_test_file: /workdir/app/__tests__/deselecting_a_review_updates_button_count.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: selection_state_persists_when_scrolling
+    checklist_label: Selection state persists when scrolling
+    source_test_file: tests/selection_state_persists_when_scrolling.spec.ts
+    destination_test_file: /workdir/app/__tests__/selection_state_persists_when_scrolling.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clicking_outside_modal_backdrop_closes_modal_and_clears_selection
+    checklist_label: Clicking outside modal backdrop closes modal and clears selection
+    source_test_file: tests/clicking_outside_modal_backdrop_closes_modal_and_clears_selection.spec.ts
+    destination_test_file: /workdir/app/__tests__/clicking_outside_modal_backdrop_closes_modal_and_clears_selection.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_review
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the review selection UI on a scale of 0 to 1:
+
+
+      0 - Selection feature missing: No checkboxes visible on review cards, no way to select reviews, or no Compare button
+      visible anywhere on the page.
+
+
+      1 - Selection feature working: Review cards display checkboxes with data-testid pattern "review-select-checkbox-{id}",
+      two reviews are visibly selected (checked checkboxes and/or visual highlight like border), and a Compare button with
+      data-testid "compare-selected-button" is visible showing the count (e.g., "Compare (2)").'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]''); if (reviewsSection)
+      reviewsSection.scrollIntoView({ behavior: ''instant'' }); })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const checkboxes = document.querySelectorAll('[data-testid^="review-select-checkbox-"]'); if (checkboxes[0])
+      checkboxes[0].click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 300))
+    - (function() { const checkboxes = document.querySelectorAll('[data-testid^="review-select-checkbox-"]'); if (checkboxes[2])
+      checkboxes[2].click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_comparison
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the comparison modal on a scale of 0 to 1:
+
+
+      0 - Modal not visible: No modal/dialog overlay appears on the page, or the page shows an error state, or nothing changed
+      after the button click.
+
+
+      1 - Modal displaying comparison: A modal/dialog with data-testid "review-comparison-modal" is visible overlaying the
+      page with a semi-transparent backdrop (data-testid "comparison-modal-backdrop"), displaying 3 reviews in side-by-side
+      columns (data-testid "comparison-review-column-0/1/2"). Each column shows review content (rating stars, review text,
+      visit type badge). A close button with data-testid "comparison-modal-close" is visible in the modal.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - (function() { const checkboxes = document.querySelectorAll('[data-testid^="review-select-checkbox-"]'); if (checkboxes[0])
+      checkboxes[0].click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 300))
+    - (function() { const checkboxes = document.querySelectorAll('[data-testid^="review-select-checkbox-"]'); if (checkboxes[1])
+      checkboxes[1].click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 300))
+    - (function() { const checkboxes = document.querySelectorAll('[data-testid^="review-select-checkbox-"]'); if (checkboxes[2])
+      checkboxes[2].click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const btn = document.querySelector('[data-testid="compare-selected-button"]'); if (btn && !btn.disabled)
+      btn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - eslint
+  - tsc
+  - vlm.screenshot_10_rate_the_comparison
+  - vlm.screenshot_9_rate_the_review
+  - checklist_items
+  grader_weights:
+    compare_button_state_transitions_based_on_selection_count: 1.0
+  gating_graders:
+  - playwright_test.clicking_outside_modal_backdrop_closes_modal_and_clears_selection
+  - playwright_test.closing_modal_clears_all_selection_state
+  - playwright_test.comparison_modal_displays_reviews_in_side_by_side_columns
+  - playwright_test.deselecting_a_review_updates_button_count
+  - playwright_test.selection_state_persists_when_scrolling

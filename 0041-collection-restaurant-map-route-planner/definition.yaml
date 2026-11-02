@@ -1,0 +1,213 @@
+problem_id: 0041-collection-restaurant-map-route-planner
+app: deld
+task:
+  prompt: 'Implement a Route Planner for Collections. On the collection detail page
+    (/user/collections/[id]), add route planning functionality.
+
+
+    **Feature Requirements**:
+
+
+    1. **Plan Route Button**: Add a "Plan Route" button (data-testid="plan-route-button")
+    below the collection info section. When clicked, it calculates an optimized visiting
+    order for restaurants using nearest-neighbor algorithm starting from the first
+    restaurant. The button should be disabled if fewer than 2 restaurants exist in
+    the collection. Display "Not enough restaurants" tooltip when disabled.
+
+
+    2. **Route Visualization**: When route is planned, render a Leaflet Polyline (data-testid="route-polyline")
+    connecting restaurant markers in the optimized order. Show route stats panel (data-testid="route-stats")
+    displaying total number of stops and estimated total distance in miles (sum of
+    straight-line distances). Add "Clear Route" button (data-testid="clear-route-button")
+    to remove the polyline and stats.
+
+
+    **Routes**: /user/collections/[id] (existing page, add components)
+
+
+    **Element Selectors**:
+    - Remove restaurant 0: `[data-testid="remove-restaurant-0"]`
+    - Leaflet marker icon: CSS class `leaflet-marker-icon`'
+hint: '**Files**: ~4 (route-planner component, distance utility, collection detail
+  page integration, polyline component)
+
+
+  **Authentication**: Required (collections are user-specific)'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Route Planner for Collections. On the collection detail
+    page (/user/collections/[id])...
+  intent: 49
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_polyline_when_plan_route_is_clicked_on_collection_with_3_restaurants
+    checklist_label: Display polyline when plan route is clicked on collection with
+      3 restaurants
+    source_test_file: tests/should_display_polyline_when_plan_route_is_clicked_on_collection_with_3_restaurants.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_polyline_when_plan_route_is_clicked_on_collection_with_3_restaurants.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_disable_plan_route_button_when_collection_has_fewer_than_2_restaurants
+    checklist_label: Disable plan route button when collection has fewer than 2 restaurants
+    source_test_file: tests/should_disable_plan_route_button_when_collection_has_fewer_than_2_restaurants.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_disable_plan_route_button_when_collection_has_fewer_than_2_restaurants.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_route_stats_with_correct_stop_count_and_distance_in_miles
+    checklist_label: Display route stats with correct stop count and distance in miles
+    source_test_file: tests/should_display_route_stats_with_correct_stop_count_and_distance_in_miles.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_route_stats_with_correct_stop_count_and_distance_in_miles.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_remove_polyline_and_stats_when_clear_route_is_clicked
+    checklist_label: Remove polyline and stats when clear route is clicked
+    source_test_file: tests/should_remove_polyline_and_stats_when_clear_route_is_clicked.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_remove_polyline_and_stats_when_clear_route_is_clicked.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_reset_route_state_when_navigating_away_and_returning
+    checklist_label: Reset route state when navigating away and returning
+    source_test_file: tests/should_reset_route_state_when_navigating_away_and_returning.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_reset_route_state_when_navigating_away_and_returning.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_clear_route_when_a_restaurant_is_removed_from_collection
+    checklist_label: Clear route when a restaurant is removed from collection
+    source_test_file: tests/should_clear_route_when_a_restaurant_is_removed_from_collection.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_clear_route_when_a_restaurant_is_removed_from_collection.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_route
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the route polyline visualization on a scale of 0 to 1:
+
+
+      0 - Route not displayed: No polyline visible on the map, or "Plan Route" button
+      missing/not functional, or route stats panel not showing, or markers not connected
+
+
+      1 - Route correctly displayed: Blue polyline visible connecting multiple restaurant
+      markers in sequence on the map, route stats panel visible showing stop count
+      (e.g., "X stops") and distance in miles format, "Clear Route" button visible,
+      all restaurant markers clearly visible at saved locations'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const pwdInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (pwdInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(pwdInput, ''password123''); pwdInput.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const avatarTrigger = document.querySelector('[data-testid="user-avatar-menu-trigger"]');
+      if (avatarTrigger) avatarTrigger.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const collectionsLink = document.querySelector('[data-testid="user-avatar-menu-collections"]');
+      if (collectionsLink) collectionsLink.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const collectionTile = document.querySelector('[data-testid^="collection-tile-"]')
+      || document.querySelector('a[href*="/user/collections/"]'); if (collectionTile)
+      collectionTile.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - (function() { const planRouteBtn = document.querySelector('[data-testid="plan-route-button"]');
+      if (planRouteBtn && !planRouteBtn.disabled) planRouteBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_disabled
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the disabled Plan Route button state on a scale of 0
+      to 1:
+
+
+      0 - Incorrect button state: "Plan Route" button is enabled (clickable) despite
+      having fewer than 2 restaurants, or button is missing entirely, or tooltip/title
+      text is missing
+
+
+      1 - Correct disabled state: "Plan Route" button visible with grayed-out/disabled
+      styling (visually muted colors, cursor not pointer), button shows disabled attribute,
+      title or tooltip text showing "Not enough restaurants" visible or accessible,
+      collection shown has 0 or 1 restaurant cards in the list, map shows 0 or 1 markers
+      with no polyline'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const pwdInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (pwdInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(pwdInput, ''password123''); pwdInput.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const avatarTrigger = document.querySelector('[data-testid="user-avatar-menu-trigger"]');
+      if (avatarTrigger) avatarTrigger.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const collectionsLink = document.querySelector('[data-testid="user-avatar-menu-collections"]');
+      if (collectionsLink) collectionsLink.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const tiles = document.querySelectorAll('[data-testid^="collection-tile-"]');
+      for (const tile of tiles) { const countEl = tile.querySelector('[data-testid="collection-items-count"]');
+      if (countEl && countEl.textContent) { const count = parseInt(countEl.textContent);
+      if (count < 2) { tile.click(); return; } } } const createBtn = document.querySelector('[data-testid="create-collection-button"]');
+      if (createBtn) createBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const nameInput = document.querySelector(''[data-testid="collection-name-input"]'');
+      if (nameInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(nameInput, ''Empty Route Test''); nameInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const saveBtn = document.querySelector('[data-testid="save-collection-button"]');
+      if (saveBtn) saveBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))

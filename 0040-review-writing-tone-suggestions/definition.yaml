@@ -1,0 +1,210 @@
+problem_id: 0040-review-writing-tone-suggestions
+app: deld
+task:
+  prompt: 'Implement Review Writing Tone Suggestions for the Deld restaurant reviews
+    app. Add inline suggestions in the review text area that appear when the user
+    types negative language, offering constructive alternatives.
+
+
+    **Feature Requirements**:
+
+
+    1. **Tone Suggestion Popover**: Create a Radix Popover component that anchors
+    near the textarea. When user types text matching negative patterns (defined in
+    config), show popover with the matched phrase highlighted in red with strikethrough
+    styling (data-testid="tone-negative-highlight") and the constructive alternative
+    highlighted in green (data-testid="tone-positive-highlight").
+    Add "Apply Suggestion" button with data-testid="apply-suggestion-button" and "Dismiss"
+    button with data-testid="dismiss-suggestion-button". Popover container uses data-testid="tone-suggestion-popover".
+
+
+    2. **Suggestion Config & Detection**: Create a local config file at src/config/tone-suggestions.ts
+    with an array of suggestion rules. Each rule has: pattern (regex string), matchText
+    (phrase to detect like "terrible" or "worst ever"), and suggestion (constructive
+    alternative text). Detect matches on textarea onChange using these patterns. Show
+    only first match found. When "Apply Suggestion" clicked, replace matched text
+    in textarea with suggestion text.
+
+
+    **Routes**: No new routes (extends existing /addreview/[restaurantId] and /editreview/[reviewId]
+    pages)
+
+
+    **Element Selectors**:
+    - Post review button: `[data-testid="post-review-button"]`
+    - Rating star 3: `[data-testid="rating-star-3"]`
+    - Negative highlight (strikethrough): `[data-testid="tone-negative-highlight"]`
+    - Positive highlight (suggestion): `[data-testid="tone-positive-highlight"]`'
+hint: '**Files**: ~4 files (tone-suggestions.ts config, popover atom component, modified
+  about-experience.tsx, package.json for @radix-ui/react-popover)
+
+
+  **Authentication**: Required (review pages are auth-protected)'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement Review Writing Tone Suggestions for the Deld restaurant reviews
+    app. Add inline suggest...
+  intent: 48
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_show_tone_suggestion_popover_when_typing_negative_language
+    checklist_label: Show tone suggestion popover when typing negative language
+    source_test_file: tests/should_show_tone_suggestion_popover_when_typing_negative_language.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_tone_suggestion_popover_when_typing_negative_language.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_apply_suggestion_and_replace_negative_text_when_clicking_apply_suggestion
+    checklist_label: Apply suggestion and replace negative text when clicking apply
+      suggestion
+    source_test_file: tests/should_apply_suggestion_and_replace_negative_text_when_clicking_apply_suggestion.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_apply_suggestion_and_replace_negative_text_when_clicking_apply_suggestion.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_dismiss_suggestion_and_preserve_textarea_content_when_clicking_dismiss
+    checklist_label: Dismiss suggestion and preserve textarea content when clicking
+      dismiss
+    source_test_file: tests/should_dismiss_suggestion_and_preserve_textarea_content_when_clicking_dismiss.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_dismiss_suggestion_and_preserve_textarea_content_when_clicking_dismiss.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_clear_popover_state_when_navigating_from_add_to_edit_review_page
+    checklist_label: Clear popover state when navigating from add to edit review page
+    source_test_file: tests/should_clear_popover_state_when_navigating_from_add_to_edit_review_page.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_clear_popover_state_when_navigating_from_add_to_edit_review_page.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_not_show_popover_when_typing_positive_or_neutral_text
+    checklist_label: Not show popover when typing positive or neutral text
+    source_test_file: tests/should_not_show_popover_when_typing_positive_or_neutral_text.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_not_show_popover_when_typing_positive_or_neutral_text.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_close_popover_when_negative_text_is_deleted_and_not_reappear_for_positive_text
+    checklist_label: Close popover when negative text is deleted and not reappear
+      for positive text
+    source_test_file: tests/should_close_popover_when_negative_text_is_deleted_and_not_reappear_for_positive_text.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_close_popover_when_negative_text_is_deleted_and_not_reappear_for_positive_text.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_tone
+    screenshot_url: http://localhost:3000/addreview/
+    evaluation_rubric: 'Rate the tone suggestion popover appearance on a scale of
+      0 to 1:
+
+
+      0 - Popover not visible OR missing required elements: No popover appears near
+      the textarea after typing negative text, OR the popover is missing the highlighted
+      phrase "terrible", OR the "Apply Suggestion" button is not visible, OR the "Dismiss"
+      button is not visible, OR the constructive alternative suggestion text is not
+      displayed.
+
+
+      1 - Popover fully functional: The tone suggestion popover with data-testid="tone-suggestion-popover"
+      is visible and anchored near the textarea. The matched phrase "terrible" is
+      displayed with a highlighted style (distinct color, background, or formatting).
+      A constructive alternative suggestion text is shown below the matched phrase.
+      Both the "Apply Suggestion" button with data-testid="apply-suggestion-button"
+      and the "Dismiss" button with data-testid="dismiss-suggestion-button" are clearly
+      visible and actionable.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const input = document.querySelector(''[data-testid="login-email-input"]'');
+      if (input) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(input, ''sarah.chen@email.com''); input.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const input = document.querySelector(''[data-testid="login-password-input"]'');
+      if (input) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(input, ''password123''); input.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const textarea = document.querySelector(''[data-testid="review-textarea"]'');
+      if (textarea) { Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,
+      ''value'').set.call(textarea, ''The service was terrible''); textarea.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_state
+    screenshot_url: http://localhost:3000/addreview/
+    evaluation_rubric: 'Rate the state after applying tone suggestion on a scale of
+      0 to 1:
+
+
+      0 - Apply suggestion failed: The tone suggestion popover with data-testid="tone-suggestion-popover"
+      is still visible after clicking Apply Suggestion, OR the review textarea still
+      contains the word "terrible", OR the textarea is empty/cleared incorrectly,
+      OR a character count indicator shows 0 characters.
+
+
+      1 - Apply suggestion successful: The tone suggestion popover with data-testid="tone-suggestion-popover"
+      is no longer visible (dismissed after applying). The review textarea displays
+      updated text that does NOT contain the word "terrible" but instead contains
+      the constructive alternative replacement text. The character count indicator
+      (if present) displays a number greater than 0, reflecting the new text length.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const input = document.querySelector(''[data-testid="login-email-input"]'');
+      if (input) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(input, ''sarah.chen@email.com''); input.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const input = document.querySelector(''[data-testid="login-password-input"]'');
+      if (input) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(input, ''password123''); input.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const textarea = document.querySelector(''[data-testid="review-textarea"]'');
+      if (textarea) { Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,
+      ''value'').set.call(textarea, ''The food was terrible''); textarea.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+    - (function() { const applyBtn = document.querySelector('[data-testid="apply-suggestion-button"]');
+      if (applyBtn) applyBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))

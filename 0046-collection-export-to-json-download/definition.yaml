@@ -1,0 +1,166 @@
+problem_id: 0046-collection-export-to-json-download
+app: deld
+task:
+  prompt: 'Implement Collection Export to JSON Download. Users want to export their restaurant collections as JSON files for backup or sharing.
+
+
+    **Feature Requirements**:
+
+
+    1. **Export Button**: Add an ''Export'' button (data-testid=''export-collection-button'') to the collection detail page at /user/collections/[id]. Button should appear in the collection info section near the existing action buttons. Use secondary button styling consistent with existing UI.
+
+
+    2. **JSON Download**: When clicked, generate and download a JSON file named ''{collection-name}.json''. The JSON structure must include: collection name, createdAt date, and restaurants array with objects containing id, name, cuisine (first item only), rating, and address (formatted as ''street, city, state''). Use browser Blob API and programmatic anchor click for download.
+
+
+    **Routes**: /user/collections/[id] (modify existing)
+
+
+    **Element Selectors**:
+
+    - Collection tile: `[data-testid^="collection-tile-"]`'
+hint: '**Files**: ~3 (collection info component, export utility function, types if needed)
+
+
+  **Authentication**: Required (collection pages are auth-protected)'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement Collection Export to JSON Download. Users want to export their restaurant collections a...
+  intent: 55
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: export_button_is_visible_on_collection_detail_page
+    checklist_label: Export button is visible on collection detail page
+    source_test_file: tests/export_button_is_visible_on_collection_detail_page.spec.ts
+    destination_test_file: /workdir/app/__tests__/export_button_is_visible_on_collection_detail_page.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: export_button_has_correct_text_label
+    checklist_label: Export button has correct text label
+    source_test_file: tests/export_button_has_correct_text_label.spec.ts
+    destination_test_file: /workdir/app/__tests__/export_button_has_correct_text_label.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clicking_export_triggers_json_file_download
+    checklist_label: Clicking export triggers json file download
+    source_test_file: tests/clicking_export_triggers_json_file_download.spec.ts
+    destination_test_file: /workdir/app/__tests__/clicking_export_triggers_json_file_download.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: exported_json_contains_collection_name_and_createdat_fields
+    checklist_label: Exported json contains collection name and createdat fields
+    source_test_file: tests/exported_json_contains_collection_name_and_createdat_fields.spec.ts
+    destination_test_file: /workdir/app/__tests__/exported_json_contains_collection_name_and_createdat_fields.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: exported_json_restaurants_array_contains_required_fields_with_correct_types
+    checklist_label: Exported json restaurants array contains required fields with correct types
+    source_test_file: tests/exported_json_restaurants_array_contains_required_fields_with_correct_types.spec.ts
+    destination_test_file: /workdir/app/__tests__/exported_json_restaurants_array_contains_required_fields_with_correct_types.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: export_works_correctly_for_empty_collection_with_zero_restaurants
+    checklist_label: Export works correctly for empty collection with zero restaurants
+    source_test_file: tests/export_works_correctly_for_empty_collection_with_zero_restaurants.spec.ts
+    destination_test_file: /workdir/app/__tests__/export_works_correctly_for_empty_collection_with_zero_restaurants.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_export
+    screenshot_url: http://localhost:3000/user/collections
+    evaluation_rubric: 'Rate the Export button visibility and placement on a scale of 0 to 1:
+
+
+      0 - Export button missing or not visible: No button with data-testid "export-collection-button" appears on the collection detail page, or the button is hidden/not rendered in the collection info section.
+
+
+      1 - Export button properly displayed: The Export button is clearly visible in the collection info/actions section of the collection detail page, positioned logically near other action buttons, with secondary button styling consistent with the app''s design system (appropriate padding, border-radius, and color scheme).'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000/user/collections'
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]'); if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const el = document.querySelector(''[data-testid="login-email-input"]''); if (el) { el.focus(); Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(el, ''sarah.chen@email.com''); el.dispatchEvent(new Event(''input'', { bubbles: true })); el.dispatchEvent(new Event(''change'', { bubbles: true })); el.dispatchEvent(new Event(''blur'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - '(function() { const el = document.querySelector(''[data-testid="login-password-input"]''); if (el) { el.focus(); Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(el, ''password123''); el.dispatchEvent(new Event(''input'', { bubbles: true })); el.dispatchEvent(new Event(''change'', { bubbles: true })); el.dispatchEvent(new Event(''blur'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]'); if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 5000))
+    - (function() { const tile = document.querySelector('[data-testid^="collection-tile-"]'); if (tile) { const link = tile.closest('a'); if (link && link.href) window.location.href = link.href; } })()
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_export
+    screenshot_url: http://localhost:3000/user/collections
+    evaluation_rubric: 'Rate the Export button styling and focus state on a scale of 0 to 1:
+
+
+      0 - Button missing or no visible focus state: The Export button is not present, or when focused it shows no visual indication of focus (no focus ring, outline, or color change).
+
+
+      1 - Button has proper focus state: The Export button displays a visible focus indicator (focus ring, outline, or background color change) when focused, consistent with the app''s accessibility standards and design system. The button styling matches other action buttons in the collection info section.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000/user/collections'
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]'); if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const el = document.querySelector(''[data-testid="login-email-input"]''); if (el) { el.focus(); Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(el, ''sarah.chen@email.com''); el.dispatchEvent(new Event(''input'', { bubbles: true })); el.dispatchEvent(new Event(''change'', { bubbles: true })); el.dispatchEvent(new Event(''blur'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - '(function() { const el = document.querySelector(''[data-testid="login-password-input"]''); if (el) { el.focus(); Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(el, ''password123''); el.dispatchEvent(new Event(''input'', { bubbles: true })); el.dispatchEvent(new Event(''change'', { bubbles: true })); el.dispatchEvent(new Event(''blur'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]'); if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 5000))
+    - (function() { const tile = document.querySelector('[data-testid^="collection-tile-"]'); if (tile) { const link = tile.closest('a'); if (link && link.href) window.location.href = link.href; } })()
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - (function() { const exportBtn = document.querySelector('[data-testid="export-collection-button"]'); if (exportBtn) { exportBtn.focus(); } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - eslint
+  - tsc
+  - vlm.screenshot_10_rate_the_export
+  - vlm.screenshot_9_rate_the_export
+  - checklist_items
+  grader_weights:
+    clicking_export_triggers_json_file_download: 0.1969
+    export_button_has_correct_text_label: 0.197
+    export_button_is_visible_on_collection_detail_page: 0.197
+    export_works_correctly_for_empty_collection_with_zero_restaurants: 0.0644
+    exported_json_contains_collection_name_and_createdat_fields: 0.1477
+    exported_json_restaurants_array_contains_required_fields_with_correct_types: 0.197

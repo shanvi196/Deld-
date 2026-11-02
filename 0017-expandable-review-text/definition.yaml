@@ -1,0 +1,151 @@
+problem_id: 0017-expandable-review-text
+app: deld
+task:
+  prompt: 'Implement expandable review text for the Deld restaurant reviews app. Long reviews (>300 characters) should be
+    truncated with ellipsis and show a ''Read more'' button. When expanded, show full text with ''Show less'' button.
+
+
+    **Feature Requirements**:
+
+
+    1. **Review Text Truncation**: Modify the ReviewText component to truncate reviews exceeding 300 characters. Display truncated
+    text with ''...'' ellipsis using CSS line-clamp-4. Add ''Read more'' link button (data-testid=''review-read-more'') below
+    truncated text. Only show truncation UI for reviews >300 chars.
+
+
+    2. **Expand/Collapse Toggle**: Track expanded state per review using React useState. When expanded, show full review text
+    without line-clamp. Display ''Show less'' link button (data-testid=''review-show-less'') when expanded. Animate height
+    transition using CSS transition-all duration-300.
+
+
+    **Routes**: /restaurants/[id] (restaurant details page with reviews)'
+hint: '**Files**: ~3 (review-text.tsx component, globals.css for transitions, types if needed)
+
+
+  **Authentication**: Not required - reviews are publicly visible
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password:
+  password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement expandable review text for the Deld restaurant reviews app. Long reviews (>300 characte...
+  intent: 14
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: short_review_displays_fully_without_read_more_button
+    checklist_label: Short review displays fully without read more button
+    source_test_file: tests/short_review_displays_fully_without_read_more_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/short_review_displays_fully_without_read_more_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: long_review_is_truncated_with_read_more_button_visible
+    checklist_label: Long review is truncated with read more button visible
+    source_test_file: tests/long_review_is_truncated_with_read_more_button_visible.spec.ts
+    destination_test_file: /workdir/app/__tests__/long_review_is_truncated_with_read_more_button_visible.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clicking_read_more_expands_review_to_show_full_text
+    checklist_label: Clicking read more expands review to show full text
+    source_test_file: tests/clicking_read_more_expands_review_to_show_full_text.spec.ts
+    destination_test_file: /workdir/app/__tests__/clicking_read_more_expands_review_to_show_full_text.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: show_less_button_appears_when_review_is_expanded
+    checklist_label: Show less button appears when review is expanded
+    source_test_file: tests/show_less_button_appears_when_review_is_expanded.spec.ts
+    destination_test_file: /workdir/app/__tests__/show_less_button_appears_when_review_is_expanded.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: clicking_show_less_collapses_review_back_to_truncated_state
+    checklist_label: Clicking show less collapses review back to truncated state
+    source_test_file: tests/clicking_show_less_collapses_review_back_to_truncated_state.spec.ts
+    destination_test_file: /workdir/app/__tests__/clicking_show_less_collapses_review_back_to_truncated_state.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: multiple_reviews_maintain_independent_expanded_states
+    checklist_label: Multiple reviews maintain independent expanded states
+    source_test_file: tests/multiple_reviews_maintain_independent_expanded_states.spec.ts
+    destination_test_file: /workdir/app/__tests__/multiple_reviews_maintain_independent_expanded_states.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_truncated
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the truncated reviews display on a scale of 0 to 1:
+
+
+      0 - Reviews not truncated correctly: Long reviews display full text without truncation, no ''Read more'' link buttons
+      visible, reviews have no ellipsis or line-clamp styling, or the reviews section failed to load
+
+
+      1 - Reviews truncated correctly: Long reviews (>300 characters) are visually truncated showing approximately 4 lines
+      of text, ''Read more'' link appears in blue text below truncated review content, truncated text ends with ellipsis or
+      is cut off with CSS line-clamp, review cards have consistent height when truncated'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]''); if (reviewsSection)
+      reviewsSection.scrollIntoView({ behavior: ''instant'', block: ''center'' }); })()'
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_expanded
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the expanded review display on a scale of 0 to 1:
+
+
+      0 - Review not expanded correctly: Review text still truncated after clicking Read more, no ''Show less'' button visible,
+      review card height unchanged from truncated state, or the expand interaction failed
+
+
+      1 - Review expanded correctly: Full review text is visible without truncation or line-clamp, ''Show less'' link button
+      appears in blue text at the end of the expanded review, expanded review card is visibly taller than other truncated
+      review cards, transition appears smooth'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]''); if (reviewsSection)
+      reviewsSection.scrollIntoView({ behavior: ''instant'', block: ''center'' }); })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const readMoreBtn = document.querySelector('[data-testid="review-read-more"]'); if (readMoreBtn) readMoreBtn.click();
+      })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+extra_fields:
+  disable_graders:
+  - playwright_test.clicking_read_more_expands_review_to_show_full_text
+  - playwright_test.clicking_show_less_collapses_review_back_to_truncated_state
+  - playwright_test.long_review_is_truncated_with_read_more_button_visible
+  - playwright_test.multiple_reviews_maintain_independent_expanded_states
+  - playwright_test.show_less_button_appears_when_review_is_expanded

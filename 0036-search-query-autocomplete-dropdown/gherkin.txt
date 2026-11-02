@@ -1,0 +1,72 @@
+```gherkin
+Feature: Search Query Autocomplete Dropdown
+  As a user searching for restaurants
+  I want autocomplete suggestions as I type
+  So that I can quickly find popular search terms
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And the page has fully loaded
+
+  @unit-test @priority-high
+  Scenario: Show autocomplete dropdown when typing matching text
+    Given I am on the homepage with the search input empty
+    When I type "piz" in the search query input with data-testid="search-query-input"
+    Then the autocomplete dropdown with data-testid="search-autocomplete-dropdown" should be visible
+    And the first suggestion item with data-testid="autocomplete-item-0" should contain "Pizza"
+
+  @unit-test @priority-high
+  Scenario: Hide dropdown when input is cleared
+    Given I have typed "sushi" in the search query input
+    And the autocomplete dropdown is visible
+    When I clear the search query input
+    Then the autocomplete dropdown should not be visible
+
+  @unit-test @priority-high
+  Scenario: Fill input and close dropdown when clicking suggestion
+    Given I have typed "burg" in the search query input
+    And the autocomplete dropdown is visible with "Burgers" suggestion
+    When I click the first autocomplete item with data-testid="autocomplete-item-0"
+    Then the search query input should have value "Burgers"
+    And the autocomplete dropdown should not be visible
+
+  @unit-test @priority-medium
+  Scenario: Close dropdown when pressing Escape key
+    Given I have typed "taco" in the search query input
+    And the autocomplete dropdown is visible
+    When I press the Escape key
+    Then the autocomplete dropdown should not be visible
+    And the search query input should retain value "taco"
+
+  @unit-test @priority-medium @edge-case
+  Scenario: Show no dropdown when input matches zero suggestions
+    Given I am on the homepage with the search input empty
+    When I type "xyz123" in the search query input with data-testid="search-query-input"
+    Then the autocomplete dropdown with data-testid="search-autocomplete-dropdown" should not be visible
+    And the search query input should retain value "xyz123"
+
+  @unit-test @priority-medium @integration
+  Scenario: Close dropdown when clicking outside the search component
+    Given I have typed "pizza" in the search query input
+    And the autocomplete dropdown is visible with "Pizza" suggestion
+    When I click outside the search input on the page body
+    Then the autocomplete dropdown should not be visible
+    And the search query input should retain value "pizza"
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of autocomplete dropdown with suggestions
+    Given I am on the homepage
+    When I type "sushi" in the search query input
+    Then the page should visually show a dropdown positioned directly below the search input
+    And the dropdown should contain exactly 1 suggestion item displaying "Sushi" text
+    And the dropdown should have a visible border and white background
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation after selecting a suggestion
+    Given I have typed "break" in the search query input
+    And the autocomplete dropdown is visible with "Breakfast" suggestion
+    When I click the "Breakfast" suggestion item
+    Then the page should visually show the search input containing "Breakfast"
+    And the autocomplete dropdown should not be visible
+    And the search input should retain focus with a visible focus ring
+```

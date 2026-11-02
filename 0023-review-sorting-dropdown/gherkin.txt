@@ -1,0 +1,90 @@
+```gherkin
+Feature: Review Sorting Dropdown
+  As a user browsing restaurant reviews
+  I want to sort reviews by different criteria
+  So that I can find the most relevant reviews quickly
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am on a restaurant detail page with multiple reviews
+
+  @unit-test @priority-high
+  Scenario: Display sort dropdown with default selection
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has finished loading
+    When I view the reviews section
+    Then I should see a dropdown trigger with data-testid "review-sort-dropdown-trigger"
+    And the trigger should display "Newest First" as the default selection
+
+  @unit-test @priority-high
+  Scenario: Show all sort options when dropdown is opened
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has finished loading
+    When I click the element with data-testid "review-sort-dropdown-trigger"
+    Then I should see dropdown content with data-testid "review-sort-dropdown-content"
+    And I should see sort option "Newest First" with data-testid "review-sort-option-newest"
+    And I should see sort option "Oldest First" with data-testid "review-sort-option-oldest"
+    And I should see sort option "Highest Rated" with data-testid "review-sort-option-highest"
+    And I should see sort option "Lowest Rated" with data-testid "review-sort-option-lowest"
+    And I should see sort option "Most Helpful" with data-testid "review-sort-option-helpful"
+
+  @unit-test @priority-high
+  Scenario: Update URL param when sort option is selected
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has finished loading
+    When I click the element with data-testid "review-sort-dropdown-trigger"
+    And I click the element with data-testid "review-sort-option-highest"
+    Then the URL should contain "reviewSort=highest"
+    And the dropdown trigger should display "Highest Rated"
+
+  @unit-test @priority-medium
+  Scenario: Persist sort selection on page refresh
+    Given I navigate to "/restaurants/rest_0001?reviewSort=oldest"
+    And the page has finished loading
+    Then the dropdown trigger should display "Oldest First"
+    When I reload the page
+    And the page has finished loading
+    Then the dropdown trigger should display "Oldest First"
+    And the URL should still contain "reviewSort=oldest"
+
+  @unit-test @priority-high
+  Scenario: Reorder reviews when sorting by highest rated
+    Given I navigate to "/restaurants/rest_0001?reviewSort=oldest"
+    And the page has finished loading
+    And I note the order of review cards
+    When I click the element with data-testid "review-sort-dropdown-trigger"
+    And I click the element with data-testid "review-sort-option-highest"
+    And I wait for the URL to contain "reviewSort=highest"
+    Then the first review card should have a rating greater than or equal to the second review card
+    And the reviews should be in descending order by rating
+
+  @unit-test @priority-medium
+  Scenario: Preserve reviewSort parameter when navigating away and using browser back button
+    Given I navigate to "/restaurants/rest_0001?reviewSort=helpful"
+    And the page has finished loading
+    And the dropdown trigger should display "Most Helpful"
+    When I click a link to navigate to "/restaurants"
+    And the page has finished loading
+    And I click the browser back button
+    And the page has finished loading
+    Then the URL should contain "reviewSort=helpful"
+    And the dropdown trigger should display "Most Helpful"
+    And the reviews should be sorted by helpfulness with the most helpful review first
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of open sort dropdown
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has finished loading
+    When I click the element with data-testid "review-sort-dropdown-trigger"
+    Then the page should visually show the dropdown menu open
+    And all five sort options should be visible with proper styling
+    And the dropdown should match the app's existing design patterns
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of sorted reviews with URL state
+    Given I navigate directly to "/restaurants/rest_0001?reviewSort=highest"
+    And the page has finished loading
+    Then the page should visually show the reviews section
+    And the dropdown trigger should display "Highest Rated"
+    And review cards should be visible in the results area
+```

@@ -1,0 +1,175 @@
+problem_id: 0024-photo-zoom-and-pan-viewer
+app: deld
+task:
+  prompt: 'Implement photo zoom and pan controls for the restaurant photo viewer. Users want to inspect food and menu photos
+    more closely by zooming in and panning around.
+
+
+    **Feature Requirements**:
+
+
+    1. **Zoom Controls Overlay**: Add a control overlay to the PhotoBox component in the menu photo dialog. Include three
+    circular buttons: zoom in (+ icon, data-testid="zoom-in-button"), zoom out (- icon, data-testid="zoom-out-button"), and
+    reset zoom (expand icon, data-testid="zoom-reset-button"). Position buttons in bottom-right corner above the photo counter.
+    Zoom in increases scale by 0.5x (max 3x), zoom out decreases by 0.5x (min 1x), reset returns to 1x. Display current zoom
+    level as text "1.0x" with data-testid="zoom-level-indicator". Disable zoom-out and reset buttons when at 1x scale. Disable
+    zoom-in button when at 3x scale.
+
+
+    2. **Pan Functionality**: When zoom level is above 1x, enable click-and-drag panning on the photo. Use CSS transform for
+    both scale and translate. Track pan position with useState. Reset pan position to center (0,0) when zoom resets or when
+    navigating to different photo. Show grab cursor when zoomed (cursor: grab), default cursor at 1x. Container data-testid="zoomable-photo-container".
+
+
+    **Routes**: Existing `/restaurants/[id]` page, menu photo dialog'
+hint: '**Files**: ~3 (photo-box.tsx modification, new zoom-controls.tsx component, optional hook)
+
+
+  **Authentication**: Not required
+
+  **Preferred Account**: If login is required, please use the following credentials: - Login: sarah.chen@email.com - Password:
+  password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement photo zoom and pan controls for the restaurant photo viewer. Users want to inspect food...
+  intent: 25
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: zoom_controls_are_visible_when_photo_dialog_opens
+    checklist_label: Zoom controls are visible when photo dialog opens
+    source_test_file: tests/zoom_controls_are_visible_when_photo_dialog_opens.spec.ts
+    destination_test_file: /workdir/app/__tests__/zoom_controls_are_visible_when_photo_dialog_opens.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: zoom_in_button_increases_zoom_level_by_05x_increments_up_to_maximum_3x
+    checklist_label: Zoom in button increases zoom level by 05x increments up to maximum 3x
+    source_test_file: tests/zoom_in_button_increases_zoom_level_by_05x_increments_up_to_maximum_3x.spec.ts
+    destination_test_file: /workdir/app/__tests__/zoom_in_button_increases_zoom_level_by_05x_increments_up_to_maximum_3x.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: zoom_out_and_reset_buttons_are_disabled_at_minimum_zoom_1x
+    checklist_label: Zoom out and reset buttons are disabled at minimum zoom 1x
+    source_test_file: tests/zoom_out_and_reset_buttons_are_disabled_at_minimum_zoom_1x.spec.ts
+    destination_test_file: /workdir/app/__tests__/zoom_out_and_reset_buttons_are_disabled_at_minimum_zoom_1x.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: reset_button_returns_zoom_to_1x_and_resets_pan_position
+    checklist_label: Reset button returns zoom to 1x and resets pan position
+    source_test_file: tests/reset_button_returns_zoom_to_1x_and_resets_pan_position.spec.ts
+    destination_test_file: /workdir/app/__tests__/reset_button_returns_zoom_to_1x_and_resets_pan_position.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: zoom_and_pan_state_resets_when_navigating_to_different_photo
+    checklist_label: Zoom and pan state resets when navigating to different photo
+    source_test_file: tests/zoom_and_pan_state_resets_when_navigating_to_different_photo.spec.ts
+    destination_test_file: /workdir/app/__tests__/zoom_and_pan_state_resets_when_navigating_to_different_photo.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: zoom_out_button_decreases_zoom_level_by_05x_increments_down_to_minimum_1x
+    checklist_label: Zoom out button decreases zoom level by 05x increments down to minimum 1x
+    source_test_file: tests/zoom_out_button_decreases_zoom_level_by_05x_increments_down_to_minimum_1x.spec.ts
+    destination_test_file: /workdir/app/__tests__/zoom_out_button_decreases_zoom_level_by_05x_increments_down_to_minimum_1x.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_zoom
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the zoom controls overlay at default state on a scale of 0 to 1:
+
+
+      0 - Zoom controls not visible: Photo dialog may or may not be open, but zoom controls overlay is missing. No zoom in
+      button, zoom out button, reset button, or zoom level indicator visible in the dialog.
+
+
+      1 - Zoom controls correctly displayed: Photo dialog is open showing menu/food photo. Zoom controls overlay visible in
+      bottom-right corner with three buttons: zoom in (+), zoom out (-), and reset (expand icon). Zoom level indicator shows
+      ''1.0x'' in white text. Zoom out and reset buttons appear disabled or grayed out (reduced opacity). Photo displays at
+      normal scale (1x).'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - (function() { const slide = document.querySelector('[data-testid="menu-carousel-slide"]'); if (slide) slide.click();
+      })()
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_zoomed
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the zoomed photo state at maximum zoom on a scale of 0 to 1:
+
+
+      0 - Photo not zoomed or controls missing: Photo appears at normal 1x scale, zoom level indicator missing or still shows
+      ''1.0x'', or zoom controls overlay not visible at all.
+
+
+      1 - Photo correctly zoomed to 3.0x: Photo dialog shows zoomed-in photo at 3.0x scale (photo appears larger/cropped due
+      to zoom transform). Zoom level indicator displays ''3.0x''. Zoom in button appears disabled (reduced opacity) since
+      max zoom reached. Zoom out and reset buttons appear enabled (full opacity). Container shows grab cursor style indicating
+      pan capability.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 4500))
+    - (function() { const slide = document.querySelector('[data-testid="menu-carousel-slide"]'); if (slide) slide.click();
+      })()
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+    - (function() { const zoomIn = document.querySelector('[data-testid="zoom-in-button"]'); if (zoomIn) { zoomIn.click();
+      } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const zoomIn = document.querySelector('[data-testid="zoom-in-button"]'); if (zoomIn) { zoomIn.click();
+      } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const zoomIn = document.querySelector('[data-testid="zoom-in-button"]'); if (zoomIn) { zoomIn.click();
+      } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const zoomIn = document.querySelector('[data-testid="zoom-in-button"]'); if (zoomIn) { zoomIn.click();
+      } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - eslint
+  - tsc
+  - vlm.screenshot_10_rate_the_zoomed
+  - vlm.screenshot_9_rate_the_zoom
+  - checklist_items
+  grader_weights:
+    reset_button_returns_zoom_to_1x_and_resets_pan_position: 0.2754
+    zoom_and_pan_state_resets_when_navigating_to_different_photo: 0.3623
+    zoom_out_button_decreases_zoom_level_by_05x_increments_down_to_minimum_1x: 0.3623
+  gating_graders:
+  - playwright_test.zoom_controls_are_visible_when_photo_dialog_opens
+  - playwright_test.zoom_in_button_increases_zoom_level_by_05x_increments_up_to_maximum_3x
+  - playwright_test.zoom_out_and_reset_buttons_are_disabled_at_minimum_zoom_1x

@@ -1,0 +1,77 @@
+```gherkin
+Feature: Review Keyword Highlighting in Search Results
+  As a user searching for restaurants
+  I want to see review snippets on restaurant cards with highlighted keywords
+  So that I can quickly see relevant review content matching my search
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Review snippet displays on restaurant card
+    Given I am on the homepage with restaurant cards visible
+    When I view a restaurant card that has reviews
+    Then I should see a review snippet with data-testid "review-snippet"
+    And the snippet should contain text from the restaurant's most recent review
+    And the snippet should be no longer than 100 characters plus ellipsis
+
+  @unit-test @priority-high
+  Scenario: Keywords highlighted when search query matches review text
+    Given I am on the homepage
+    When I enter "delicious" in the search query input with data-testid "search-query-input"
+    And I wait for the search debounce of 600ms
+    Then restaurant cards with reviews containing "delicious" should show highlighted text
+    And the highlighted text should be wrapped in elements with data-testid "highlighted-keyword"
+    And the highlighted text should have a yellow background (bg-yellow-200 class)
+
+  @unit-test @priority-high
+  Scenario: URL search parameter triggers keyword highlighting on page load
+    Given I navigate directly to "http://localhost:3000/?query=amazing"
+    When the page finishes loading
+    Then restaurant cards with reviews containing "amazing" should display
+    And the word "amazing" should be wrapped in elements with data-testid "highlighted-keyword"
+    And the search input with data-testid "search-query-input" should contain the value "amazing"
+
+  @unit-test @edge-case
+  Scenario: No review snippet displays for restaurant without reviews
+    Given I am on the homepage with restaurant cards visible
+    When I view a restaurant card for a restaurant with zero reviews
+    Then no element with data-testid "review-snippet" should be present on that card
+    And the restaurant name and other details should still be visible
+
+  @unit-test @edge-case
+  Scenario: Multiple keyword occurrences all highlighted in single snippet
+    Given I am on the homepage
+    When I enter "good" in the search query input with data-testid "search-query-input"
+    And I wait for the search debounce of 600ms
+    And I view a restaurant card with a review containing "good" twice within the first 100 characters
+    Then exactly 2 elements with data-testid "highlighted-keyword" should be present in that review snippet
+    And both occurrences of "good" should have the bg-yellow-200 class applied
+
+  @unit-test @integration
+  Scenario: Highlighting updates when search query changes
+    Given I am on the homepage with search query "pasta" applied
+    And elements with data-testid "highlighted-keyword" containing "pasta" are visible
+    When I clear the search query input with data-testid "search-query-input"
+    And I enter "pizza" in the search query input
+    And I wait for the search debounce of 600ms
+    Then no elements with data-testid "highlighted-keyword" containing "pasta" should be present
+    And elements with data-testid "highlighted-keyword" containing "pizza" should be visible on matching cards
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of review snippet with highlighted keywords
+    Given I am on the homepage
+    When I enter "food" in the search query input
+    And I wait for the page to update
+    Then the page should visually show restaurant cards with review snippets
+    And highlighted keywords should appear with yellow background color
+    And the review text should be readable and properly truncated
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of review snippet without search query
+    Given I am on the homepage without any search query
+    When the page loads with restaurant cards
+    Then the page should visually show restaurant cards with review snippets
+    And no yellow highlighting should be visible
+    And review snippets should appear below restaurant names in a readable format
+```

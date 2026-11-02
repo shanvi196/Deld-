@@ -1,0 +1,179 @@
+problem_id: 0031-group-dining-organizer
+app: deld
+task:
+  prompt: 'Implement a Group Dining Planner feature for organizing restaurant visits with friends. Users need to create group
+    dining events and share them.
+
+
+    **Feature Requirements**:
+
+
+    1. **Event Creation Modal**: Add ''Plan Group Visit'' button (data-testid=''plan-group-visit-button'') on restaurant detail
+    pages. Opens modal (data-testid=''group-event-modal'') with form fields: event name input (data-testid=''event-name-input''),
+    date picker (data-testid=''event-date-input''), and create button (data-testid=''create-event-button''). On submit, generate
+    unique event ID, save to localStorage key ''groupEvents'' as JSON array with structure {id, restaurantId, name, date,
+    createdAt}, show success toast with text "Event created successfully", and display shareable link (data-testid=''event-share-link'').
+
+
+    2. **Event Details Page**: Create /events/[id] route displaying event information. Page shows event name (data-testid=''event-name''),
+    restaurant name with link (data-testid=''event-restaurant-link''), event date (data-testid=''event-date''), and ''Event
+    not found'' message (data-testid=''event-not-found'') for invalid IDs. Load event data from localStorage.
+
+
+    **Routes**: /events/[id] (new public route)
+
+
+    '
+hint: '**Files**: ~4 (modal component, event page, localStorage utility, restaurant detail integration)
+
+
+  **Authentication**: Event creation requires login; event viewing is public
+
+
+  **localStorage** use following keys in localStorage:
+
+  - `groupEvents`'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a Group Dining Planner feature for organizing restaurant visits with friends. Users nee...
+  intent: 36
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_open_event_creation_modal_from_restaurant_detail_page
+    checklist_label: Open event creation modal from restaurant detail page
+    source_test_file: tests/should_open_event_creation_modal_from_restaurant_detail_page.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_open_event_creation_modal_from_restaurant_detail_page.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_create_group_event_and_see_shareable_link
+    checklist_label: Create group event and see shareable link
+    source_test_file: tests/should_create_group_event_and_see_shareable_link.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_create_group_event_and_see_shareable_link.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_persist_event_in_localstorage_after_creation
+    checklist_label: Persist event in localstorage after creation
+    source_test_file: tests/should_persist_event_in_localstorage_after_creation.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_persist_event_in_localstorage_after_creation.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_view_event_details_on_public_event_page
+    checklist_label: View event details on public event page
+    source_test_file: tests/should_view_event_details_on_public_event_page.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_view_event_details_on_public_event_page.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_event_not_found_page_for_invalid_event_id
+    checklist_label: Show event not found page for invalid event id
+    source_test_file: tests/should_show_event_not_found_page_for_invalid_event_id.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_event_not_found_page_for_invalid_event_id.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_store_multiple_events_for_same_restaurant_separately_in_localstorage
+    checklist_label: Store multiple events for same restaurant separately in localstorage
+    source_test_file: tests/should_store_multiple_events_for_same_restaurant_separately_in_localstorage.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_store_multiple_events_for_same_restaurant_separately_in_localstorage.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_group
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the group event creation modal display on a scale of 0 to 1:
+
+
+      0 - Modal not displayed or broken: The group event modal is not visible, modal is empty, form elements are missing,
+      or there are obvious rendering errors. The ''Plan Group Visit'' button did not trigger the modal to appear.
+
+
+      1 - Modal correctly displayed: The group event modal is visible and properly rendered with a form containing an event
+      name input field, a date picker input, and a create event button. The modal follows the application''s existing dialog
+      styling patterns (similar to login/signup dialogs). Form fields are clearly labeled and accessible.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]'); if (loginBtn) loginBtn.click();
+      })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]''); if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new Event(''input'', { bubbles:
+      true })); } })()'
+    - '(function() { const passwordInput = document.querySelector(''[data-testid="login-password-input"]''); if (passwordInput)
+      { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, ''value'').set.call(passwordInput, ''password123'');
+      passwordInput.dispatchEvent(new Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]'); if (submitBtn) submitBtn.click();
+      })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - (function() { const planBtn = document.querySelector('[data-testid="plan-group-visit-button"]'); if (planBtn) planBtn.click();
+      })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_event
+    screenshot_url: http://localhost:3000/events/event_1769116701391_tgheers
+    evaluation_rubric: 'Rate the event details page display on a scale of 0 to 1:
+
+
+      0 - Event page not displayed or broken: The event details page shows a 404 error, event not found message, blank page,
+      or significant rendering errors. The event name, date, and restaurant link are not visible or the page layout is broken.
+
+
+      1 - Event details correctly displayed: The event details page shows the event information clearly with the event name
+      ''Screenshot Test Event'' prominently displayed, the event date shown in a readable format (August 15, 2025 or similar),
+      and a visible link to the associated restaurant. The page has a clean layout consistent with the application''s styling.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - '(function() { const event = { id: ''evt_visual789'', restaurantId: ''25047088-5a40-4fab-be5c-3ee9a54fb980'', name:
+      ''Screenshot Test Event'', date: ''2025-08-15'', createdAt: new Date().toISOString() }; const events = [event]; localStorage.setItem(''groupEvents'',
+      JSON.stringify(events)); })()'
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - eslint
+  - tsc
+  - vlm.screenshot_10_rate_the_event
+  - vlm.screenshot_9_rate_the_group
+  - checklist_items
+  grader_weights:
+    should_create_group_event_and_see_shareable_link: 0.7436
+    should_view_event_details_on_public_event_page: 0.2564
+  gating_graders:
+  - playwright_test.should_open_event_creation_modal_from_restaurant_detail_page
+  - playwright_test.should_persist_event_in_localstorage_after_creation
+  - playwright_test.should_show_event_not_found_page_for_invalid_event_id
+  - playwright_test.should_store_multiple_events_for_same_restaurant_separately_in_localstorage

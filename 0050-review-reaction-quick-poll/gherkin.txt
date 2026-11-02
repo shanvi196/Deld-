@@ -1,0 +1,84 @@
+```gherkin
+Feature: Review Reaction Quick Poll
+  As a user reading restaurant reviews
+  I want to vote on whether a review helped me decide
+  So that other users can see which reviews are most helpful
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+    And I am on restaurant "rest_0001" details page at "/restaurant/rest_0001"
+    And the page has loaded with reviews visible
+
+  @unit-test @priority-high
+  Scenario: Poll buttons display below each review
+    Given I can see at least one review on the page
+    When I look at the first review card
+    Then I should see a poll container with data-testid matching pattern "review-poll-{reviewId}"
+    And the poll should contain text "Did this review help you decide?"
+    And I should see a Yes button with data-testid matching pattern "poll-yes-btn-{reviewId}"
+    And I should see a No button with data-testid matching pattern "poll-no-btn-{reviewId}"
+
+  @unit-test @priority-high
+  Scenario: Clicking Yes button stores vote in localStorage
+    Given I have not voted on the first review
+    And localStorage key "review-polls" does not contain the first review's ID
+    When I click the Yes button with data-testid "poll-yes-btn-{firstReviewId}"
+    Then localStorage key "review-polls" should contain an object
+    And the object should have a property for the first review ID with value "yes"
+    And the Yes and No buttons should no longer be visible
+
+  @unit-test @priority-high
+  Scenario: Clicking No button stores vote in localStorage
+    Given I have cleared localStorage key "review-polls"
+    And I have not voted on the first review
+    When I click the No button with data-testid "poll-no-btn-{firstReviewId}"
+    Then localStorage key "review-polls" should contain an object
+    And the object should have a property for the first review ID with value "no"
+    And the poll buttons should be replaced with results display
+
+  @unit-test @priority-medium
+  Scenario: Results display shows percentage after voting Yes
+    Given I have cleared localStorage key "review-polls"
+    When I click the Yes button on the first review poll
+    Then I should see a result element with data-testid matching pattern "poll-result-{reviewId}"
+    And the result should display "100% found helpful"
+    And I should see a vote count element with data-testid matching pattern "poll-count-{reviewId}"
+    And the vote count should display "1" or "1 vote"
+
+  @unit-test @priority-medium
+  Scenario: Previously voted reviews show results on page load
+    Given localStorage key "review-polls" contains object with first review ID mapped to "yes"
+    When I reload the page at "/restaurant/rest_0001"
+    And the page finishes loading with reviews visible
+    Then the first review should not show poll buttons with data-testid "poll-yes-btn-{firstReviewId}"
+    And the first review should show result element with data-testid "poll-result-{firstReviewId}"
+    And the result should display the stored percentage based on localStorage data
+
+  @unit-test @edge-case
+  Scenario: Poll state syncs across multiple reviews on same page
+    Given I have cleared localStorage key "review-polls"
+    And the page displays at least 2 reviews with different review IDs
+    When I click the Yes button on the first review poll
+    Then the first review should show result element with data-testid "poll-result-{firstReviewId}"
+    And the second review should still show poll buttons with data-testid "poll-yes-btn-{secondReviewId}" and "poll-no-btn-{secondReviewId}"
+    And localStorage key "review-polls" should contain exactly 1 entry for the first review ID
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of poll buttons before voting
+    Given I have cleared localStorage key "review-polls"
+    And I am viewing the restaurant detail page at "/restaurant/rest_0001"
+    When the reviews section is visible
+    Then the page should visually show inline Yes/No buttons below the first review
+    And the buttons should be styled consistently with the app's button design
+    And the poll question text "Did this review help you decide?" should be visible
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of results bar after voting
+    Given I have cleared localStorage key "review-polls"
+    And I am on restaurant detail page at "/restaurant/rest_0001"
+    When I click the Yes button on the first review poll
+    Then the page should visually show an animated result bar replacing the buttons
+    And the bar should display a percentage fill
+    And the percentage text should be clearly visible
+    And the vote count should be displayed near the result bar
+```

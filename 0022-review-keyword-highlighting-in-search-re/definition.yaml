@@ -1,0 +1,161 @@
+problem_id: 0022-review-keyword-highlighting-in-search-re
+app: deld
+task:
+  prompt: 'Implement review keyword highlighting in search results for the Deld restaurant
+    app. When users search for restaurants, restaurant cards should display a review
+    snippet (first 100 characters of the most recent review), and matching search
+    keywords should be highlighted with a yellow background.
+
+
+    **Feature Requirements**:
+
+
+    1. **Review Snippet Display**: Add a review snippet to each restaurant card showing
+    the first 100 characters of the restaurant''s most recent review (by date). Display
+    below the restaurant name with data-testid=''review-snippet''. If no reviews exist,
+    show nothing. Truncate with ellipsis if longer than 100 chars.
+
+
+    2. **Keyword Highlighting**: When a search query exists (from URL param or search
+    input), highlight matching keywords in the review snippet with a yellow background
+    (bg-yellow-200). Use a utility function to wrap matches in <mark> elements with
+    data-testid=''highlighted-keyword''. Case-insensitive matching.
+
+
+    **Routes**: Homepage at `/` displays restaurant cards with search functionality.'
+hint: '**Files**: ~4 files (restaurant-card component, highlight utility, API query
+  update, types)
+
+
+  **Authentication**: Not required - search and display work for all users.
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement review keyword highlighting in search results for the Deld
+    restaurant app. When users s...
+  intent: 21
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_review_snippet_on_restaurant_card_with_reviews
+    checklist_label: Display review snippet on restaurant card with reviews
+    source_test_file: tests/should_display_review_snippet_on_restaurant_card_with_reviews.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_review_snippet_on_restaurant_card_with_reviews.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_highlight_keywords_when_search_query_matches_review_text
+    checklist_label: Highlight keywords when search query matches review text
+    source_test_file: tests/should_highlight_keywords_when_search_query_matches_review_text.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_highlight_keywords_when_search_query_matches_review_text.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_highlight_keywords_from_url_search_parameter_on_page_load
+    checklist_label: Highlight keywords from url search parameter on page load
+    source_test_file: tests/should_highlight_keywords_from_url_search_parameter_on_page_load.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_highlight_keywords_from_url_search_parameter_on_page_load.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_truncate_long_review_snippets_with_ellipsis
+    checklist_label: Truncate long review snippets with ellipsis
+    source_test_file: tests/should_truncate_long_review_snippets_with_ellipsis.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_truncate_long_review_snippets_with_ellipsis.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_highlight_keywords_case_insensitively
+    checklist_label: Highlight keywords case insensitively
+    source_test_file: tests/should_highlight_keywords_case_insensitively.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_highlight_keywords_case_insensitively.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_not_display_highlights_when_no_search_query_is_present
+    checklist_label: Not display highlights when no search query is present
+    source_test_file: tests/should_not_display_highlights_when_no_search_query_is_present.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_not_display_highlights_when_no_search_query_is_present.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_review
+    screenshot_url: http://localhost:3000/
+    evaluation_rubric: 'Rate the review snippet with highlighted keywords display
+      on a scale of 0 to 1:
+
+
+      0 - Feature not implemented: No review snippets visible on restaurant cards,
+      OR no yellow highlighting visible despite search query ''food'' being entered,
+      OR restaurant cards missing entirely, OR page shows error state
+
+
+      1 - Feature correctly implemented: Restaurant cards display review snippets
+      below restaurant names, keywords matching ''food'' are highlighted with yellow
+      background (bg-yellow-200), review text is readable and properly truncated if
+      needed, multiple restaurant cards visible with consistent snippet formatting'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000/'
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - '(function() { const input = document.querySelector(''[data-testid="search-query-input"]'');
+      if (input) { Object.getOwnPropertyDescriptor( window.HTMLInputElement.prototype,
+      ''value'' ).set.call(input, ''food''); input.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_review
+    screenshot_url: http://localhost:3000/
+    evaluation_rubric: 'Rate the review snippet display without search query on a
+      scale of 0 to 1:
+
+
+      0 - Feature not implemented: No review snippets visible on restaurant cards,
+      OR yellow highlighting incorrectly appears despite no search query, OR restaurant
+      cards missing entirely, OR page shows error state
+
+
+      1 - Feature correctly implemented: Restaurant cards display review snippets
+      below restaurant names in readable format, NO yellow highlighting visible (since
+      no search query is active), review snippets properly truncated with ellipsis
+      if longer than 100 characters, multiple restaurant cards visible with consistent
+      formatting'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = "http://localhost:3000/"
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function () { const input = document.querySelector(''[data-testid="search-query-input"]'');
+      if (input) { Object.getOwnPropertyDescriptor( window.HTMLInputElement.prototype, ''value'' ).set.call(input, '''');
+        input.dispatchEvent(new Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 2000))

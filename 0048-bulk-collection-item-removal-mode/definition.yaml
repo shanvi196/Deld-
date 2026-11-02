@@ -1,0 +1,220 @@
+problem_id: 0048-bulk-collection-item-removal-mode
+app: deld
+task:
+  prompt: 'Implement a bulk selection mode for collection detail pages. When a user
+    navigates to `/user/collections/[id]`, they can toggle a ''Select'' mode that
+    enables checkboxes next to each restaurant item.
+
+
+    **Feature Requirements**:
+
+
+    1. **Selection Mode Toggle**: Add a ''Select'' button (data-testid=''select-mode-toggle'')
+    to the collection header area that toggles selection mode on/off. When active,
+    show checkboxes (data-testid=''item-checkbox-{restaurantId}'') next to each restaurant
+    in the list. Track selected items using React state (Set<string> of restaurantIds).
+
+
+    2. **Floating Action Bar with Confirmation**: When items are selected, display
+    a floating action bar (data-testid=''bulk-action-bar'') at the bottom with a ''Remove
+    Selected (N)'' button (data-testid=''remove-selected-button''). Clicking it opens
+    a confirmation dialog (data-testid=''bulk-remove-dialog'') showing "Remove N restaurants
+    from collection?". Use the existing removeCollectionItemsMutationOptions for the
+    API call.
+
+
+    **Routes**: `/user/collections/[id]` (existing collection detail page)
+
+
+    **Element Selectors**:
+    - Bulk remove confirm: `[data-testid="bulk-remove-confirm"]`'
+hint: '**Files**: ~3-4 (client-side-collection-items-list.tsx, new floating-action-bar
+  component, new bulk-remove-dialog component)
+
+
+  **Authentication**: Required (collection pages are auth-protected)'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a bulk selection mode for collection detail pages. When a
+    user navigates to `/user/coll...
+  intent: 58
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_toggle_selection_mode_on_when_clicking_select_button
+    checklist_label: Toggle selection mode on when clicking select button
+    source_test_file: tests/should_toggle_selection_mode_on_when_clicking_select_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_toggle_selection_mode_on_when_clicking_select_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_floating_action_bar_when_selecting_multiple_items
+    checklist_label: Show floating action bar when selecting multiple items
+    source_test_file: tests/should_show_floating_action_bar_when_selecting_multiple_items.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_floating_action_bar_when_selecting_multiple_items.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_remove_selected_items_and_update_list_after_confirmation
+    checklist_label: Remove selected items and update list after confirmation
+    source_test_file: tests/should_remove_selected_items_and_update_list_after_confirmation.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_remove_selected_items_and_update_list_after_confirmation.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_empty_state_when_removing_all_items_from_collection
+    checklist_label: Show empty state when removing all items from collection
+    source_test_file: tests/should_show_empty_state_when_removing_all_items_from_collection.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_empty_state_when_removing_all_items_from_collection.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_hide_floating_action_bar_when_deselecting_all_items
+    checklist_label: Hide floating action bar when deselecting all items
+    source_test_file: tests/should_hide_floating_action_bar_when_deselecting_all_items.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_hide_floating_action_bar_when_deselecting_all_items.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_clear_selections_and_hide_checkboxes_when_cancelling_selection_mode
+    checklist_label: Clear selections and hide checkboxes when cancelling selection
+      mode
+    source_test_file: tests/should_clear_selections_and_hide_checkboxes_when_cancelling_selection_mode.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_clear_selections_and_hide_checkboxes_when_cancelling_selection_mode.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_selection
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the selection mode display on a scale of 0 to 1:
+
+
+      0 - Selection mode not functional: No checkboxes visible next to restaurant
+      items, no floating action bar at bottom, or no visual indication of selection
+      state.
+
+
+      1 - Selection mode correctly displayed: Checkboxes visible to the left of each
+      restaurant item, exactly 2 items with checked/filled checkboxes, exactly 1 or
+      more items with unchecked/empty checkboxes, floating action bar fixed at bottom
+      of viewport with semi-transparent or distinct background, ''Remove Selected
+      (2)'' button visible in action bar with red/danger styling, ''Cancel'' button
+      visible in header area where ''Select'' button was.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const passInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (passInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(passInput, ''password123''); passInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const avatar = document.querySelector('[data-testid="user-avatar-menu-trigger"]');
+      if (avatar) avatar.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const collectionsLink = document.querySelector('[data-testid="user-avatar-menu-collections"]');
+      if (collectionsLink) collectionsLink.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const firstCollection = document.querySelector('[data-testid^="collection-tile"]
+      a, a[href^="/user/collections/"]'); if (firstCollection) { window.location.href
+      = firstCollection.getAttribute('href'); } })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const selectBtn = document.querySelector('[data-testid="select-mode-toggle"]');
+      if (selectBtn) selectBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const checkboxes = document.querySelectorAll('[data-testid^="item-checkbox-"]');
+      if (checkboxes.length >= 2) { checkboxes[0].click(); checkboxes[1].click();
+      } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_bulk
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the bulk remove confirmation dialog on a scale of 0 to
+      1:
+
+
+      0 - Confirmation dialog not displayed or malformed: No modal overlay visible,
+      dialog not appearing, or missing key elements like header text or action buttons.
+
+
+      1 - Confirmation dialog correctly displayed: Modal overlay dimming the background
+      content with semi-transparent dark overlay, dialog box centered horizontally
+      and vertically on screen, header text reading ''Remove 2 restaurants from collection?''
+      or similar in bold/prominent styling, red/danger styled ''Remove'' or ''Confirm''
+      button on the right side, gray/neutral styled ''Cancel'' button on the left
+      side, dialog has reasonable width between 300px and 500px with proper padding.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const passInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (passInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(passInput, ''password123''); passInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const avatar = document.querySelector('[data-testid="user-avatar-menu-trigger"]');
+      if (avatar) avatar.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 500))
+    - (function() { const collectionsLink = document.querySelector('[data-testid="user-avatar-menu-collections"]');
+      if (collectionsLink) collectionsLink.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const firstCollection = document.querySelector('[data-testid^="collection-tile"]
+      a, a[href^="/user/collections/"]'); if (firstCollection) { window.location.href
+      = firstCollection.getAttribute('href'); } })()
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const selectBtn = document.querySelector('[data-testid="select-mode-toggle"]');
+      if (selectBtn) selectBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const checkboxes = document.querySelectorAll('[data-testid^="item-checkbox-"]');
+      if (checkboxes.length >= 2) { checkboxes[0].click(); checkboxes[1].click();
+      } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const removeBtn = document.querySelector('[data-testid="remove-selected-button"]');
+      if (removeBtn) removeBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))

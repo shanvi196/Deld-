@@ -1,0 +1,168 @@
+problem_id: 0035-review-photo-count-badge-on-restaurant-c
+app: deld
+task:
+  prompt: 'Implement a photo count badge overlay on restaurant card images. When a
+    restaurant has more than 1 photo in its photos.general array, display a small
+    badge in the bottom-right corner of the card image showing the total photo count
+    (e.g., ''12 photos'').
+
+
+    **Feature Requirements**:
+
+
+    1. **Photo Count Badge Display**: Add a badge overlay positioned at the bottom-right
+    corner of the restaurant card image (data-testid=''photo-count-badge''). The badge
+    should have a semi-transparent dark background (bg-black/60) with white text.
+    Format: ''{count} photos'' (e.g., ''5 photos''). Only render the badge when the
+    restaurant has more than 1 photo in photos.general array.
+
+
+    2. **Conditional Rendering Logic**: The badge must only appear when photos.general.length
+    > 1. If photos is null, undefined, or photos.general has 0 or 1 items, no badge
+    should be displayed. The badge should be positioned using absolute positioning
+    within the existing relative image container.
+
+
+    **Routes**: Home page (/) displays restaurant cards'
+hint: '**Files**: ~2 (restaurant-card.tsx component modification, possibly a new photo-count-badge
+  atom)
+
+
+  **Authentication**: Not required
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a photo count badge overlay on restaurant card images. When
+    a restaurant has more than ...
+  intent: 41
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_photo_count_badge_for_restaurant_with_multiple_photos
+    checklist_label: Display photo count badge for restaurant with multiple photos
+    source_test_file: tests/should_display_photo_count_badge_for_restaurant_with_multiple_photos.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_photo_count_badge_for_restaurant_with_multiple_photos.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_show_badge_text_ending_with_photos_and_number_greater_than_1
+    checklist_label: Show badge text ending with photos and number greater than 1
+    source_test_file: tests/should_show_badge_text_ending_with_photos_and_number_greater_than_1.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_show_badge_text_ending_with_photos_and_number_greater_than_1.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_position_badge_with_absolute_positioning_classes_in_bottom_right
+    checklist_label: Position badge with absolute positioning classes in bottom right
+    source_test_file: tests/should_position_badge_with_absolute_positioning_classes_in_bottom_right.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_position_badge_with_absolute_positioning_classes_in_bottom_right.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_have_fewer_badges_than_total_restaurant_cards
+    checklist_label: Have fewer badges than total restaurant cards
+    source_test_file: tests/should_have_fewer_badges_than_total_restaurant_cards.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_have_fewer_badges_than_total_restaurant_cards.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_not_log_console_errors_related_to_null_or_undefined_properties
+    checklist_label: Not log console errors related to null or undefined properties
+    source_test_file: tests/should_not_log_console_errors_related_to_null_or_undefined_properties.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_not_log_console_errors_related_to_null_or_undefined_properties.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_have_semi_transparent_dark_background_styling
+    checklist_label: Have semi transparent dark background styling
+    source_test_file: tests/should_have_semi_transparent_dark_background_styling.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_have_semi_transparent_dark_background_styling.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_photo
+    screenshot_url: http://localhost:3000/
+    evaluation_rubric: 'Rate the photo count badge implementation on restaurant cards
+      on a scale of 0 to 1:
+
+
+      0 - Badge implementation missing or incorrect: No photo count badges visible
+      on any restaurant cards, or badges appear on cards that should not have them
+      (single photo or no photos), or badges are not positioned in the bottom-right
+      corner of card images, or badge text format is incorrect (not showing ''{number}
+      photos'' pattern), or badge styling is wrong (missing dark semi-transparent
+      background or white text).
+
+
+      1 - Badge implementation correct: Restaurant cards with more than 1 photo display
+      photo count badges in the bottom-right corner of their card images. Badges have
+      dark semi-transparent backgrounds (bg-black/60 class visible as darkened overlay).
+      Badge text is white and formatted as ''{number} photos'' where number matches
+      the actual photo count. At least 2-3 restaurant cards with badges are visible
+      on the home page. Badges are properly positioned using absolute positioning
+      within the image container.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000';
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - (function() { const cards = document.querySelectorAll('[data-testid^="restaurant-card-link-"]');
+      if (cards.length < 3) { window.scrollTo(0, 500); } })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_visual
+    screenshot_url: http://localhost:3000/
+    evaluation_rubric: 'Rate the visual consistency of photo count badge positioning
+      and styling on a scale of 0 to 1:
+
+
+      0 - Inconsistent badge styling or positioning: Photo count badges have inconsistent
+      positioning across different restaurant cards (not uniformly in bottom-right
+      corners), or badge sizes vary inconsistently between cards, or font styling
+      differs between badges, or some badges have different background opacity levels,
+      or badges are not aligned consistently with 8px margins from bottom and right
+      edges.
+
+
+      1 - Consistent badge styling and positioning: All visible photo count badges
+      are consistently positioned in the bottom-right corners of their respective
+      card images. All badges have identical styling including: same dark semi-transparent
+      background color, same white text color, same font size and padding, same border-radius.
+      Badges maintain sufficient contrast (white text readable against dark background).
+      Multiple cards with badges visible show uniform appearance and positioning.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000';
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - window.scrollTo(0, 600)
+    - await new Promise(resolve => setTimeout(resolve, 1500))

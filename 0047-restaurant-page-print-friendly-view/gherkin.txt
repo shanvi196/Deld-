@@ -1,0 +1,81 @@
+```gherkin
+Feature: Restaurant Page Print-Friendly View
+  As a user planning a restaurant visit
+  I want to print restaurant information
+  So that I can reference it offline without my device
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Print button is visible in QuickActionButtons section
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has fully loaded
+    Then I should see a button with data-testid "print-button"
+    And the print button should be in the quick-action-buttons container with data-testid "quick-action-buttons"
+    And the print button should display a Printer icon
+
+  @unit-test @priority-high
+  Scenario: Print button triggers browser print dialog
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has fully loaded
+    When I click the button with data-testid "print-button"
+    Then window.print should be called exactly 1 time
+    And no JavaScript errors should occur
+
+  @unit-test @priority-high
+  Scenario: Print button has correct styling and variant
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has fully loaded
+    Then the button with data-testid "print-button" should have outline variant styling
+    And the button should have size "xl" matching other quick action buttons
+    And the button should contain text "Print"
+
+  @unit-test @priority-medium
+  Scenario: Print styles hide navigation elements
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has fully loaded
+    When print media styles are applied
+    Then elements with data-testid "search-bar-header" should have display none in print
+    And elements with data-testid "main-navigation" should have display none in print
+    And the map container should have display none in print
+
+  @unit-test @priority-medium
+  Scenario: Print styles show essential restaurant information
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has fully loaded
+    When print media styles are applied
+    Then the restaurant name should be visible in print
+    And the restaurant address should be visible in print
+    And the opening hours table should be visible in print
+    And the restaurant rating should be visible in print
+
+  @unit-test @priority-medium
+  Scenario: Print button remains functional after page content updates
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has fully loaded
+    When the restaurant data is refetched via client-side navigation
+    And the page content updates with fresh data
+    Then the button with data-testid "print-button" should still be visible
+    And clicking the button with data-testid "print-button" should call window.print exactly 1 time
+    And the print-content wrapper with data-testid "print-content" should contain the updated restaurant name
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of print button in QuickActionButtons
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has fully loaded
+    Then the quick action buttons section should display exactly 3 buttons in a row
+    And the Print button should be positioned as the third button after "Write Review" and "Save"
+    And the Printer icon should be visible to the left of the "Print" text
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of print-friendly layout
+    Given I navigate to "/restaurants/rest_0001"
+    And the page has fully loaded
+    When I emulate print media
+    Then the page should show a single-column layout without sidebars
+    And elements with data-testid "main-navigation" should not be visible
+    And elements with data-testid "map-container" should not be visible
+    And the restaurant name should appear at the top in bold text
+    And the opening hours table should display all 7 days of the week
+```

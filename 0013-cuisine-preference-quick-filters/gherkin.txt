@@ -1,0 +1,91 @@
+```gherkin
+Feature: Cuisine Preference Quick Filters
+  As a user searching for restaurants
+  I want quick access to my favorite cuisine filters
+  So that I can rapidly filter to my preferred food types without using the full filter panel
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Display cuisine chips from localStorage preferences
+    Given localStorage "deld-cuisine-prefs" contains ["italian", "japanese", "mexican"]
+    When I navigate to the home page "/"
+    Then I should see a container with data-testid "cuisine-quick-filters"
+    And I should see exactly 3 cuisine chips
+    And I should see chip with data-testid "cuisine-chip-italian" showing "Italian"
+    And I should see chip with data-testid "cuisine-chip-japanese" showing "Japanese"
+    And I should see chip with data-testid "cuisine-chip-mexican" showing "Mexican"
+
+  @unit-test @priority-high
+  Scenario: Clicking cuisine chip applies filter to URL and updates restaurant list
+    Given localStorage "deld-cuisine-prefs" contains ["italian", "chinese", "thai"]
+    And I am on the home page "/" with no filters applied
+    And the URL does not contain "categories="
+    And all restaurant categories are visible in the list
+    When I click the chip with data-testid "cuisine-chip-italian"
+    Then the URL should change to contain "categories=italian"
+    And the chip with data-testid "cuisine-chip-italian" should have class "bg-primary" indicating active state
+    And all visible restaurant cards should have category "Italian" displayed
+    And restaurant cards with category "Chinese" should not be visible
+
+  @unit-test @priority-high
+  Scenario: Clicking active cuisine chip removes filter and restores full restaurant list
+    Given localStorage "deld-cuisine-prefs" contains ["italian", "japanese"]
+    And I am on the home page "/?categories=italian" with Italian filter active
+    And the chip with data-testid "cuisine-chip-italian" has class "bg-primary" indicating selected state
+    And only Italian restaurants are visible
+    When I click the chip with data-testid "cuisine-chip-italian"
+    Then the URL should change to "/" without "categories=" parameter
+    And the chip with data-testid "cuisine-chip-italian" should have class "bg-secondary" indicating inactive state
+    And restaurants from all categories should be visible in the list
+
+  @unit-test @priority-medium
+  Scenario: Empty localStorage shows no cuisine chips but shows Customize button
+    Given localStorage "deld-cuisine-prefs" is empty or not set
+    When I navigate to the home page "/"
+    Then I should see the container with data-testid "cuisine-quick-filters"
+    And I should see 0 cuisine chips
+    And I should see button with data-testid "customize-cuisines-btn" with text "Customize"
+
+  @unit-test @priority-high
+  Scenario: Maximum 5 chips displayed when localStorage has more than 5 cuisines
+    Given localStorage "deld-cuisine-prefs" contains ["italian", "japanese", "mexican", "chinese", "indian", "thai", "korean", "vietnamese"]
+    When I navigate to the home page "/"
+    Then I should see exactly 5 cuisine chips in the quick filters bar
+    And I should see chip with data-testid "cuisine-chip-italian" as the first chip
+    And I should see chip with data-testid "cuisine-chip-indian" as the fifth chip
+    And I should not see chip with data-testid "cuisine-chip-thai"
+    And I should not see chip with data-testid "cuisine-chip-korean"
+    And I should not see chip with data-testid "cuisine-chip-vietnamese"
+
+  @unit-test @priority-high
+  Scenario: URL filter state syncs with chip selection on page load
+    Given localStorage "deld-cuisine-prefs" contains ["italian", "japanese", "mexican"]
+    When I navigate directly to "/?categories=japanese"
+    Then the chip with data-testid "cuisine-chip-japanese" should have class "bg-primary" indicating active state
+    And the chip with data-testid "cuisine-chip-italian" should have class "bg-secondary" indicating inactive state
+    And the chip with data-testid "cuisine-chip-mexican" should have class "bg-secondary" indicating inactive state
+    And only Japanese restaurants should be visible in the list
+
+  @screenshot-test @priority-high
+  Scenario: Visual validation of cuisine quick filters bar with multiple chips
+    Given localStorage "deld-cuisine-prefs" contains ["italian", "japanese", "mexican", "chinese", "indian"]
+    When I navigate to the home page "/"
+    And I wait for the page to fully load
+    Then the page should visually show a horizontal row of 5 cuisine chips below the search area
+    And the chips should display cuisine names clearly
+    And the "Customize" button should be visible at the end of the row
+    And chips should have consistent pill/badge styling matching the app design
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of customize preferences modal
+    Given localStorage "deld-cuisine-prefs" contains ["italian", "japanese", "mexican"]
+    And I am on the home page "/"
+    When I click the button with data-testid "customize-cuisines-btn"
+    And I wait for the modal to appear
+    Then the modal should visually show a list of saved cuisines with reorder handles
+    And each cuisine item should have a remove button
+    And the "Add Cuisine" dropdown should be visible
+    And the "Save" button should be prominently displayed at the bottom
+```

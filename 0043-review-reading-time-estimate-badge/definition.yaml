@@ -1,0 +1,161 @@
+problem_id: 0043-review-reading-time-estimate-badge
+app: deld
+task:
+  prompt: 'Implement a reading time estimate badge for reviews. Users want to quickly
+    gauge how long a review will take to read before diving in.
+
+
+    **Feature Requirements**:
+
+
+    1. **Reading Time Utility**: Create `src/utils/text/calculate-reading-time.ts`
+    utility function. It should calculate reading time from text word count using
+    200 words-per-minute average. Return object with `minutes` (number) and `display`
+    (formatted string like "2 min read"). For texts under 1 minute, show "1 min read".
+
+
+    2. **Reading Time Badge**: Display the reading time badge next to the review date
+    in ReviewStars component (`src/components/molecules/review-card/review-stars/review-stars.tsx`).
+    Use existing Tag component from `@/components/atoms/tag/tag`. Badge should show
+    formatted reading time (e.g., "2 min read") with data-testid="reading-time-badge".
+
+
+    **Routes**: Restaurant detail page `/restaurants/[id]` (reviews section)'
+hint: '**Files**: ~3 (utility function, ReviewStars component, pass review text prop)
+
+
+  **Authentication**: Not required
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a reading time estimate badge for reviews. Users want to
+    quickly gauge how long a revie...
+  intent: 51
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: reading_time_badge_displays_on_review_cards
+    checklist_label: Reading time badge displays on review cards
+    source_test_file: tests/reading_time_badge_displays_on_review_cards.spec.ts
+    destination_test_file: /workdir/app/__tests__/reading_time_badge_displays_on_review_cards.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: reading_time_calculates_correctly_for_medium_length_reviews
+    checklist_label: Reading time calculates correctly for medium length reviews
+    source_test_file: tests/reading_time_calculates_correctly_for_medium_length_reviews.spec.ts
+    destination_test_file: /workdir/app/__tests__/reading_time_calculates_correctly_for_medium_length_reviews.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: short_reviews_show_minimum_1_minute_reading_time
+    checklist_label: Short reviews show minimum 1 minute reading time
+    source_test_file: tests/short_reviews_show_minimum_1_minute_reading_time.spec.ts
+    destination_test_file: /workdir/app/__tests__/short_reviews_show_minimum_1_minute_reading_time.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: reading_time_badge_appears_on_all_review_cards_in_list
+    checklist_label: Reading time badge appears on all review cards in list
+    source_test_file: tests/reading_time_badge_appears_on_all_review_cards_in_list.spec.ts
+    destination_test_file: /workdir/app/__tests__/reading_time_badge_appears_on_all_review_cards_in_list.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: reading_time_badge_persists_after_review_list_refresh
+    checklist_label: Reading time badge persists after review list refresh
+    source_test_file: tests/reading_time_badge_persists_after_review_list_refresh.spec.ts
+    destination_test_file: /workdir/app/__tests__/reading_time_badge_persists_after_review_list_refresh.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: reading_time_badge_renders_correctly_when_navigating_between_restaurant_pages
+    checklist_label: Reading time badge renders correctly when navigating between
+      restaurant pages
+    source_test_file: tests/reading_time_badge_renders_correctly_when_navigating_between_restaurant_pages.spec.ts
+    destination_test_file: /workdir/app/__tests__/reading_time_badge_renders_correctly_when_navigating_between_restaurant_pages.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_reading
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the reading time badge display on restaurant reviews
+      on a scale of 0 to 1:
+
+
+      0 - Reading time badges NOT visible: No reading time badges appear next to review
+      dates, OR the reviews section is not loaded, OR badges are missing from review
+      cards entirely
+
+
+      1 - Reading time badges correctly displayed: Reading time badges appear as small
+      neutral-colored tags (similar to Tag component styling with neutral-100 background),
+      badges show text like "X min read" format, badges are positioned in the same
+      row as the review date and star rating, layout shows stars/date/reading-time-badge
+      in a horizontal arrangement without disrupting the existing review card layout'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980'
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]'')
+      || document.querySelector(''[data-testid="reviews-list"]'') || document.querySelector(''.reviews'');
+      if (reviewsSection) { reviewsSection.scrollIntoView({ behavior: ''instant'',
+      block: ''start'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_reading
+    screenshot_url: http://localhost:3000/restaurants/dc553a2b-ac48-4126-964b-bd95e45e5670
+    evaluation_rubric: 'Rate the reading time badge styling consistency on a scale
+      of 0 to 1:
+
+
+      0 - Badge styling is incorrect or missing: Reading time badges are not visible,
+      OR badges use incorrect styling (wrong colors, wrong size), OR badges disrupt
+      the review card layout, OR text is not readable due to poor contrast
+
+
+      1 - Badge styling is correct and consistent: Reading time badges use Tag component
+      styling (neutral-100 background, neutral-500 text), badges have appropriate
+      font size that is readable, badges integrate seamlessly with existing review
+      card layout without causing visual disruption, text contrast is sufficient for
+      readability, badges appear consistently across multiple review cards'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000/restaurants/dc553a2b-ac48-4126-964b-bd95e45e5670'
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]'')
+      || document.querySelector(''[data-testid="reviews-list"]'') || document.querySelector(''.reviews'');
+      if (reviewsSection) { reviewsSection.scrollIntoView({ behavior: ''instant'',
+      block: ''start'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1000))

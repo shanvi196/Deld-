@@ -1,0 +1,188 @@
+problem_id: 0016-photo-lightbox-with-navigation
+app: deld
+task:
+  prompt: 'Implement a photo lightbox modal for review photos. When users browse restaurant
+    reviews, they should be able to click on any review photo to view it in a fullscreen
+    lightbox overlay.
+
+
+    **Feature Requirements**:
+
+
+    1. **Lightbox Modal**: When clicking any photo in review cards, open a centered
+    fullscreen modal overlay displaying the photo at larger size. Include a close
+    button (data-testid="lightbox-close-button") and semi-transparent backdrop. The
+    modal container should have data-testid="photo-lightbox-modal". The large photo
+    display should have data-testid="lightbox-photo".
+
+
+    2. **Keyboard Navigation**: Support keyboard controls - Escape key closes the
+    modal, left/right arrow keys navigate between photos when a review has multiple
+    photos. Track current photo index in React state. Display current position indicator
+    (data-testid="lightbox-photo-counter") showing "X of Y" format.
+
+
+    **Routes**: Restaurant detail page at /restaurants/[id] (existing)'
+hint: '**Files**: ~3-4 files (photo-lightbox component, update review-photos component,
+  keyboard hook)
+
+
+  **Authentication**: Not required
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a photo lightbox modal for review photos. When users browse
+    restaurant reviews, they sh...
+  intent: 10
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_open_lightbox_by_clicking_review_photo
+    checklist_label: Open lightbox by clicking review photo
+    source_test_file: tests/should_open_lightbox_by_clicking_review_photo.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_open_lightbox_by_clicking_review_photo.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_close_lightbox_with_close_button
+    checklist_label: Close lightbox with close button
+    source_test_file: tests/should_close_lightbox_with_close_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_close_lightbox_with_close_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_close_lightbox_with_escape_key
+    checklist_label: Close lightbox with escape key
+    source_test_file: tests/should_close_lightbox_with_escape_key.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_close_lightbox_with_escape_key.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_photo_counter_in_x_of_y_format
+    checklist_label: Display photo counter in x of y format
+    source_test_file: tests/should_display_photo_counter_in_x_of_y_format.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_photo_counter_in_x_of_y_format.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_navigate_photos_with_arrow_keys_when_multiple_photos_exist
+    checklist_label: Navigate photos with arrow keys when multiple photos exist
+    source_test_file: tests/should_navigate_photos_with_arrow_keys_when_multiple_photos_exist.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_navigate_photos_with_arrow_keys_when_multiple_photos_exist.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_the_clicked_photo_in_lightbox
+    checklist_label: Display the clicked photo in lightbox
+    source_test_file: tests/should_display_the_clicked_photo_in_lightbox.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_the_clicked_photo_in_lightbox.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_lightbox
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the lightbox modal appearance on a scale of 0 to 1:
+
+
+      0 - Lightbox not visible: No modal overlay appeared after clicking review photo,
+      or page shows error, or no semi-transparent backdrop visible, or no enlarged
+      photo displayed
+
+
+      1 - Lightbox correctly displayed: A centered modal overlay is visible with semi-transparent
+      dark backdrop covering the page content, an enlarged photo is prominently displayed
+      in the center of the modal, a close button (X or similar) is visible in the
+      corner of the modal, and the modal appears properly styled as a fullscreen lightbox
+      overlay'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000'
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - (function () { var links = document.querySelectorAll('a');
+      for (var i = 0; i < links.length; i++) { if (links[i].href && links[i].href.indexOf('/restaurants/') !== -1) { links[i].click();
+          break; } } })();
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]'');
+      if (reviewsSection) { reviewsSection.scrollIntoView({ behavior: ''instant'',
+      block: ''start'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function() { const reviewPhoto = document.querySelector('[data-testid="review-photo"]');
+      if (reviewPhoto) { reviewPhoto.click(); } })()
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_lightbox
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the lightbox photo counter display on a scale of 0 to
+      1:
+
+
+      0 - Photo counter not visible or incorrect: No photo counter visible in the
+      lightbox modal, or counter does not show "X of Y" format, or counter is not
+      clearly visible against the modal background
+
+
+      1 - Photo counter correctly displayed: A photo counter is visible in the lightbox
+      showing position in "X of Y" format (e.g., "1 of 3"), the counter is clearly
+      legible against the modal background, and the modal displays the enlarged photo
+      with the counter indicating which photo is currently being viewed'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000'
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - (function () { var links = document.querySelectorAll('a');
+      for (var i = 0; i < links.length; i++) { if (links[i].href && links[i].href.indexOf('/restaurants/') !== -1) { links[i].click();
+          break; } } })();
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]'');
+      if (reviewsSection) { reviewsSection.scrollIntoView({ behavior: ''instant'',
+      block: ''start'' }); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+    - (function () { var reviewPhotos = document.querySelectorAll('[data-testid="review-photo"]');
+      if (reviewPhotos.length > 1) { reviewPhotos[1].click(); } })();
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+extra_fields:
+  checklist_mode: "off"
+  disable_graders:
+  - eslint
+  - tsc
+  - vlm.screenshot_10_rate_the_lightbox
+  - vlm.screenshot_9_rate_the_lightbox
+  - checklist_items
+  grader_weights:
+    should_close_lightbox_with_close_button: 0.1826
+    should_close_lightbox_with_escape_key: 0.1546
+    should_display_photo_counter_in_x_of_y_format: 0.1768
+    should_display_the_clicked_photo_in_lightbox: 0.1546
+    should_navigate_photos_with_arrow_keys_when_multiple_photos_exist: 0.1768
+    should_open_lightbox_by_clicking_review_photo: 0.1546

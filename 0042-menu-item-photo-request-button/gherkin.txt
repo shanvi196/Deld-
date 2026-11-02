@@ -1,0 +1,91 @@
+```gherkin
+Feature: Menu Item Photo Request Button
+  As a user viewing a restaurant's menu
+  I want to request photos for menu items that lack them
+  So that I can flag items I want to see and help improve the menu coverage
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Request photo button appears on menu items without photos
+    Given I navigate to "/restaurant/rest_0001"
+    And I wait for the page to load completely
+    When I scroll to the menu section
+    Then I should see at least one element with data-testid matching "request-photo-btn-"
+    And the button should display text "Request Photo"
+    And menu items with existing photos should not display the request photo button
+
+  @unit-test @priority-high
+  Scenario: Clicking request photo button saves to localStorage with correct structure
+    Given I navigate to "/restaurant/rest_0001"
+    And I wait for the page to load completely
+    And localStorage key "photo-requests" is cleared
+    When I click the first element with data-testid matching "request-photo-btn-"
+    Then localStorage key "photo-requests" should contain an array with exactly 1 item
+    And the stored item should have property "restaurantId" equal to "rest_0001"
+    And the stored item should have property "menuItemId" as a non-empty string
+    And the stored item should have property "timestamp" as a number within the last 5 seconds
+
+  @unit-test @priority-high
+  Scenario: Button changes to disabled Requested state after clicking
+    Given I navigate to "/restaurant/rest_0001"
+    And I wait for the page to load completely
+    And localStorage key "photo-requests" is cleared
+    When I click the first element with data-testid matching "request-photo-btn-"
+    Then the clicked element should now show text "Requested"
+    And the clicked element should have a disabled attribute
+    And there should be an element with data-testid matching "photo-requested-badge-"
+
+  @unit-test @priority-medium
+  Scenario: Request count badge displays correct count from localStorage
+    Given localStorage key "photo-requests" contains 3 requests for menu item "menu_001" at restaurant "rest_0001"
+    When I navigate to "/restaurant/rest_0001"
+    And I wait for the page to load completely
+    Then an element with data-testid "photo-request-count-menu_001" should be visible
+    And the count badge should display the number "3"
+    And the count badge should use the Tag atom component styling
+
+  @unit-test @priority-medium
+  Scenario: Multiple requests for different menu items maintain separate counts
+    Given localStorage key "photo-requests" contains 2 requests for menu item "menu_001" at restaurant "rest_0001"
+    And localStorage key "photo-requests" also contains 4 requests for menu item "menu_002" at restaurant "rest_0001"
+    When I navigate to "/restaurant/rest_0001"
+    And I wait for the page to load completely
+    Then an element with data-testid "photo-request-count-menu_001" should display "2"
+    And an element with data-testid "photo-request-count-menu_002" should display "4"
+    And the button for menu item "menu_001" should show text "Requested" and be disabled
+    And the button for menu item "menu_002" should show text "Requested" and be disabled
+
+  @unit-test @edge-case
+  Scenario: Requests from different restaurants do not affect current restaurant counts
+    Given localStorage key "photo-requests" contains 5 requests for menu item "menu_001" at restaurant "rest_0002"
+    And localStorage key "photo-requests" also contains 1 request for menu item "menu_001" at restaurant "rest_0001"
+    When I navigate to "/restaurant/rest_0001"
+    And I wait for the page to load completely
+    Then an element with data-testid "photo-request-count-menu_001" should display "1"
+    And the button for menu item "menu_001" should show text "Requested" and be disabled
+    When I navigate to "/restaurant/rest_0002"
+    And I wait for the page to load completely
+    Then an element with data-testid "photo-request-count-menu_001" should display "5"
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of request photo button styling on menu section
+    Given localStorage key "photo-requests" is cleared
+    When I navigate to "/restaurant/rest_0001"
+    And I wait for the page to load completely
+    And I scroll to the menu section
+    Then the Request Photo buttons should have outline variant styling with visible border
+    And buttons should be positioned below menu item names that lack photos
+    And buttons should have consistent padding and font size across all menu items
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of requested state with disabled button and count badge
+    Given localStorage key "photo-requests" contains 5 requests for menu item "menu_001" at restaurant "rest_0001"
+    When I navigate to "/restaurant/rest_0001"
+    And I wait for the page to load completely
+    And I scroll to the menu section
+    Then the button for menu item "menu_001" should appear in disabled gray state with text "Requested"
+    And a Tag component badge should be visible next to the button displaying "5"
+    And the badge should use contrasting colors to stand out from the button
+```

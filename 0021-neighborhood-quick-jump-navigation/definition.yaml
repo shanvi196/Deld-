@@ -1,0 +1,158 @@
+problem_id: 0021-neighborhood-quick-jump-navigation
+app: deld
+task:
+  prompt: 'Implement a ''Neighborhood Quick Jump'' feature in the search sidebar.
+    Users want to quickly discover restaurants by neighborhood without typing in search.
+
+
+    **Feature Requirements**:
+
+
+    1. **Neighborhood Section Component**: Add a collapsible ''Explore by Neighborhood''
+    section in the search sidebar (below distance filter). Display clickable neighborhood
+    names extracted from available restaurants with restaurant count in parentheses
+    (e.g., ''Mission District (24)''). Section starts expanded by default. Collapse/expand
+    via chevron icon button with data-testid=''neighborhood-section-toggle''. Section
+    container has data-testid=''neighborhood-section''. Each neighborhood item has
+    data-testid=''neighborhood-item-{name}'' (kebab-case name).
+
+
+    2. **Neighborhood Filter Action**: Clicking a neighborhood name applies it as
+    the location filter (updates URL with location={neighborhood}). Active neighborhood
+    is visually highlighted. Clicking same neighborhood again clears the filter. Filter
+    integrates with existing RestaurantsSearchContext via setLocation action.
+
+
+    **Routes**: / (home/search page)
+
+
+    **Element Selectors**:
+    - Neighborhood item: `[data-testid="neighborhood-item-${kebabName}"]`'
+hint: '**Files**: ~4 (neighborhood-section component, search context integration,
+  sidebar layout update, utility for extracting neighborhoods)
+
+
+  **Authentication**: Not required
+
+    **Preferred Account**: If login is required, please use the following credentials:
+    - Login: sarah.chen@email.com
+    - Password: password123'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement a 'Neighborhood Quick Jump' feature in the search sidebar.
+    Users want to quickly discov...
+  intent: 20
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_neighborhood_section_with_restaurant_counts_in_sidebar
+    checklist_label: Display neighborhood section with restaurant counts in sidebar
+    source_test_file: tests/should_display_neighborhood_section_with_restaurant_counts_in_sidebar.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_neighborhood_section_with_restaurant_counts_in_sidebar.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_apply_location_filter_and_update_url_when_clicking_neighborhood
+    checklist_label: Apply location filter and update url when clicking neighborhood
+    source_test_file: tests/should_apply_location_filter_and_update_url_when_clicking_neighborhood.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_apply_location_filter_and_update_url_when_clicking_neighborhood.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_clear_location_filter_when_clicking_active_neighborhood_again
+    checklist_label: Clear location filter when clicking active neighborhood again
+    source_test_file: tests/should_clear_location_filter_when_clicking_active_neighborhood_again.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_clear_location_filter_when_clicking_active_neighborhood_again.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_collapse_and_expand_neighborhood_section_using_toggle_button
+    checklist_label: Collapse and expand neighborhood section using toggle button
+    source_test_file: tests/should_collapse_and_expand_neighborhood_section_using_toggle_button.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_collapse_and_expand_neighborhood_section_using_toggle_button.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_combine_neighborhood_filter_with_existing_cuisine_filter
+    checklist_label: Combine neighborhood filter with existing cuisine filter
+    source_test_file: tests/should_combine_neighborhood_filter_with_existing_cuisine_filter.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_combine_neighborhood_filter_with_existing_cuisine_filter.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_highlight_neighborhood_when_navigating_with_url_location_parameter
+    checklist_label: Highlight neighborhood when navigating with url location parameter
+    source_test_file: tests/should_highlight_neighborhood_when_navigating_with_url_location_parameter.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_highlight_neighborhood_when_navigating_with_url_location_parameter.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_neighborhood
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the neighborhood section display on a scale of 0 to 1:
+
+
+      0 - Neighborhood section missing or broken: No ''Explore by Neighborhood'' section
+      visible in sidebar, or section exists but has no neighborhood items, or no counts
+      displayed next to neighborhood names, or section is not positioned below existing
+      filters in sidebar
+
+
+      1 - Neighborhood section correctly implemented: ''Explore by Neighborhood''
+      heading visible in sidebar below existing filters, at least 5 clickable neighborhood
+      names displayed in vertical list format, each neighborhood shows a count in
+      parentheses (e.g., ''Mission District (24)''), chevron icon visible for collapse/expand
+      functionality'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_active
+    screenshot_url: http://localhost:3000
+    evaluation_rubric: 'Rate the active neighborhood state on a scale of 0 to 1:
+
+
+      0 - No active state visible: Clicked neighborhood has no visual distinction
+      from other neighborhoods, or neighborhood items are not clickable, or no change
+      in appearance after clicking, or URL does not reflect the filter
+
+
+      1 - Active neighborhood correctly highlighted: Clicked neighborhood item has
+      distinct visual highlight (different background color or border), other neighborhood
+      items appear in default/inactive state, restaurant results area shows filtered
+      content, URL bar displays ''location='' parameter with neighborhood name'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - window.location.href = 'http://localhost:3000';
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const item = document.querySelector('[data-testid^="neighborhood-item-"]');
+      if (item) { item.click(); } })()
+    - await new Promise(resolve => setTimeout(resolve, 1500))

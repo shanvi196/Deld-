@@ -1,0 +1,204 @@
+problem_id: 0029-review-photo-tagging-with-dish-names
+app: deld
+task:
+  prompt: 'Implement review photo tagging with dish names for the Deld restaurant
+    reviews app. Users should be able to tag uploaded review photos with specific
+    dishes from the restaurant''s menu.
+
+
+    **Feature Requirements**:
+
+
+    1. **Photo Dish Tagging UI**: After uploading photos in the write review form,
+    display a dish tag selector for each photo. Show a combobox/dropdown with data-testid=''photo-dish-selector-{index}''
+    containing menu items from the restaurant. Each photo thumbnail should have a
+    tag button with data-testid=''photo-tag-button-{index}''. When a dish is selected,
+    show the dish name badge on the photo with data-testid=''photo-dish-tag-{index}''.
+
+
+    2. **Tagged Photos Display**: On review cards, display dish name overlays on tagged
+    photos. Show a small badge with the dish name on the bottom of each tagged photo
+    with data-testid=''review-photo-dish-badge''. The badge should be visible on hover
+    or always visible depending on space. Untagged photos display normally without
+    badges.
+
+
+    **Routes**: Write review page `/addreview/[restaurantId]`, restaurant details
+    `/restaurants/[id]`
+
+
+    **Element Selectors**:
+    - Photo dish selector 0: `[data-testid="photo-dish-selector-0"]`
+    - Photo dish selector 1: `[data-testid="photo-dish-selector-1"]`
+    - Photo tag button 0: `[data-testid="photo-tag-button-0"]`
+    - Photo tag button 1: `[data-testid="photo-tag-button-1"]`'
+hint: '**Files**: ~4 files (attach-photos component, review card component, review
+  types, photo display)
+
+
+  **Authentication**: Required for writing reviews'
+problem_metadata:
+  task_type: feature-implementation
+  description: Implement review photo tagging with dish names for the Deld restaurant
+    reviews app. Users should ...
+  intent: 34
+files_placement:
+- source: ../../../files/deld-0f6dec6
+  destination: /workdir/app
+graders:
+- name: eslint
+- name: tsc
+- name: playwright_test
+  args:
+    score_name: should_display_tag_button_and_dish_selector_after_uploading_a_photo
+    checklist_label: Display tag button and dish selector after uploading a photo
+    source_test_file: tests/should_display_tag_button_and_dish_selector_after_uploading_a_photo.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_tag_button_and_dish_selector_after_uploading_a_photo.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_dish_name_badge_after_selecting_a_dish_from_the_combobox
+    checklist_label: Display dish name badge after selecting a dish from the combobox
+    source_test_file: tests/should_display_dish_name_badge_after_selecting_a_dish_from_the_combobox.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_dish_name_badge_after_selecting_a_dish_from_the_combobox.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_remove_dish_tag_when_clicking_on_the_badge_and_show_tag_button_again
+    checklist_label: Remove dish tag when clicking on the badge and show tag button
+      again
+    source_test_file: tests/should_remove_dish_tag_when_clicking_on_the_badge_and_show_tag_button_again.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_remove_dish_tag_when_clicking_on_the_badge_and_show_tag_button_again.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_display_dish_name_badge_on_review_photos_after_submitting_review_with_tagged_photo
+    checklist_label: Display dish name badge on review photos after submitting review
+      with tagged photo
+    source_test_file: tests/should_display_dish_name_badge_on_review_photos_after_submitting_review_with_tagged_photo.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_display_dish_name_badge_on_review_photos_after_submitting_review_with_tagged_photo.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_preserve_dish_tags_after_validation_error_when_submitting_incomplete_review
+    checklist_label: Preserve dish tags after validation error when submitting incomplete
+      review
+    source_test_file: tests/should_preserve_dish_tags_after_validation_error_when_submitting_incomplete_review.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_preserve_dish_tags_after_validation_error_when_submitting_incomplete_review.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: playwright_test
+  args:
+    score_name: should_close_combobox_without_selecting_when_clicking_outside
+    checklist_label: Close combobox without selecting when clicking outside
+    source_test_file: tests/should_close_combobox_without_selecting_when_clicking_outside.spec.ts
+    destination_test_file: /workdir/app/__tests__/should_close_combobox_without_selecting_when_clicking_outside.spec.ts
+    setup_files:
+    - source: tests/playwright-task.config.js
+      destination: /workdir/app/playwright.config.js
+    passing_threshold: 1.0
+- name: vlm
+  args:
+    score_name: screenshot_9_rate_the_photo
+    screenshot_url: http://localhost:3000/addreview/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the photo tagging UI implementation on a scale of 0 to
+      1:
+
+
+      0 - Photo tagging UI not visible or broken: No photo thumbnails visible, no
+      tag button present, dish selector dropdown does not appear when clicking tag
+      button, or the write review form is not displayed properly.
+
+
+      1 - Photo tagging UI correctly implemented: Write review form is visible for
+      the restaurant, at least one photo thumbnail is displayed in the photos section,
+      a tag button with appropriate icon is visible on the photo thumbnail, clicking
+      the tag button opens a combobox/dropdown with data-testid=''photo-dish-selector-0''
+      showing menu items from the restaurant in a selectable list format.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const pwInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (pwInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(pwInput, ''password123''); pwInput.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const fileInput = document.querySelector(''input[type="file"]'');
+      if (fileInput) { const dataTransfer = new DataTransfer(); const file = new File([''test''],
+      ''test-photo.jpg'', { type: ''image/jpeg'' }); dataTransfer.items.add(file);
+      fileInput.files = dataTransfer.files; fileInput.dispatchEvent(new Event(''change'',
+      { bubbles: true })); } })()'
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const tagBtn = document.querySelector('[data-testid="photo-tag-button-0"]');
+      if (tagBtn) tagBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1000))
+- name: vlm
+  args:
+    score_name: screenshot_10_rate_the_tagged
+    screenshot_url: http://localhost:3000/restaurants/25047088-5a40-4fab-be5c-3ee9a54fb980
+    evaluation_rubric: 'Rate the tagged photo display on review cards on a scale of
+      0 to 1:
+
+
+      0 - Tagged photos not displayed correctly: Reviews section is not visible, review
+      photos are not displayed, or no dish name badges appear on photos that should
+      have tags. The restaurant details page may not be loading properly or reviews
+      are missing.
+
+
+      1 - Tagged photos display correctly implemented: Restaurant details page is
+      visible showing the reviews section, review cards display photos attached to
+      reviews, photos that have been tagged with dish names show a badge overlay with
+      data-testid=''review-photo-dish-badge'' positioned at the bottom of the photo,
+      the badge displays readable dish name text, and the visual presentation clearly
+      distinguishes tagged from untagged photos.'
+    scale:
+    - 0
+    - 1
+    prep_script:
+    - await new Promise(resolve => setTimeout(resolve, 2000))
+    - (function() { const loginBtn = document.querySelector('[data-testid="header-login-button"]');
+      if (loginBtn) loginBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 1500))
+    - '(function() { const emailInput = document.querySelector(''[data-testid="login-email-input"]'');
+      if (emailInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(emailInput, ''sarah.chen@email.com''); emailInput.dispatchEvent(new
+      Event(''input'', { bubbles: true })); } })()'
+    - '(function() { const pwInput = document.querySelector(''[data-testid="login-password-input"]'');
+      if (pwInput) { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,
+      ''value'').set.call(pwInput, ''password123''); pwInput.dispatchEvent(new Event(''input'',
+      { bubbles: true })); } })()'
+    - (function() { const submitBtn = document.querySelector('[data-testid="login-submit-button"]');
+      if (submitBtn) submitBtn.click(); })()
+    - await new Promise(resolve => setTimeout(resolve, 2500))
+    - await new Promise(resolve => setTimeout(resolve, 3000))
+    - '(function() { const reviewsSection = document.querySelector(''[data-testid="recommended-reviews-section"]'');
+      if (reviewsSection) reviewsSection.scrollIntoView({ behavior: ''instant'', block:
+      ''center'' }); })()'
+    - await new Promise(resolve => setTimeout(resolve, 1500))

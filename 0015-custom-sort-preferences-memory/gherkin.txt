@@ -1,0 +1,84 @@
+```gherkin
+Feature: Sort Preference Memory for Home Page
+  As a user browsing restaurants
+  I want my sort preference to be remembered
+  So that I don't have to re-select my preferred sort every time I return
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: Sort preference is saved to localStorage when changed
+    Given I am on the home page with localStorage cleared
+    And the sort dropdown shows "Recommended" as selected
+    When I click on the sort dropdown trigger with data-testid="sort-dropdown-trigger"
+    And I select "Highest Rated" from the sort dropdown
+    Then localStorage key "deld-sort-memory" should contain {"home": "highest-rated"}
+    And a toast with data-testid="sort-saved-toast" should appear with text "Sort preference saved"
+
+  @unit-test @priority-high
+  Scenario: Saved sort preference is auto-applied on page load
+    Given localStorage "deld-sort-memory" is set to {"home": "most-reviewed"}
+    When I navigate to the home page "http://localhost:3000"
+    And I wait for the page to load
+    Then the sort dropdown should display "Most Reviewed" as the selected option
+    And the URL should contain "sort=most-reviewed"
+
+  @unit-test @priority-high
+  Scenario: Reset to Default clears preference and shows toast
+    Given I am on the home page
+    And localStorage "deld-sort-memory" contains {"home": "highest-rated"}
+    And the sort dropdown shows "Highest Rated" as selected
+    When I click on the sort dropdown trigger
+    And I click the "Reset to Default" option with data-testid="sort-reset-to-default"
+    Then the sort dropdown should display "Recommended" as the selected option
+    And localStorage key "deld-sort-memory" should not contain "home" key
+    And a toast with data-testid="sort-reset-toast" should appear with text "Sort reset to default"
+
+  @unit-test @edge-case
+  Scenario: Invalid localStorage value falls back to default sort
+    Given localStorage "deld-sort-memory" is set to {"home": "invalid-sort-option"}
+    When I navigate to the home page "http://localhost:3000"
+    And I wait for the page to load
+    Then the sort dropdown should display "Recommended" as the selected option
+    And the URL should not contain "sort=invalid-sort-option"
+    And localStorage key "deld-sort-memory" should not contain "home" key
+
+  @unit-test @edge-case
+  Scenario: URL sort parameter takes precedence over localStorage preference
+    Given localStorage "deld-sort-memory" is set to {"home": "highest-rated"}
+    When I navigate to "http://localhost:3000?sort=most-reviewed"
+    And I wait for the page to load
+    Then the sort dropdown should display "Most Reviewed" as the selected option
+    And localStorage key "deld-sort-memory" should contain {"home": "most-reviewed"}
+    And a toast with data-testid="sort-saved-toast" should appear with text "Sort preference saved"
+
+  @unit-test @edge-case
+  Scenario: Sort preference persists after navigating away and returning
+    Given I am on the home page with localStorage cleared
+    When I click on the sort dropdown trigger with data-testid="sort-dropdown-trigger"
+    And I select "Newest" from the sort dropdown
+    And I click on a restaurant card with data-testid="restaurant-card-0"
+    And I wait for the restaurant detail page to load
+    And I click the browser back button
+    And I wait for the home page to load
+    Then the sort dropdown should display "Newest" as the selected option
+    And localStorage key "deld-sort-memory" should contain {"home": "newest"}
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of sort dropdown with Reset to Default option
+    Given I am on the home page
+    When I click on the sort dropdown trigger
+    Then the sort dropdown should be open showing all options
+    And the dropdown should show sort options in order: "Recommended", "Highest Rated", "Most Reviewed", "Newest"
+    And a visual separator line should appear between "Newest" and "Reset to Default"
+    And "Reset to Default" should be the last item positioned below the separator
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of toast notification on sort change
+    Given I am on the home page with localStorage cleared
+    When I select "Highest Rated" from the sort dropdown
+    Then a toast notification should be visible at bottom-center of screen
+    And the toast should display "Sort preference saved"
+    And the toast should auto-dismiss after 3 seconds
+```

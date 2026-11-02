@@ -1,0 +1,71 @@
+```gherkin
+Feature: Price Range Visual Indicator
+  As a user browsing restaurants
+  I want to see a visual price scale instead of text dollar signs
+  So that I can quickly understand price levels at a glance
+
+  Background:
+    Given the app is running at "http://localhost:3000"
+
+  @unit-test @priority-high
+  Scenario: PriceScale displays correct number of filled indicators for level 2
+    Given I am on the homepage with restaurant listings
+    When I view a restaurant card with price level 2 ($$)
+    Then the element with data-testid="price-scale" should be visible
+    And there should be exactly 2 elements with data-testid="price-scale-filled"
+    And there should be exactly 2 elements with data-testid="price-scale-empty"
+
+  @unit-test @priority-high
+  Scenario: PriceScale displays correct number of filled indicators for level 4
+    Given I am on the homepage with restaurant listings
+    When I view a restaurant card with price level 4 ($$$$)
+    Then the element with data-testid="price-scale" should be visible
+    And there should be exactly 4 elements with data-testid="price-scale-filled"
+    And there should be exactly 0 elements with data-testid="price-scale-empty"
+
+  @unit-test @priority-high
+  Scenario: Tooltip shows correct price range on hover for level 1
+    Given I am on the homepage with restaurant listings
+    When I hover over a PriceScale element with data-testid="price-scale" for a level 1 restaurant
+    Then the tooltip with data-testid="price-scale-tooltip" should become visible
+    And the tooltip should contain the text "Under $15"
+
+  @unit-test @priority-high
+  Scenario: Tooltip shows correct price range on hover for level 3
+    Given I am on the homepage with restaurant listings
+    When I hover over a PriceScale element with data-testid="price-scale" for a level 3 restaurant
+    Then the tooltip with data-testid="price-scale-tooltip" should become visible
+    And the tooltip should contain the text "$30-$60"
+
+  @unit-test @edge-case
+  Scenario: Tooltip hides when mouse leaves PriceScale
+    Given I am on the homepage with restaurant listings
+    And I have hovered over a PriceScale to show the tooltip
+    When I move the mouse away from the PriceScale element
+    Then the tooltip with data-testid="price-scale-tooltip" should not be visible
+
+  @unit-test @edge-case
+  Scenario: PriceScale renders consistently across multiple restaurant cards with different price levels
+    Given I am on the homepage with restaurant listings
+    When I view the restaurant listing grid containing cards with price levels 1, 2, 3, and 4
+    Then each restaurant card should display exactly 4 total price indicators (filled + empty combined)
+    And the first restaurant card with level 1 should have exactly 1 filled and 3 empty indicators
+    And the restaurant card with level 3 should have exactly 3 filled and 1 empty indicator
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of PriceScale component on restaurant cards
+    Given I am on the homepage at "http://localhost:3000"
+    When the page has fully loaded with at least 3 restaurant cards visible
+    Then each restaurant card should display a visual price scale with exactly 4 dollar sign indicators
+    And filled indicators should use a solid/highlighted style distinct from empty indicators
+    And the price scale should be horizontally aligned within the restaurant card metadata section
+
+  @screenshot-test @priority-medium
+  Scenario: Visual validation of PriceScale tooltip positioning and styling
+    Given I am on the homepage at "http://localhost:3000"
+    And at least 1 restaurant card is visible
+    When I hover over the price scale indicator on the first restaurant card
+    Then the tooltip with data-testid="price-scale-tooltip" should appear within 300ms
+    And the tooltip should be positioned directly above or below the price scale element
+    And the tooltip text should be readable with sufficient contrast against its background
+```
